@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 
     Graph* G = readGraph(filename);
     
-    G->
+    
 
     cin.ignore(cin.rdbuf()->in_avail());
     cin.get();
