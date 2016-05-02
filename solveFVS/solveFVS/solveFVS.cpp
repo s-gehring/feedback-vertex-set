@@ -17,6 +17,97 @@ using namespace std;
 */
 typedef boost::adjacency_list<boost::vecS, boost::vecS, boost::undirectedS> Graph;
 typedef boost::graph_traits<Graph>::vertex_descriptor Vertex;  
+// TODO:
+// Implement all this shit. Preferably Object Oriented.
+
+// Returns true iff G has at least one cycle. In O(|G|) or better.
+bool hasCycle(Graph G);                                     
+
+// ... what do you think?
+bool hasEdge(Graph G, Vertex u, Vertex v);                  
+
+// For any pair of neighbours (x,y) of u in U: Is there a path in G from x to y,
+// only visiting vertices of U?
+// This method is going to be called a lot. Better make it fast.
+bool sameTreeNeighbours(Graph G, list<Vertex> U, Vertex u); 
+
+// Obviously not making a copy.
+Graph removeVertex(Graph G, Vertex x);
+
+// Get a node with a degree of <= 1 in U.
+// That means the returned node has at most 1 neighbor in U, but maybe more in G.
+// Such a vertex is guaranteed to exist.
+Vertex getLowDegreeNode(Graph G, list<Vertex> U);
+
+int getDegree(Graph G, Vertex x);
+// We need this!
+Graph operator -(Graph G, Vertex x) { // Does operator overloading work this way?
+    return removeVertex(G, x);
+}
+list<Vertex> operator -(list<Vertex> V, Vertex x) {
+    V.remove(x);
+    return V;
+}
+list<Vertex> operator +(list<Vertex> V, Vertex y) {
+    V.insert(y);
+    return V;
+}
+
+
+list<Vertex> Feedback(Graph G, list<Vertex> V_1, list<Vertex> V_2, int k) {
+    /*
+        https://www.dropbox.com/sh/ar26siyo2cjw6y1/AACqJWkA0YHXxkg5FTz2ZEeBa/ChenFLLV08_ImprovedAlgorithmsForFeedbackVertexSetProblems.pdf?dl=0
+        ... I'm so sorry for what I've done here.
+    */
+
+
+    list<Vertex> F;
+    if(k < 0 || (k==0 && hasCycle(G))) return F; // Return null or false, not F, not empty list. Dunno how to implement this though.
+    if(k >= 0 && !hasCycle(G)) return F;
+    
+    // Find a Node in V_1 with at least two neighbors in V_2
+    Vertex w = (Vertex) nullptr; // Fuck the police.
+    for(Vertex v : V_1) {
+        int neighbours = 0;
+        for(Vertex w : V_2) {
+            if(hasEdge(G, v, w)) {
+                if(++neighbours == 2) {
+                    // Found a Vertex w in V_1 which has at least two neighbors in V_2.
+                    w = v;
+                    break;
+                }
+            }
+        }
+        if(w != (Vertex) nullptr) break;
+    }
+
+    /*
+        Sorry for that shit name 'w'. It's called w in the paper.
+    */
+
+    if(w != (Vertex) nullptr) {
+/*3.1.*/if(sameTreeNeighbours(G, V_2, w)) {
+            
+            F = Feedback(G-w, V_1-w, V_2, k-1);
+            if(F == nullptr) return nullptr; // Again, check if F==NULL and return NULL. 
+            F.insert(w); // help :(
+            return F;
+/*3.2.*/} else {
+
+            F = Feedback(G-w, V_1-w, V_2, k-1);
+            if(F != nullptr) return F; // If F!=NULL return F;
+            return Feedback(G, V_1-w, V_2+w, k);
+        }
+    } else {
+        w = getLowDegreeNode(G, V_1);
+/*4.1.*/if(getDegree(G, w) <= 1) {
+    return Feedback(G-w, V_1-w, V_2, k); // VS indents this line weirdly.
+/*4.2.*/} else {
+    return Feedback(G, V_1-w, V_2+w, k);
+        }
+    }
+}
+
 
 
 Graph* readGraph(char* filename) {
