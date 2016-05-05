@@ -168,13 +168,12 @@ void fvs::induced_subgraph(Graph &s, const Graph& g, const set<Node>& u) {
 * This function right now resembles a direct copy of the pseudo code of the article.
 *
 * @param [in] g The graph to find a feedback vertex set for.
-* @param [in] v1 A node set.
-* @param [in] v2 Another node set.
+* @param [in] f A subgraph of g, for which f is a forest and g-f is a forest.
 * @param [in] k The currently guessed size of a min. feedback vertex set.
 * @returns A pair of a set of nodes and a bool. The set of nodes contains a part of the feedback
 *		vertex set. The bool will be false, if the algorithm decides that there is no fvs.
 */
-pair<set<Node>, bool> fvs::compute_fvs(Graph& g, set<Node> v1, set<Node> v2, int k) {
+pair<set<Node>, bool> fvs::compute_fvs(Graph& g, set<Node> f, int k) {
 	set<Node> fvs;
 	pair<set<Node>, bool> retValue;
 
@@ -182,18 +181,18 @@ pair<set<Node>, bool> fvs::compute_fvs(Graph& g, set<Node> v1, set<Node> v2, int
 		return make_pair(fvs, false);
 	}
 
-	if (k >= 0 && !has_cycle(g)) {
+	if (!has_cycle(g)) {
 		return make_pair(fvs, true);
 	}
 
-	Node w = two_neighbour_node(g, v1, v2);
+	Node w = two_neighbour_node(g, f); // A vertex of f which has least two neighbors in g-f.
 
 	if (w != graph_traits<Graph>::null_vertex()) {
-		if (creates_circle(g, v2, w)) {
+		if (creates_circle(g, g-f, w)) {
 			Graph h(g);
 			remove_vertex(w, h);
 			v1.erase(w);
-			retValue = compute_fvs(h, v1, v2, k - 1);
+			retValue = compute_fvs(h, f, k - 1);
 
 			if (false == retValue.second) {
 				return make_pair(fvs, false);
@@ -207,8 +206,8 @@ pair<set<Node>, bool> fvs::compute_fvs(Graph& g, set<Node> v1, set<Node> v2, int
 		else {
 			Graph h(g);
 			remove_vertex(w, h);
-			v1.erase(w);
-			retValue = compute_fvs(h, v1, v2, k - 1);
+			f.erase(w);
+			retValue = compute_fvs(h, f, k - 1);
 
 			if (true == retValue.second) {
 				fvs = retValue.first;
@@ -216,24 +215,21 @@ pair<set<Node>, bool> fvs::compute_fvs(Graph& g, set<Node> v1, set<Node> v2, int
 				return make_pair(fvs, true);
 			}
 			else {
-				v1.erase(w);
-				v2.insert(w);
-				return compute_fvs(g, v1, v2, k);
+				f.erase(w);
+				return compute_fvs(g, f, k);
 			}
 		}
 	}
 	else {
-		w = get_lowest_degree_node(g, v1);
+		w = get_lowest_degree_node(g, f);
 		if (out_degree(w, g) < 2) {
 			Graph h(g);
 			remove_vertex(w, h);
-			v1.erase(w);
-			retValue = compute_fvs(h, v1, v2, k - 1);
-		}
-		else {
-			v1.erase(w);
-			v2.insert(w);
-			return compute_fvs(g, v1, v2, k);
+			f.erase(w);
+			retValue = compute_fvs(h, f, k - 1);
+		} else {
+			f.erase(w);
+			return compute_fvs(g, f, k);
 		}
 	}
 }
