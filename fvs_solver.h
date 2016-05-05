@@ -35,6 +35,8 @@ namespace fvs {
 	Node get_lowest_degree_node(const Graph& g, const set<Node>& u);
 	bool creates_circle(const Graph& g, const set<Node>& u, const Node& v);
 	Node two_neighbour_node(const Graph& g, const set<Node> &u, const set<Node> &v);
+	void maintain_integrity(const Node& v, const set<Node> &u);
+
 
 	void cleanup(Graph& g);
 	set<Node> two_approx_fvs(Graph& g);
@@ -42,14 +44,19 @@ namespace fvs {
 	pair<set<Node>, bool> compute_fvs(Graph& g, set<Node> v1, set<Node> v2, int k); ///< DESCRIPTIVE NAMES PLS
 
 	void read_graph(Graph& g, const char* filepath);
+	void print_graph(const Graph& g);
+
 
 	void induced_subgraph(Graph& s, const Graph& g, const set<Node>& u);
 
 	/**
 	* A dfs visitor that helps to finds circles in a graph. Finds a circle, if a back, forward or cross edge is found.
 	*/
+	/**
+	* A dfs visitor that helps to finds circles in a graph. Finds a circle, if a back, forward or cross edge is found.
+	*/
 	struct CycleVisitor : public default_dfs_visitor {
-		CycleVisitor() : _circle(false) {};
+		CycleVisitor(bool& b) { _circle = &b; };
 		CycleVisitor(const CycleVisitor& other) : _circle(other._circle) {};
 		void back_edge(Edge e, Graph g) { *_circle = true; };
 		void forward_or_cross_edge(Edge e, Graph g) { *_circle = true; };
