@@ -29,11 +29,15 @@ namespace fvs {
 
 
 	bool has_cycle(const Graph& g);
+	bool has_semidisjoint_cycle(const Graph& g);
 	bool edge_exists_between(const Graph& g, Node u, Node v);
 
 	Node get_lowest_degree_node(const Graph& g, const set<Node>& u);
 	bool creates_circle(const Graph& g, const set<Node>& u, const Node& v);
 	Node two_neighbour_node(const Graph& g, const set<Node> &u, const set<Node> &v);
+
+	void cleanup(Graph& g);
+	set<Node> two_approx_fvs(Graph& g);
 
 	pair<set<Node>, bool> compute_fvs(Graph& g, set<Node> v1, set<Node> v2, int k); ///< DESCRIPTIVE NAMES PLS
 
