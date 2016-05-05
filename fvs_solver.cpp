@@ -87,6 +87,12 @@ Node fvs::get_lowest_degree_node(const Graph &g, const set<Node>& u) {
 * @returns True, if a neighbour of a neighbour of v is a neighbour of v.
 */
 bool fvs::creates_circle(const Graph& g, const set<Node>& u, const Node& v) {
+	//Make sure we dont call the rest on an invalid call.
+	if (vertex(v, g) == graph_traits<Graph>::null_vertex()) {
+		//Might be useful to find a proper way for this...
+		return false; 
+	}
+
 	typedef graph_traits<Graph>::out_edge_iterator edge_iterator;
 	pair<edge_iterator, edge_iterator> eIt = out_edges(v, g);
 
@@ -337,6 +343,20 @@ void cleanup(Graph& g)
 		if (in_degree(*vi, g) <= 1)
 		{
 			remove_vertex(*vi, g);
+		}
+	}
+}
+
+void fvs::print_graph(const Graph& g) {
+	typedef graph_traits<Graph>::vertex_iterator node_iterator;
+	typedef graph_traits<Graph>::out_edge_iterator edge_iterator;
+	
+	pair<node_iterator, node_iterator> nIt = vertices(g);
+	for (node_iterator it = nIt.first; it != nIt.second; ++it) {
+		cout << "Edges outgoing from " << (*it) << ":" << endl;
+		pair<edge_iterator, edge_iterator> eIt = out_edges((*it), g);
+		for (edge_iterator edgeIt = eIt.first; edgeIt != eIt.second; ++edgeIt) {
+			cout << source((*edgeIt), g) << " -> " << target((*edgeIt), g) << endl;
 		}
 	}
 }
