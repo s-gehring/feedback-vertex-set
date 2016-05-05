@@ -38,10 +38,13 @@ bool fvs::edge_exists_between(const Graph& g, Node u, Node v) {
 * This function iterates over all nodes to find the one with lowest degreen in U.
 * Only neighbours also in u are counted.
 *
+* During the algorithm, it is assumed, that this method always returns a node with 
+* degree 1.
+*
 * PLEASE SOMEBODY COME UP WITH A NAME FOR U. A DESCRIPTIVE ONE!
 *
-* @param g [in] The graph.
-* @param u [in] A set of nodes. 
+* @param [in] g The graph.
+* @param [in] u A set of nodes. 
 * @returns The lowest degree node in u.
 */
 Node fvs::get_lowest_degree_node(const Graph &g, const set<Node>& u) {
@@ -68,6 +71,171 @@ Node fvs::get_lowest_degree_node(const Graph &g, const set<Node>& u) {
 		}
 	}
 	return lowestDegreeNode.second;
+}
+
+/**
+* @brief This function checks, if two of the neighbours of v belong to the same tree in g[u].
+*
+* This check is done by checking wether any neighbour of v in u has a neighbour (also in u), that
+* is also neighbour to v. If this happens, it is assumed that they belong in the same tree, thus
+* the function returns true.
+*
+* @param [in] g The basic graph.
+* @param [in] u The nodeset that induces the subgraph for which were checking the neighbourhood of v.
+* @param [in] v A node, which might connect a circle in g[u].
+* @returns True, if a neighbour of a neighbour of v is a neighbour of v.
+*/
+bool fvs::creates_circle(const Graph& g, const set<Node>& u, const Node& v) {
+	typedef graph_traits<Graph>::out_edge_iterator edge_iterator;
+	pair<edge_iterator, edge_iterator> eIt = out_edges(v, g);
+
+	set<Node> neighbours;
+	for (edge_iterator it = eIt.first; it != eIt.second; ++it) {
+		if (u.end() != u.find(target((*it), g))) {
+			neighbours.insert(target((*it), g));
+		}
+	}
+
+	for (const auto& i : neighbours) {
+		eIt = out_edges(i, g);
+		for (edge_iterator it = eIt.first; it != eIt.second; ++it) {
+			if (neighbours.end() != neighbours.find(target((*it), g))) {
+				return true; //A neighbour of a neighbour of v is neighbour of v (in u).
+			}
+		}
+	}
+
+	return false;
+}
+
+/**
+* @brief Finds a node in u, which has atleast two neighbours in v with respect to g.
+*
+* This function iterates over all elements of u to find a node which has two neighbours
+* in v, where both u and v are sets of nodes of the same graph g. Returns a node, if one
+* was found or a null_vertex() if no fitting node was found.
+*
+* @param [in] g The graph this is based on.
+* @param [in] u A node set. 
+* @param [in] v Another node set.
+* @returns A node of u with atleast two neighbours in v, if such a node exists or a null_vertex()
+*		otherwise.
+*/
+Node fvs::two_neighbour_node(const Graph& g, const set<Node> &u, const set<Node> &v) {
+	typedef graph_traits<Graph>::out_edge_iterator edge_iterator;
+
+	pair<edge_iterator, edge_iterator> eIt;
+	int numNeighbours;
+
+	for (const auto& i : u) {
+		eIt = out_edges(i, g);
+		for (edge_iterator it = eIt.first; it != eIt.second; ++it) {
+			if (v.end() != v.find(target((*it), g))) {
+				++numNeighbours;
+			}
+
+			if (numNeighbours > 1) {
+				return i;
+			}
+		}
+	}
+	return graph_traits<Graph>::null_vertex();
+}
+
+/**
+* @brief Creates the induced subgraph g[u].
+*/
+void fvs::induced_subgraph(Graph &s, const Graph& g, const set<Node>& u) {
+	typedef graph_traits<Graph>::out_edge_iterator edge_iterator;
+	
+	s.clear();
+	for (const auto& i : u) {
+		pair<edge_iterator, edge_iterator> eIt = out_edges(i, g);
+		for (edge_iterator it = eIt.first; it != eIt.second; ++it) {
+			if (u.end() != u.find(target((*it), g))) {
+				add_edge(i, target((*it), g), s);
+			}
+		}
+	}
+}
+
+/**
+* @brief Computes a feedback vertex set.
+*
+* This algorithm was proposed in the paper, that we have here:
+*	https://www.dropbox.com/sh/ar26siyo2cjw6y1/AACqJWkA0YHXxkg5FTz2ZEeBa/ChenFLLV08_ImprovedAlgorithmsForFeedbackVertexSetProblems.pdf?dl=0
+*
+* This function right now resembles a direct copy of the pseudo code of the article.
+*
+* @param [in] g The graph to find a feedback vertex set for.
+* @param [in] v1 A node set.
+* @param [in] v2 Another node set.
+* @param [in] k The currently guessed size of a min. feedback vertex set.
+* @returns A pair of a set of nodes and a bool. The set of nodes contains a part of the feedback
+*		vertex set. The bool will be false, if the algorithm decides that there is no fvs.
+*/
+pair<set<Node>, bool> fvs::compute_fvs(Graph& g, set<Node> v1, set<Node> v2, int k) {
+	set<Node> fvs;
+	pair<set<Node>, bool> retValue;
+
+	if (k < 0 || (k == 0 && has_cycle(g))) {
+		return make_pair(fvs, false);
+	}
+
+	if (k >= 0 && !has_cycle(g)) {
+		return make_pair(fvs, true);
+	}
+
+	Node w = two_neighbour_node(g, v1, v2);
+
+	if (w != graph_traits<Graph>::null_vertex()) {
+		if (creates_circle(g, v2, w)) {
+			Graph h(g);
+			remove_vertex(w, h);
+			v1.erase(w);
+			retValue = compute_fvs(h, v1, v2, k - 1);
+
+			if (false == retValue.second) {
+				return make_pair(fvs, false);
+			}
+			else {
+				fvs = retValue.first;
+				fvs.insert(w);
+				return make_pair(fvs, true);
+			}
+		}
+		else {
+			Graph h(g);
+			remove_vertex(w, h);
+			v1.erase(w);
+			retValue = compute_fvs(h, v1, v2, k - 1);
+
+			if (true == retValue.second) {
+				fvs = retValue.first;
+				fvs.insert(w);
+				return make_pair(fvs, true);
+			}
+			else {
+				v1.erase(w);
+				v2.insert(w);
+				return compute_fvs(g, v1, v2, k);
+			}
+		}
+	}
+	else {
+		w = get_lowest_degree_node(g, v1);
+		if (out_degree(w, g) < 2) {
+			Graph h(g);
+			remove_vertex(w, h);
+			v1.erase(w);
+			retValue = compute_fvs(h, v1, v2, k - 1);
+		}
+		else {
+			v1.erase(w);
+			v2.insert(w);
+			return compute_fvs(g, v1, v2, k);
+		}
+	}
 }
 
 /**

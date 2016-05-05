@@ -32,10 +32,14 @@ namespace fvs {
 	bool edge_exists_between(const Graph& g, Node u, Node v);
 
 	Node get_lowest_degree_node(const Graph& g, const set<Node>& u);
+	bool creates_circle(const Graph& g, const set<Node>& u, const Node& v);
+	Node two_neighbour_node(const Graph& g, const set<Node> &u, const set<Node> &v);
 
-	set<Node> compute_fvs(Graph& g, set<Node> v1, set<Node> v2, int k); ///< DESCRIPTIVE NAMES PLS
+	pair<set<Node>, bool> compute_fvs(Graph& g, set<Node> v1, set<Node> v2, int k); ///< DESCRIPTIVE NAMES PLS
 
 	void read_graph(Graph& g, const char* filepath);
+
+	void induced_subgraph(Graph& s, const Graph& g, const set<Node>& u);
 
 	/**
 	* A dfs visitor that helps to finds circles in a graph. Finds a circle, if a back, forward or cross edge is found.
