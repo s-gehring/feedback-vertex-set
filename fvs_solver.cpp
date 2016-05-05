@@ -191,7 +191,7 @@ pair<set<Node>, bool> fvs::compute_fvs(Graph& g, set<Node> f, int k) {
 		if (creates_circle(g, g-f, w)) {
 			Graph h(g);
 			remove_vertex(w, h);
-			v1.erase(w);
+			f.erase(w);
 			retValue = compute_fvs(h, f, k - 1);
 
 			if (false == retValue.second) {
