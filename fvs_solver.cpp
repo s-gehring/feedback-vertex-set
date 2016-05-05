@@ -19,7 +19,8 @@ using namespace fvs;
 * @returns True, if there is a circle in g (hopefully).
 */
 bool fvs::has_cycle(const fvs::Graph& g) {
-	CycleVisitor cv;
+  bool b = false;
+	CycleVisitor cv(b);
 	depth_first_search(g, visitor(cv));
 	return *cv._circle;
 }
@@ -129,7 +130,7 @@ Node fvs::two_neighbour_node(const Graph& g, const set<Node> &u) {
 	for (const auto& i : u) {
 		eIt = out_edges(i, g);
 		for (edge_iterator it = eIt.first; it != eIt.second; ++it) {
-			if (u.end() == g.find(target((*it), g))) { // Node is in v iff node is not in u
+			if (u.end() == u.find(target((*it), g))) { // Node is in v iff node is not in u
 				++numNeighbours;
 			}
 
