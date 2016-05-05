@@ -116,12 +116,11 @@ bool fvs::creates_circle(const Graph& g, const set<Node>& u, const Node& v) {
 * was found or a null_vertex() if no fitting node was found.
 *
 * @param [in] g The graph this is based on.
-* @param [in] u A node set. 
-* @param [in] v Another node set.
+* @param [in] u A node subset of g which partitions g in u and g-u.
 * @returns A node of u with atleast two neighbours in v, if such a node exists or a null_vertex()
 *		otherwise.
 */
-Node fvs::two_neighbour_node(const Graph& g, const set<Node> &u, const set<Node> &v) {
+Node fvs::two_neighbour_node(const Graph& g, const set<Node> &u) {
 	typedef graph_traits<Graph>::out_edge_iterator edge_iterator;
 
 	pair<edge_iterator, edge_iterator> eIt;
@@ -130,7 +129,7 @@ Node fvs::two_neighbour_node(const Graph& g, const set<Node> &u, const set<Node>
 	for (const auto& i : u) {
 		eIt = out_edges(i, g);
 		for (edge_iterator it = eIt.first; it != eIt.second; ++it) {
-			if (v.end() != v.find(target((*it), g))) {
+			if (u.end() == g.find(target((*it), g))) { // Node is in v iff node is not in u
 				++numNeighbours;
 			}
 
