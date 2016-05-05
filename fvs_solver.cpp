@@ -318,3 +318,25 @@ void fvs::read_graph(Graph&g, const char* filepath) {
 	}
 	return;
 }
+
+//@TODO: Debug
+/**
+* @brief: Deletes all vertices of degree at most 1 along with all incident edges from a given graph.
+*
+* As long as a given graph has vertices of degree at most 1, these vertices and all incident edges
+* are deleted. We need this as a subroutine for the 2-approx-algo.
+*
+* @param [in] g The graph.
+*/
+void cleanup(Graph& g)
+{
+	graph_traits<Graph>::vertex_iterator vi, vi_end, next;
+	tie(vi, vi_end) = vertices(g);
+	for (next = vi; vi != vi_end; vi = next) {
+		++next;
+		if (in_degree(*vi, g) <= 1)
+		{
+			remove_vertex(*vi, g);
+		}
+	}
+}
