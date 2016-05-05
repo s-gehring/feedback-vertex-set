@@ -325,7 +325,6 @@ void fvs::read_graph(Graph&g, const char* filepath) {
 	return;
 }
 
-//@TODO: Debug
 /**
 * @brief: Deletes all vertices of degree at most 1 along with all incident edges from a given graph.
 *
@@ -336,14 +335,19 @@ void fvs::read_graph(Graph&g, const char* filepath) {
 */
 void cleanup(Graph& g)
 {
-	graph_traits<Graph>::vertex_iterator vi, vi_end, next;
-	tie(vi, vi_end) = vertices(g);
-	for (next = vi; vi != vi_end; vi = next) {
-		++next;
+	graph_traits<Graph>::vertex_iterator vi, vi_end;
+	for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi)
+	{
 		if (in_degree(*vi, g) <= 1)
 		{
+			// remove edges and delete
+			clear_vertex(*vi, g);
 			remove_vertex(*vi, g);
+			// check everything again
+			tie(vi, vi_end) = vertices(g);
+			// we can defintively save some runtime by just checking the neighbours we have already visited
 		}
+		cout << num_vertices(g) << endl;
 	}
 }
 
