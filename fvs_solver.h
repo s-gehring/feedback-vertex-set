@@ -23,7 +23,7 @@ using namespace std;
 
 namespace fvs {
 
-	typedef adjacency_list<> Graph;
+	typedef adjacency_list<vecS, vecS, undirectedS> Graph;
 	typedef graph_traits<Graph>::vertex_descriptor Node;
 	typedef graph_traits<Graph>::edge_descriptor Edge;
 
