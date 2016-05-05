@@ -82,7 +82,7 @@ Node fvs::get_lowest_degree_node(const Graph &g, const set<Node>& u) {
 * the function returns true.
 *
 * @param [in] g The basic graph.
-* @param [in] u The nodeset that induces the subgraph for which were checking the neighbourhood of v.
+* @param [in] u The nodeset that does not induce the subgraph for which were checking the neighbourhood of v.
 * @param [in] v A node, which might connect a circle in g[u].
 * @returns True, if a neighbour of a neighbour of v is a neighbour of v.
 */
@@ -92,7 +92,7 @@ bool fvs::creates_circle(const Graph& g, const set<Node>& u, const Node& v) {
 
 	set<Node> neighbours;
 	for (edge_iterator it = eIt.first; it != eIt.second; ++it) {
-		if (u.end() != u.find(target((*it), g))) {
+		if (u.end() == u.find(target((*it), g))) {
 			neighbours.insert(target((*it), g));
 		}
 	}
@@ -188,7 +188,7 @@ pair<set<Node>, bool> fvs::compute_fvs(Graph& g, set<Node> f, int k) {
 	Node w = two_neighbour_node(g, f); // A vertex of f which has least two neighbors in g-f.
 
 	if (w != graph_traits<Graph>::null_vertex()) {
-		if (creates_circle(g, g-f, w)) {
+		if (creates_circle(g, f, w)) {
 			Graph h(g);
 			remove_vertex(w, h);
 			f.erase(w);

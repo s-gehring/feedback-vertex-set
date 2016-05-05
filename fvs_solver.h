@@ -49,7 +49,7 @@ namespace fvs {
 	* A dfs visitor that helps to finds circles in a graph. Finds a circle, if a back, forward or cross edge is found.
 	*/
 	struct CycleVisitor : public default_dfs_visitor {
-		CycleVisitor() : _circle(false) {};
+		CycleVisitor(bool &b) {_circle=&b;};
 		CycleVisitor(const CycleVisitor& other) : _circle(other._circle) {};
 		void back_edge(Edge e, Graph g) { *_circle = true; };
 		void forward_or_cross_edge(Edge e, Graph g) { *_circle = true; };
