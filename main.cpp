@@ -17,15 +17,20 @@ int main(int argc, char** argv) {
     std::pair<iterator, iterator> nIt = boost::vertices(g);
     for (iterator it = nIt.first; it != nIt.second; ++it) {
         v1.insert((*it));
-        v2.insert((*it));
     }
-    feedback = fvs::compute_fvs(g, v1, v2, boost::num_vertices(g));
+    
+    v1 = { 2, 7, 4, 6 };
+    v2 = { 0, 1, 3, 5 };
+    int k = 4;
+    
+    Graph h(g);
+    feedback = fvs::compute_fvs(h, g, v1, v2, k);
     
     cout << "FVS: " << (feedback.second ? "exists" : "doesnt exists") << endl;
     for (const auto& i : feedback.first) {
         cout << i << ", ";
     }
     cout << endl;
-    cout << "Total size: " << feedback.first.size();
+    cout << "Total size: " << feedback.first.size() << endl;
     cout << "--------------- END OF PROGRAM ---------------" << endl;
 }
