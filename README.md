@@ -1,5 +1,8 @@
 # feedback-vertex-set
 
+Kompiliert mit: g++ -Og -Wall -std=c++11 -I "/home/fabian/Documents/Progamming/boost_1_60_0/" fvs_solver.cpp main.cpp -o fvs
+Eine Warnung.
+
 # An alle:
 
 Es wäre schön wenn ab jetzt nur noch changes gepusht würden die verwendbar und getestet sind. Damit können dann auch alle anderen gleichzeitig oder nach dem push noch weiterarbeiten (da das Projekt noch compiled).
