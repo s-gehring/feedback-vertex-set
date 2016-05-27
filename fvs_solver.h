@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include <set>
+#include <vector>
 
 #include "boost/graph/adjacency_list.hpp"
 #include "boost/graph/undirected_dfs.hpp"
@@ -31,7 +32,7 @@ namespace fvs {
 
 
 	bool has_cycle(const Graph& g);
-	bool has_semidisjoint_cycle(const Graph& g);
+	pair<set<Node>, bool> find_semidisjoint_cycle(const Graph& g);
 	bool edge_exists_between(const Graph& g, Node u, Node v);
 
 	Node get_lowest_degree_node(const Graph& g, const set<Node>& u);
@@ -73,6 +74,51 @@ namespace fvs {
 
 		bool& _circle; //True if a circle was found.
 		set<pair<Node, Node>> foundEdges;
+	};
+
+	/**
+	* A dfs visitor that helps to find semi-disjoint cycles in a graph.
+	*/
+	struct SemiDisjointCycleVisitor : public dfs_visitor<> {
+		SemiDisjointCycleVisitor(bool &b, set<Node> &sdc) : _sdcycle(b), _sdVertices(sdc) {};
+		SemiDisjointCycleVisitor(const SemiDisjointCycleVisitor& other) : _sdcycle(other._sdcycle), _sdVertices(other._sdVertices) {};
+		void tree_edge(Edge e, const Graph& g) {
+			//			cout << "Found edge " << source(e,g) << " -> " << target(e,g) << endl;
+			foundEdges.push_back(make_pair(source(e, g), target(e, g)));
+		};
+		void back_edge(Edge e, const Graph& g) {
+			//			cout << "Back edge: " << source(e, g) << " -> " << target(e,g) << endl;
+
+			if (find(foundEdges.begin(), foundEdges.end(), make_pair(target(e, g), source(e, g))) == foundEdges.end()) {
+				//				cout << "Not yet found." << endl;
+				foundEdges.push_back(make_pair(source(e, g), target(e, g)));
+				// found cycle, check if it is semi-disjoint
+				if (!_sdcycle) {
+					// get vertices of cycle going backwards along the edges
+					vector<pair<Node, Node>>::iterator it = foundEdges.end()-1;
+					int vertices_with_high_degree = 0;
+					while((*it).first != target(e, g)) {
+						_sdVertices.insert((*it).second);
+						// count number of vertices with degrees >2
+						if (in_degree((*it).second, g) > 2) {
+							vertices_with_high_degree++;
+						}
+						--it;
+					}
+					_sdVertices.insert((*it).second);
+					if(vertices_with_high_degree <= 1) {
+						_sdcycle = true;
+					}
+					else{
+						_sdVertices.clear();
+					}
+				}
+			}
+		};
+
+		bool& _sdcycle; //True if a semi-disjoint-cycle was found.
+		vector<pair<Node, Node>> foundEdges;
+		set<Node>& _sdVertices;
 	};
 }
 
