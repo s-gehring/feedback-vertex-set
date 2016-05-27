@@ -28,6 +28,27 @@ bool fvs::has_cycle(const fvs::Graph& g) {
 	return b;
 }
 
+
+/**
+* @brief Checks, whether a given graph contains a semidisjoint cycle.
+*
+* This function checks if a given graph contains a semidisjoint cycle,
+* i.e. every vertex of the cycle has degree 2 with at most one exeption.
+*
+* We need this for the 2-approximation algo.
+* @param [in] g The graph.
+* @returns The set of nodes forming the semidisjoint cycle in g and an indicator for the existence.
+*/
+pair<set<Node>, bool> fvs::find_semidisjoint_cycle(const Graph& g)
+{
+	bool b = false;
+	set<Node> sdc;
+	SemiDisjointCycleVisitor cv(b ,sdc);
+	depth_first_search<Graph, SemiDisjointCycleVisitor>(g, visitor(cv));
+	pair<set<Node>, bool> retValue = make_pair(sdc, b);
+	return retValue;
+}
+
 /**
 * This is basically an example on how to do that with boost.
 * Dont use this method, just call the original.
@@ -459,7 +480,7 @@ void fvs::read_graph(Graph&g, const char* filepath) {
 *
 * @param [in] g The graph.
 */
-void cleanup(Graph& g)
+void fvs::cleanup(Graph& g)
 {
 	graph_traits<Graph>::vertex_iterator vi, vi_end;
 	for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi)
