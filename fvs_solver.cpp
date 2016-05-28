@@ -20,7 +20,6 @@ using namespace fvs;
 */
 bool fvs::has_cycle(const fvs::Graph& g) {
 //	cout << "FINDING CYCLES" << endl;
-	print_graph(g);
   	bool b = false;
 	CycleVisitor cv(b);
 	depth_first_search<Graph, CycleVisitor>(g, visitor(cv));
@@ -475,27 +474,133 @@ void fvs::read_graph(Graph&g, const char* filepath) {
 /**
 * @brief: Deletes all vertices of degree at most 1 along with all incident edges from a given graph.
 *
-* As long as a given graph has vertices of degree at most 1, these vertices and all incident edges
-* are deleted. We need this as a subroutine for the 2-approx-algo.
+* As long as a given graph has vertices of degree at most 1, all incident edges and all vertices
+* are deleted (by setting their weight to -1). We need this as a subroutine for the 2-approx-algo.
 *
 * @param [in] g The graph.
+* @param [in] weights The weights of the vertices.
 */
-void fvs::cleanup(Graph& g)
+void fvs::cleanup(Graph& g, map<Node, double>& weights)
 {
 	graph_traits<Graph>::vertex_iterator vi, vi_end;
-	for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi)
+	for (tie(vi, vi_end) = vertices(g); vi != vi_end && num_vertices(g) > 0; ++vi)
 	{
-		if (in_degree(*vi, g) <= 1)
+		if (in_degree(*vi, g) <= 1 && weights[*vi] >= 0)
 		{
 			// remove edges and delete
 			clear_vertex(*vi, g);
-			remove_vertex(*vi, g);
+			weights[*vi] = -1;
 			// check everything again
 			tie(vi, vi_end) = vertices(g);
-			// we can defintively save some runtime by just checking the neighbours we have already visited
+			// we can definitively save some runtime by just checking the neighbours we have already visited
 		}
-		cout << num_vertices(g) << endl;
 	}
+}
+
+/**
+*@brief: Computes a 2 - approximation of an fvs for a given graph.
+*
+* This function computes a 2 - approximation of a feedback vertex set following
+* Bafna et al, A 2 - APPROXIMATION ALGORITHM FOR THE UNDIRECTED
+* FEEDBACK VERTEX SET PROBLEM, 1999. It runs in O(n ^ 2) if implemented correctly :D.
+*
+* We need this to initialize the fvs for the iterative compression process.
+*
+* @param[in] orig The graph.
+* @returns The feedback vertex set.
+*/
+set<Node> fvs::two_approx_fvs(const Graph& orig)
+{
+	// initialize weights and f
+	Graph g(orig);
+	map<Node, double> weights;
+	graph_traits<Graph>::vertex_iterator vi, vi_end;
+	set<Node> f;
+	stack<Node> s;
+	for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi)
+	{
+		if (in_degree(*vi, g) == 1)
+		{
+			f.insert(*vi);
+		}
+		weights[*vi] = *vi+1; // maybe there is a smarter way to initialize the weights
+	}
+	cleanup(g, weights);
+	// count number of vertices with weight > 0
+	int active_vertices = 0;
+	for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi) {
+		if (weights[*vi] >= 0) {
+			active_vertices++;
+		}
+	}
+	while (active_vertices > 0)
+	{
+		// contains a semidisjoint cycle?
+		pair<set<Node>, bool> sdcycle = find_semidisjoint_cycle(g);
+		if (sdcycle.second) {
+			double gamma = 0;
+			for (set<Node>::iterator it = sdcycle.first.begin(); it != sdcycle.first.end(); ++it) {
+				if ((weights[*it] < gamma || gamma == 0) && weights[*it] >= 0) {
+					gamma = weights[*it];
+				}
+			}
+			for (set<Node>::iterator it = sdcycle.first.begin(); it != sdcycle.first.end(); ++it) {
+				weights[*it] -= gamma;
+			}
+		}
+		else { // is clean and contains no semidisjoint cycle
+			double gamma = 0;
+			for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi)
+			{
+				if ((weights[*vi] / (in_degree(*vi, g) - 1) < gamma || gamma == 0) && weights[*vi] >=0) {
+					gamma = weights[*vi]/(in_degree(*vi, g)-1);
+				}
+			}
+			for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi) {
+				if (weights[*vi] >= 0) {
+					weights[*vi] = weights[*vi] - gamma*(in_degree(*vi, g)-1);
+				}
+			}
+		}
+		// handle vertices with weight 0
+		for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi) {
+			if (weights[*vi] == 0) {
+				f.insert(*vi);
+				s.push(*vi);
+				clear_vertex(*vi, g);
+				weights[*vi] = -1; // this means that the vertex is considered to be deleted
+			}
+		}
+		cleanup(g, weights);
+		// count number of vertices with weight > 0
+		active_vertices = 0;
+		for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi) {
+			if (weights[*vi] >= 0) {
+				active_vertices++;
+			}
+		}
+	}
+	// shrink the approximation of the fvs set
+	while (!s.empty()) {
+		Node u = s.top();
+		s.pop();
+		// construct graph to be checked
+		Graph g(orig);
+		set<Node>::iterator it_u;
+		for (set<Node>::iterator it = f.begin(); it != f.end(); ++it) {
+			if (*it != u) {
+				clear_vertex(*it, g); // the vertex does not need to be deleted
+			}
+			else {
+				it_u = it;
+			}
+		}
+		// is f without u an fvs in the original g?
+		if (!has_cycle(g)) {
+			f.erase(it_u);
+		}
+	}
+	return f;
 }
 
 /**
