@@ -1,10 +1,6 @@
 /*
 * File:   fvs_solver.h
-* Author: fabian
 *
-* Created on 04. Mai 2016, 15:40
-*
-* Version: 0.1
 * This file describes the interface used to solve the fvs problem.
 */
 
@@ -14,6 +10,7 @@
 #include <iostream>
 #include <set>
 #include <vector>
+#include <stack>
 
 #include "boost/graph/adjacency_list.hpp"
 #include "boost/graph/undirected_dfs.hpp"
@@ -39,8 +36,8 @@ namespace fvs {
 	bool creates_circle(const Graph& g, const set<Node>& u, const Node& v);
 	Node two_neighbour_node(const Graph& g, const set<Node> &u, const set<Node>& v); //Removed second set. Some1 previously forgot that?
 
-	void cleanup(Graph& g);
-	set<Node> two_approx_fvs(Graph& g);
+	void cleanup(Graph& g, map<Node, double>& weights);
+	set<Node> two_approx_fvs(const Graph& orig);
 
 	pair<set<Node>, bool> compute_fvs(const Graph& orig, Graph& g, set<Node>& f, set<Node>& v2, int k); ///< DESCRIPTIVE NAMES PLS
 
