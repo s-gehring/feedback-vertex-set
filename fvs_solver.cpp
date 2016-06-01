@@ -387,6 +387,10 @@ pair<set<Node>, bool> fvs::compute_fvs(const Graph& orig, Graph& g, set<Node>& f
 	return make_pair(fvs, false);
 }
 
+pair<string, string> explode(string s) {
+  return make_pair("", "");
+}
+
 /**
 * @brief Reads in a graph from a standard text format.
 *
@@ -401,9 +405,8 @@ pair<set<Node>, bool> fvs::compute_fvs(const Graph& orig, Graph& g, set<Node>& f
 */
 void fvs::read_graph(Graph&g, const char* filepath) {
 	typedef graph_traits<Graph>::vertices_size_type NodeId;
-	size_t invalid = (size_t)-1;
-
-	ifstream file(filepath, ios::in);
+	//size_t invalid = (size_t)-1;
+  ifstream file(filepath, ios::in);
 	//Check if the file exists.
 	if (!file.is_open())
 	{
@@ -413,61 +416,26 @@ void fvs::read_graph(Graph&g, const char* filepath) {
 
 	//Reset the graph.
 	g.clear();
-
-	NodeId numnodes = 0;
 	string line;
-
-	//Get first line of the file.
-	getline(file, line);
-
-	//Convert to stringstream
-	stringstream stream;
-	stream << line;
-
-	//Check if the stream is valid.
-	if (!stream.good())
-	{
-		throw std::runtime_error("Invalid file format.");
-	}
-
-	//Control parameter.
-	size_t num_edges = 0;
-
-	//Edge parameter
-	NodeId source = invalid;
-	NodeId target = invalid;
-
-	//Initialize the graph.
-	stream >> numnodes;
-	g = Graph(numnodes);
-
-	//Set the control parameter.
-	getline(file, line);
-	stream.clear();
-	stream << line;
-	stream >> num_edges;
-
-	stream.str("");
-	stream.clear();
-
 	//Read out all lines.
+	//int lineNo = 0;
+	
+
 	while (getline(file, line))
 	{
-		stream.str(line);
+		istringstream iss(line);
+	  int src, dst; 
+	  int x = sscanf(line.c_str(), "%d %d", &src, &dst);
+	  if(x != 2) {
+	    throw std::runtime_error("Can't parse file. Wrong format?");
+	    return;
+	  }
 
-		//Add the edge.
-		stream >> source;
-		stream >> target;
-		add_edge(vertex(source, g), vertex(target, g), g);
+	  // TODO: Add Lookup Table
+		add_edge(vertex(src, g), vertex(dst, g), g);
 
-		stream.clear();
 	}
-
-	//Check if the graph was read correctly.
-	if (boost::num_edges(g) != num_edges)
-	{
-		throw std::runtime_error("The graph was not read correctly.");
-	}
+  file.close();
 	return;
 }
 
