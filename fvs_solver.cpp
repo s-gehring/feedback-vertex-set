@@ -289,6 +289,7 @@ pair<set<Node>, bool> fvs::compute_fvs(const Graph& orig, Graph& g, set<Node>& f
 	for (const auto& i : f) { cout << i << ", "; } cout << endl;
 	cout << "V2: ";
 	for (const auto& i : v2) { cout << i << ", "; } cout << endl;
+	
 	print_graph(g);*/
 
 	if (k < 0 || (k == 0 && has_cycle(g))) {
@@ -613,7 +614,7 @@ void fvs::print_graph(const Graph& g) {
 	cout << "Printing a graph." << endl;
 	cout << "Number of nodes: " << num_vertices(g) << endl;
 	cout << "Number of edges: " << num_edges(g) << endl;
-	
+	if(num_edges(g) > 1000 || num_vertices(g) > 500) return;
 	pair<node_iterator, node_iterator> nIt = vertices(g);
 	for (node_iterator it = nIt.first; it != nIt.second; ++it) {
 		cout << "Edges outgoing from " << (*it) << ":" << endl;
