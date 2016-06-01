@@ -170,7 +170,6 @@ Node fvs::two_neighbour_node(const Graph& g, const set<Node> &u, const set<Node>
 	
 
 	pair<edge_iterator, edge_iterator> eIt;
-	int numNeighbours = 0;
 
 	for (const auto& i : u) {
 		eIt = out_edges(i, g);

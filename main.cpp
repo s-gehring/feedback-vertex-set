@@ -5,7 +5,7 @@
 using namespace fvs;
 
 int main(int argc, char** argv) {
-    const char* filepath = "mini_graph.txt";
+    const char* filepath = "graphs/mini_graph.txt";
     if(argc>1) {
         filepath = argv[1];
     }
@@ -36,27 +36,40 @@ int main(int argc, char** argv) {
     }
     cout << endl;
     cout << "Total size: "<<v1.size()<<endl;
-    cout << (0.5*v1.size()) << "<= MinFVS"<<endl;
+    cout << (0.5*v1.size()) << " <= MinFVS <= "<< v1.size() <<endl;
     int k = v1.size();
-    int n = num_vertices(g);
-    int m = num_edges(g);
+  //  int n = num_vertices(g);
+//    int m = num_edges(g);
     
 
     int min = k/2;
-    int max = n;
+    int max = k;
+    pair<set<Node>, bool> currentSolution;
     do { // Do binary search??
         k = (min + max) / 2;
         Graph h(g);
         set<fvs::Node> x (v1);
         set<fvs::Node> y (v2);
         feedback = fvs::compute_fvs(h, g, x, y, k);
+
         // ToFix: compute_fvs seems to destroy some of these values.
-        cout << "Finished calculation for k = "<<k<<endl;
-
+        cout << "Finished calculation for k = "<<k<<" [min:"<<min<<"|max:"<<max<<"]"<<endl;
         
+        if(feedback.second) {
+            currentSolution = feedback; // Save, in case last iteration is in 'else' part.
+            max = k;
+        } else {
+            if(min == k) {
+                // Rounding errors;
+                ++min;
+            } else {
+                min = k;
+            }
+            
+        }
 
-    } while(!feedback.second && k!=min);
-    
+    } while(max != min);
+    feedback = currentSolution;
     
     
     cout << "FVS: " << (feedback.second ? "exists" : "doesnt exists") << endl;
