@@ -44,24 +44,25 @@ int main(int argc, char** argv) {
 
     int min = k/2;
     int max = k;
-    pair<set<Node>, bool> currentSolution;
-    do { // Do binary search??
+
+    do {        
         k = (min + max) / 2;
+        // Copy like hell!
         Graph h(g);
         set<fvs::Node> x (v1);
         set<fvs::Node> y (v2);
+        
         feedback = fvs::compute_fvs(h, g, x, y, k);
 
         // ToFix: compute_fvs seems to destroy some of these values.
         cout << "Finished calculation for k = "<<k<<" [min:"<<min<<"|max:"<<max<<"]"<<endl;
         
         if(feedback.second) {
-            currentSolution = feedback; // Save, in case last iteration is in 'else' part.
             max = k;
         } else {
             if(min == k) {
                 // Rounding errors;
-                ++min;
+                k = ++min;
             } else {
                 min = k;
             }
@@ -69,10 +70,15 @@ int main(int argc, char** argv) {
         }
 
     } while(max != min);
-    feedback = currentSolution;
+    // This is a bit weird. Binary search cancels if max == min. This is the size of the min FVS. However, since the loop just breaks,
+    // we're not guaranteed a result in currentSolution.
+    Graph h(g);
+    cout << "Found size of min FVS: "<<min<<", continue to compute min FVS."<<endl;
+    feedback = fvs::compute_fvs(h,g,v1,v2,min);
     
+    // TODO: Sanity function.
     
-    cout << "FVS: " << (feedback.second ? "exists" : "doesnt exists") << endl;
+    cout << "Feedback Vertex Set: " << (feedback.second ? "Found" : "Not found!") << endl;
     for (const auto& i : feedback.first) {
         cout << i << ", ";
     }
