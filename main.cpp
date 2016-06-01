@@ -53,8 +53,6 @@ int main(int argc, char** argv) {
         set<fvs::Node> y (v2);
         
         feedback = fvs::compute_fvs(h, g, x, y, k);
-
-        // ToFix: compute_fvs seems to destroy some of these values.
         cout << "Finished calculation for k = "<<k<<" [min:"<<min<<"|max:"<<max<<"]"<<endl;
         
         if(feedback.second) {
