@@ -8,27 +8,6 @@
 using namespace fvs;
 
 /**
-* @brief Checks, wether the given graph contains a circle.
-*
-* This function uses dfs to check if the given graph contains circles. Right now
-* a circle is found, when the dfs finds a back, forward or cross edge (since the graph is undirected).
-* 
-* Boost's visitor concept is used to transport info.
-* 
-* @param [in] g The graph.
-* @returns True, if there is a circle in g (hopefully).
-*/
-bool fvs::has_cycle(const fvs::Graph& g) {
-//	cout << "FINDING CYCLES" << endl;
-  	bool b = false;
-	CycleVisitor cv(b);
-	depth_first_search<Graph, CycleVisitor>(g, visitor(cv));
-//	cout << "Has cycle: " << (b ? "true" : "false") << endl;
-	return b;
-}
-
-
-/**
 * @brief Checks, whether a given graph contains a semidisjoint cycle.
 *
 * This function checks if a given graph contains a semidisjoint cycle,
@@ -53,7 +32,7 @@ pair<set<Node>, bool> fvs::find_semidisjoint_cycle(const Graph& g)
 * Dont use this method, just call the original.
 */
 bool fvs::edge_exists_between(const Graph& g, Node u, Node v) {
-	return edge(u, v, g).second;
+	return g.has_edge(u,v);
 }
 
 /**
@@ -72,31 +51,7 @@ bool fvs::edge_exists_between(const Graph& g, Node u, Node v) {
 * @returns The lowest degree node in u.
 */
 Node fvs::get_lowest_degree_node(const Graph &g, const set<Node>& u) {
-	typedef graph_traits<Graph>::vertices_size_type id;
-	if (u.size() == 0) {
-		return graph_traits<Graph>::null_vertex();
-//		throw runtime_error("Error: Searching lowest degree node in an empty set.");
-	}
-
-	typedef graph_traits<Graph>::out_edge_iterator edge_iterator;
-	pair<id, Node> lowestDegreeNode = make_pair(1000, graph_traits<Graph>::null_vertex());
-
-	for (const auto& i : u) {
-		if (u.end() != u.find(i)) {
-			size_t edgesToOtherUs = 0;
-			pair<edge_iterator, edge_iterator> eIt = out_edges(i, g);
-			for (edge_iterator it = eIt.first; it != eIt.second; ++it) {
-				if (u.end() != u.find(target((*it), g))) {
-					++edgesToOtherUs;
-				}
-			}
-
-			if (edgesToOtherUs < lowestDegreeNode.first) {
-				lowestDegreeNode = make_pair(edgesToOtherUs, i);
-			}
-		}
-	}
-	return lowestDegreeNode.second;
+	return g.lowest_deg_node(u);
 }
 
 /**
@@ -112,36 +67,39 @@ Node fvs::get_lowest_degree_node(const Graph &g, const set<Node>& u) {
 * @returns True, if a neighbour of a neighbour of v is a neighbour of v.
 */
 bool fvs::creates_circle(const Graph& g, const set<Node>& u, const Node& v) {
-	//Make sure we dont call the rest on an invalid call.
-	if (v == graph_traits<Graph>::null_vertex()) {
-		//Might be useful to find a proper way for this...
-		return false; 
-	}
-	
+    if(u == INVALID_NODE || v == INVALID_NODE) {
+        cout << "Warning: Called creates_circle() with at least one invalid node." << endl;
+        return false;
+    }
 /*	cout << "Checking for circles." << endl;
 	cout << "Node that is checked: " << v << endl;
 	cout << "Set: "; for (const auto& i : u) { cout << i << ", "; } cout << endl;*/
 
-	typedef graph_traits<Graph>::out_edge_iterator edge_iterator;
-	pair<edge_iterator, edge_iterator> eIt = out_edges(v, g);
-
-	set<Node> neighbours;
-	for (edge_iterator it = eIt.first; it != eIt.second; ++it) {
-		if (u.end() != u.find(target((*it), g))) {
-			neighbours.insert(target((*it), g));
-		}
+	pair<Neighborhood, bool> neighbors = g.get_neighbors(v);
+    if(!neighbors.second) {
+        cout << "Warning: Called creates_circle() with a vertex (v) not being in the graph (g)."<<endl;
+        return false;
+    }
+    
+	set<Node> neighbors_in_u;
+	for(const auto &it : neighbors.first) {
+	    if(u.find(g.target(*it)) != u.end()) {
+	        neighbors_in_u.insert(g.target(*it));
+	    }
 	}
 
-	for (const auto& i : neighbours) {
-		eIt = out_edges(i, g);
-		for (edge_iterator it = eIt.first; it != eIt.second; ++it) {
-			if (neighbours.end() != neighbours.find(target((*it), g))) {
-//				cout << "Circle found." << endl;
-				return true; //A neighbour of a neighbour of v is neighbour of v (in u).
-			}
+	for (const auto& i : neighbors_in_u) {
+		eIt = g.get_neighbors(i);
+		if(!eIt.first) {
+		    throw std::runtime_error("Error: There is a vertex in u, but not in g.");
+		    return false;
+		}
+		for (const auto& it : eIt.first) {
+		    if(neighbors_in_u.find(g.target(*it)) != neighbors_in_u.end()) {
+		        true;
+		    }
 		}
 	}
-
 	return false;
 }
 
@@ -158,40 +116,17 @@ bool fvs::creates_circle(const Graph& g, const set<Node>& u, const Node& v) {
 *		otherwise.
 */
 Node fvs::two_neighbour_node(const Graph& g, const set<Node> &u, const set<Node> &v) {
-	typedef graph_traits<Graph>::out_edge_iterator edge_iterator;
-	typedef graph_traits<Graph>::adjacency_iterator adjacency_iterator;
 	
-/*	cout << "TWO NEIGHBOUR NODE:" << endl;
-	cout << "Set 1: ";
-	for (const auto& i : u) { cout << i << ", "; } cout << endl;
-	cout << "Set 2: ";
-	for (const auto& i : v) { cout << i << ", "; } cout << endl;
-	print_graph(g);*/
-	
-
-	pair<edge_iterator, edge_iterator> eIt;
-
 	for (const auto& i : u) {
-		eIt = out_edges(i, g);
-		
-		set<Node> neighbours;
-		pair<adjacency_iterator, adjacency_iterator> adj = adjacent_vertices(i, g);
-		for (adjacency_iterator aIt = adj.first; aIt != adj.second; ++aIt) {
-			neighbours.insert((*aIt));
-		}
-		
-		for (const auto& n : neighbours) {
-			pair<adjacency_iterator, adjacency_iterator> neighboursNeighbours = adjacent_vertices(n, g);
-			for (adjacency_iterator aIt = neighboursNeighbours.first; aIt != neighboursNeighbours.second; ++aIt) {
-				if (neighbours.find((*aIt)) != neighbours.end()) {
-//					cout << "Node found: " << i << endl;
-					return i;
-				}
-			}
+		int neighbors = 0;
+		Neighborhood n = g.get_neighbors(i);
+		for(const auto& j : n) {
+		    if(v.find(j) != v.end()) {
+		        if(++neighbors > 1) return v;
+		    }
 		}
 	}
-//	cout << "No node found: " << endl;
-	return graph_traits<Graph>::null_vertex();
+	return INVALID_NODE;
 }
 
 /**
@@ -199,14 +134,17 @@ Node fvs::two_neighbour_node(const Graph& g, const set<Node> &u, const set<Node>
 */
 void fvs::induced_subgraph(Graph &s, const Graph& g, const set<Node>& u) {
 	typedef graph_traits<Graph>::out_edge_iterator edge_iterator;
-	
 	s.clear();
 	for (const auto& i : u) {
-		pair<edge_iterator, edge_iterator> eIt = out_edges(i, g);
-		for (edge_iterator it = eIt.first; it != eIt.second; ++it) {
-			if (u.end() != u.find(target((*it), g))) {
-				add_edge(i, target((*it), g), s);
-			}
+		Neighborhood eIt = g.get_neighbors(i);
+		if(!eIt.second) {
+		    cout << "Warning: Called induced_subgraph with a nodeset containing at least one node not in g"<<endl;
+		} else {
+		    for(const auto& j : eIt.first) {
+		        if(u.find(g.target((*j)))!=u.end()) {
+		            s.add_edge(i, g.target(*j));
+		        }
+		    }
 		}
 	}
 }
@@ -229,36 +167,7 @@ void fvs::induced_subgraph(Graph &s, const Graph& g, const set<Node>& u) {
 * @param [in] dt A direction_tag, defaults to forward.
 */
 void fvs::maintain_integrity(Graph& g, set<Node>& u, Node aDeletedNode, direction_tag dt) {
-/*	cout << "Maintain integrity." << endl;
-	cout << "Deleted Node: " << aDeletedNode << endl;
-	cout << "U: ";				
-	for (const auto& i : u) { cout << i << ", "; } cout << endl;*/
-	
-	set<Node> newSet;
-	for (set<Node>::iterator it = u.begin(); it != u.end(); ++it) {
-		if (direction_tag::forward == dt) { 
-			if (*it > aDeletedNode && 0 < *it) {
-				newSet.insert(((*it) - 1));
-				//(*it) = (*it) - 1;
-			}
-			else if (*it < aDeletedNode || (0 == *it && 0 != aDeletedNode)) {
-				newSet.insert(((*it)));
-			}
-		}
-		else {
-			if (*it >= aDeletedNode) {
-				newSet.insert(((*it) + 1));
-			}
-			else if (*it < aDeletedNode) {
-				newSet.insert((*it));
-			}
-		}
-	}
-	
-	u = newSet;
-	
-	//cout << "New U: ";				
-	//for (const auto& i : u) { cout << i << ", "; } cout << endl << endl;
+    return; // Obsolete
 }
 
 
@@ -403,11 +312,8 @@ pair<string, string> explode(string s) {
 * @param [out] g The graph will be written to this object. All data will be cleared before reading the new graph.
 * @param [in] filepath The path to the file containing the graph.
 */
-void fvs::read_graph(Graph&g, const char* filepath) {
-	typedef graph_traits<Graph>::vertices_size_type NodeId;
-	//size_t invalid = (size_t)-1;
-  ifstream file(filepath, ios::in);
-	//Check if the file exists.
+void fvs::read_graph(Graph &g, const char* filepath) {
+    ifstream file(filepath, ios::in);
 	if (!file.is_open())
 	{
 		throw std::runtime_error("Cannot open file.");
@@ -424,18 +330,18 @@ void fvs::read_graph(Graph&g, const char* filepath) {
 	while (getline(file, line))
 	{
 		istringstream iss(line);
-	  int src, dst; 
-	  int x = sscanf(line.c_str(), "%d %d", &src, &dst);
-	  if(x != 2) {
-	    throw std::runtime_error("Can't parse file. Wrong format?");
-	    return;
-	  }
+	    int src, dst; 
+	    int x = sscanf(line.c_str(), "%d %d", &src, &dst);
+	    if(x != 2) {
+	      throw std::runtime_error("Can't parse file. Wrong format?");
+	      return;
+	    }
 
-	  // TODO: Add Lookup Table
-		add_edge(vertex(src, g), vertex(dst, g), g);
+	    // TODO: Add Lookup Table
+		g.add_edge(src, dst);
 
 	}
-  file.close();
+    file.close();
 	return;
 }
 
