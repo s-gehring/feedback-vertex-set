@@ -103,6 +103,9 @@ namespace fvs {
 						--it;
 					}
 					_sdVertices.insert((*it).second);
+					if (in_degree((*it).second, g) > 2) {
+						vertices_with_high_degree++;
+					}
 					if(vertices_with_high_degree <= 1) {
 						_sdcycle = true;
 					}
