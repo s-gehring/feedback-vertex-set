@@ -1,3 +1,6 @@
+#ifndef _GRAPH_CPP
+#define _GRAPH_CPP
+
 #include <boost/container/flat_set.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/property_map/property_map.hpp>
@@ -18,24 +21,19 @@
 
 
 
+
 #define INVALID_NODE -1
 #define SKIP_MULTIEDGES
 #define TEST_NUMBER 2000000
 
 
 
-std::string B2S(bool b) {
-  if(b) return "true";
-  return "false";
-}
-namespace Graph {
-  
+namespace FvsGraph {
 
   typedef int Node;
   typedef std::pair<int,int> Edge;
   typedef std::unordered_map<Node, bool> Neighborhood; 
-  typedef std::unordered_map<Node, Neighborhood> SortedVectorVector;  // A hashtable.
-    
+  typedef std::unordered_map<Node, Neighborhood> AdjacencyList;  // A hashtable.
   
   typedef std::unordered_set<Node> NodeVector;
   struct compareNeighborhoods {
@@ -48,11 +46,12 @@ namespace Graph {
 
   class Graph {
       public:
-
-      private:
-          SortedVectorVector adj;          
           int n;
           int m;
+
+      private:
+          AdjacencyList adj;          
+
           int multiedges;
           std::set<Edge> all_multiedges;
           Sizes sizes;
@@ -86,88 +85,84 @@ namespace Graph {
               }
               return res;
           }
-          /*
-          bool add_size(const Node u, const size_t s) { // O(1)
-              if(!has_node(u)) return false;
-              size_t l = adj[u].size();
-              NodeVector nodes = sizes[l];
-              nodes.erase(u); 
-              if(sizes.find(l+s) == sizes.end()) {                
-                sizes[l+s]=NodeVector();
-              }
-              sizes[l+s].insert(u);
-              return true;        
-          }
-          
-          bool increment_size(const Node u) {
-              return add_size(u, 1);
-          }
-          bool decrement_size(const Node u) {
-              return add_size(u,-1);
-          }
-          */
-          /* Implemented iteratively
-          bool dfs_visit(
-              const SortedVectorVector::iterator &u, 
-              std::unordered_map<Node, char> &colors,
-              std::unordered_map<Node, Node> &pre,
-              std::unordered_map<Node, int> &found,
-              std::unordered_map<Node, int> &finish,
-              int &time) 
-          {
-              colors[u->first] = 1;
-              ++time;
-              found[u->first] = time;
-              for(Neighborhood::const_iterator it = u->second.begin(); it != void add_edge_list(const std::List<Edge> &u) {
-
-            for(auto std::List<Edge>::iterator it = u.begin(); it!=u.end(); ++it) {
-              add_node(it->first);
-              add_node(it->second);
-              
-              if(!has_multiedge(u, v)) {
-                if(!has_edge(u, v)) {
-                  adj[u][v] = adj[v][u] = false;
-                } else {
-                  adj[u][v] = adj[v][u] = true;
-                  ++multiedges;
-                }
-                ++m;
-              }
-            }
-            // Added all edges. Now refresh sizes.
-            
-          }u->second.end(); ++it ) {
-                  if(colors[it->first] == 0) {
-                      pre[it->first] = u->first;
-                      if(dfs_visit(adj.find(u->first), colors, pre, found, finish, time)) return true;
-                  }
-                  if(colors[it->first] == 1) return true;
-              }
-              colors[u->first] = 2;
-              ++time;
-              finish[u->first] = time;
-              return false;
-          }
-          */
-          
           
           
       public:
-          Graph(void);
+          
+          Graph() {
+            n = m = multiedges = 0;
+          }
+          
+          
           bool has_node(const Node v) { return adj.find(v) != adj.end(); }                                        // O(1)
           bool has_edge(const Node u, const Node v) { return (has_node(u)) && (adj[u].find(v) != adj[u].end()); } // O(1) + O(1)
           bool has_multiedge(const Node u, const Node v) { return has_edge(u, v) && adj[u][v]; }                  // O(1) + O(1)
           bool has_multiedge(const Edge &e) { return has_multiedge(e.first, e.second); }                          // Alias to (const Node, const Node)
           bool has_edge(const Edge &e) { return has_edge(e.first, e.second); }                                    // Alias to (const Node, const Node)
+          AdjacencyList get_adjacency_list() {
+            return adj;
+          }
           
           
-
+          std::pair<std::set<Node>, bool> find_semidisjoint_cycle() {
+              std::unordered_set<Node> done = std::unordered_set<Node>();
+              std::stack<std::pair<Node, Node> > S;
+              std::set<Node> sd_cycle;
+              std::vector<Edge> foundEdges;
+              for(AdjacencyList::iterator it = adj.begin(); it != adj.end(); ++it) {
+                if(done.find(it->first) == done.end()) {
+                  // connected_components++;
+                  S.push(std::make_pair(it->first, INVALID_NODE));
+                  done.insert(it->first); 
+                  while(!S.empty()) {
+                    Node v = S.top().first;
+                    Node f = S.top().second;
+                    S.pop();
+                    for(Neighborhood::const_iterator neighbor = adj[v].begin(); neighbor != adj[v].end(); ++neighbor) {
+                      Node w = neighbor->first;
+                      if(done.find(w) == done.end()) {
+                        // Tree edge
+                        foundEdges.push_back(std::make_pair(v, w));
+                        S.push(std::make_pair(w, v));
+                        done.insert(w);
+                      } else {
+                        if(w != f) {
+                        // Target(e) == w
+                        // Source(e) == v
+                          if(find(foundEdges.begin(), foundEdges.end(), std::make_pair(w, v)) == foundEdges.end()) {
+                            foundEdges.push_back(std::make_pair(v,w));
+                            // found cycle, check if semi-disjoint
+                            std::vector<std::pair<Node, Node> >::iterator it2 = foundEdges.end() -1;
+                            int nodes_with_high_deg = 0;
+                            while(it2->first != w) {
+                              sd_cycle.insert(it2->second);
+                              if(get_single_degree(it2->second) > 2) {
+                                nodes_with_high_deg = 0;
+                              }
+                              --it2;
+                            }
+                            sd_cycle.insert(it2->second);
+                            if(nodes_with_high_deg <= 1) {
+                              return std::make_pair(sd_cycle, true);
+                            } else {
+                              sd_cycle.clear();
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+              return std::make_pair(std::set<Node>(), false);
+          }
+          
           bool has_cycle() {
               if(m >= n) return true;
               if(multiedges > 0) return true;
               std::unordered_set<Node> done = std::unordered_set<Node>();
               std::stack<std::pair<Node, Node> > S;
-              for(SortedVectorVector::iterator it = adj.begin(); it != adj.end(); ++it) {
+              for(AdjacencyList::iterator it = adj.begin(); it != adj.end(); ++it) {
                 if(done.find(it->first) == done.end()) {
                   S.push(std::make_pair(it->first, INVALID_NODE));
                   done.insert(it->first); 
@@ -207,7 +202,8 @@ namespace Graph {
               #endif
               std::unordered_set<Node> done = std::unordered_set<Node>();
               std::stack<std::pair<Node, Node> > S;
-              for(SortedVectorVector::iterator it = adj.begin(); it != adj.end(); ++it) {
+           
+	bool has_cycle(Graph& g);   for(AdjacencyList::iterator it = adj.begin(); it != adj.end(); ++it) {
                 if(done.find(it->first) == done.end()) {
                   S.push(std::make_pair(it->first, INVALID_NODE));
                   done.insert(it->first); 
@@ -397,7 +393,7 @@ namespace Graph {
           
           
           void print_all_edges() {
-              for(SortedVectorVector::iterator it = adj.begin(); it != adj.end(); ++it) {
+              for(AdjacencyList::iterator it = adj.begin(); it != adj.end(); ++it) {
                   // it-> first = key;
                   // it-> second= value;
                   std::string s = toString(it->second);
@@ -405,135 +401,7 @@ namespace Graph {
               }
           }
   };
-  Graph::Graph(void) {
-      n=m=multiedges=0;
-      //sizes[0] = NodeVector();
-  }
-
+  
 }
 
-
-void addNewNodes(int count, Graph::Graph &G) {
-  for(int i = 0; i < count; ++i) {
-    G.add_node(i);
-  }
-}
-void addOldNodes(int count, Graph::Graph &G) {
-  for(int i = 0; i < count; ++i) {
-    G.add_node(1);
-  }
-}
-
-void addNewEdges(int count, Graph::Graph &G) {
-  int x = sqrt(count);
-  std::list<Graph::Edge> e;
-  for(int i = 0; i < x; ++i) {
-    for(int j = 0; j <= x; ++j) {
-      e.push_back(Graph::Edge(i,j));
-    }
-
-  }
-  G.add_edges(e);
-}
-
-void addOldEdges(int count, Graph::Graph &G) {
-  for(int i = 0; i < count; ++i) {
-    G.add_edge(0, 1);
-  }
-}
-
-std::string nodeListToString(const std::list<Graph::Node> &x) {
-    std::string res = "";
-    bool first = true;
-    for(std::list<Graph::Node>::const_iterator it = x.begin(); it != x.end(); ++it) {
-        if(first) {
-            first = false;
-            res = std::to_string(*it);
-        } else {
-            res = res + "|"+ std::to_string(*it);
-        }
-    }
-    return res;
-}
-
-bool validate_cycle(std::list<Graph::Node> &x, Graph::Graph &g) {
-    for(std::list<Graph::Node>::const_iterator it = x.begin(); it != x.end(); ++it) {
-        std::list<Graph::Node>::const_iterator next = std::list<Graph::Node>::const_iterator(it);
-        ++next;
-        if(next == x.end()) {
-            if(!g.has_edge(*it, *(x.begin()))) {
-                printf("Is not a cycle, because the following edge is missing: %i, %i\n", *it, *(x.begin()));
-                return false;
-            }
-        } else {
-            if(!g.has_edge(*it, *next)) {
-                printf("Is not a cycle, because the following edge is missing: %i, %i\n", *it, *next);
-                return false;
-            }
-        }
-    }
-    return true;
-}
-/*
-int main() {
-
-    Graph::Graph G;
-    int i,j;
-    int n = TEST_NUMBER;
-    time_t s1 = time(NULL);
-    printf("Starting adding new nodes.\n");
-    addNewNodes(n, G);
-    printf("Ending adding new nodes.\n");
-    time_t s2 = time(NULL);
-    printf("Starting adding old nodes.\n");
-    addOldNodes(n, G);
-    printf("Ending adding old nodes.\n");
-    time_t s3 = time(NULL);
-    printf("Starting adding new edges.\n");
-    
-    addNewEdges(3*n, G);
-    
-    printf("Ending adding new edges.\n");
-    time_t s4 = time(NULL);
-    printf("Starting adding old edges.\n");
-    addOldEdges(n, G);
-    printf("Ending adding old edges.\n");
-    time_t s5 = time(NULL);
-    printf("Starting checking for cycles.\n");
-    bool y = G.has_cycle();
-    printf("Ending checking for cycles.\n\n");
-    time_t s6 = time(NULL);
-    printf("Start getting cycle.\n");
-    std::pair<std::list<Graph::Node>, bool> x = G.get_cycle();
-    printf("End getting cycle.\n");
-    time_t s7 = time(NULL);
-    printf("Starting validating cycle.\n");
-    y = validate_cycle(x.first, G);
-    printf("Ending validating cycle.\n");
-    time_t s8 = time(NULL);
-    
-
-    printf("n = %i\n", n);
-    printf("AddNewNodes:\t%.f\n", difftime(s2,s1));
-    printf("AddOldNodes:\t%.f\n", difftime(s3,s2));  
-    printf("AddNewEdges:\t%.f\n", difftime(s4,s3));
-    printf("AddOldEdges:\t%.f\n", difftime(s5,s4));  
-    printf("FindCycle:\t%.f\n", difftime(s6,s5));
-    printf("GetCycle:\t%.f\n", difftime(s7,s6));
-    printf("ValidateCycle:\t%.f\n", difftime(s8,s7));
-    if(x.second) {
-        printf("Cycle:\t[%s]\n", nodeListToString(x.first).c_str());
-        if(!y) {
-            printf("Is not a cycle.\n");
-        } else {
-            printf("Is a cycle.\n");
-        }
-    }
-    
-
-}
-*/
-
-
-
-}
+#endif

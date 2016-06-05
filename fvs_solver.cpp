@@ -7,6 +7,13 @@
 
 using namespace fvs;
 
+
+
+	bool fvs::has_cycle(Graph& g) {
+	  return g.has_cycle();
+	}
+
+
 /**
 * @brief Checks, whether a given graph contains a semidisjoint cycle.
 *
@@ -17,21 +24,16 @@ using namespace fvs;
 * @param [in] g The graph.
 * @returns The set of nodes forming the semidisjoint cycle in g and an indicator for the existence.
 */
-pair<set<Node>, bool> fvs::find_semidisjoint_cycle(const Graph& g)
+pair<set<Node>, bool> fvs::find_semidisjoint_cycle(Graph& g)
 {
-	bool b = false;
-	set<Node> sdc;
-	SemiDisjointCycleVisitor cv(b ,sdc);
-	depth_first_search<Graph, SemiDisjointCycleVisitor>(g, visitor(cv));
-	pair<set<Node>, bool> retValue = make_pair(sdc, b);
-	return retValue;
+	return g.find_semidisjoint_cycle();
 }
 
 /**
 * This is basically an example on how to do that with boost.
 * Dont use this method, just call the original.
 */
-bool fvs::edge_exists_between(const Graph& g, Node u, Node v) {
+bool fvs::edge_exists_between(Graph& g, Node u, Node v) {
 	return g.has_edge(u,v);
 }
 
@@ -50,7 +52,7 @@ bool fvs::edge_exists_between(const Graph& g, Node u, Node v) {
 * @param [in] u A set of nodes. 
 * @returns The lowest degree node in u.
 */
-Node fvs::get_lowest_degree_node(const Graph &g, const set<Node>& u) {
+Node fvs::get_lowest_degree_node(Graph &g, const set<Node>& u) {
 	return g.lowest_deg_node(u);
 }
 
@@ -66,9 +68,9 @@ Node fvs::get_lowest_degree_node(const Graph &g, const set<Node>& u) {
 * @param [in] v A node, which might connect a circle in g[u].
 * @returns True, if a neighbour of a neighbour of v is a neighbour of v.
 */
-bool fvs::creates_circle(const Graph& g, const set<Node>& u, const Node& v) {
-    if(u == INVALID_NODE || v == INVALID_NODE) {
-        cout << "Warning: Called creates_circle() with at least one invalid node." << endl;
+bool fvs::creates_circle(Graph& g, const set<Node>& u, const Node& v) {
+    if(v == INVALID_NODE) {
+        cout << "Warning: Called creates_circle() with invalid node." << endl;
         return false;
     }
 /*	cout << "Checking for circles." << endl;
@@ -83,20 +85,20 @@ bool fvs::creates_circle(const Graph& g, const set<Node>& u, const Node& v) {
     
 	set<Node> neighbors_in_u;
 	for(const auto &it : neighbors.first) {
-	    if(u.find(g.target(*it)) != u.end()) {
-	        neighbors_in_u.insert(g.target(*it));
+	    if(u.find(it.first) != u.end()) {
+	        neighbors_in_u.insert(it.first);
 	    }
 	}
 
 	for (const auto& i : neighbors_in_u) {
-		eIt = g.get_neighbors(i);
-		if(!eIt.first) {
-		    throw std::runtime_error("Error: There is a vertex in u, but not in g.");
+		auto eIt = g.get_neighbors(i); // Neighborhood , bool
+		if(!eIt.second) {
+		    throw std::runtime_error("Error: There is a vertex which is in u, but not in g.");
 		    return false;
 		}
 		for (const auto& it : eIt.first) {
-		    if(neighbors_in_u.find(g.target(*it)) != neighbors_in_u.end()) {
-		        true;
+		    if(neighbors_in_u.find(it.first) != neighbors_in_u.end()) {
+		        return true;
 		    }
 		}
 	}
@@ -115,14 +117,14 @@ bool fvs::creates_circle(const Graph& g, const set<Node>& u, const Node& v) {
 * @returns A node of u with atleast two neighbours in v, if such a node exists or a null_vertex()
 *		otherwise.
 */
-Node fvs::two_neighbour_node(const Graph& g, const set<Node> &u, const set<Node> &v) {
+Node fvs::two_neighbour_node(Graph& g, const set<Node> &u, const set<Node> &v) {
 	
 	for (const auto& i : u) {
 		int neighbors = 0;
-		Neighborhood n = g.get_neighbors(i);
+		Neighborhood n = g.get_neighbors(i).first;
 		for(const auto& j : n) {
-		    if(v.find(j) != v.end()) {
-		        if(++neighbors > 1) return v;
+		    if(v.find(j.first) != v.end()) {
+		        if(++neighbors > 1) return i;
 		    }
 		}
 	}
@@ -132,17 +134,17 @@ Node fvs::two_neighbour_node(const Graph& g, const set<Node> &u, const set<Node>
 /**
 * @brief Creates the induced subgraph g[u].
 */
-void fvs::induced_subgraph(Graph &s, const Graph& g, const set<Node>& u) {
-	typedef graph_traits<Graph>::out_edge_iterator edge_iterator;
+void fvs::induced_subgraph(Graph &s, Graph& g, const set<Node>& u) {
 	s.clear();
 	for (const auto& i : u) {
-		Neighborhood eIt = g.get_neighbors(i);
+		std::pair<Neighborhood, bool> eIt = g.get_neighbors(i);
 		if(!eIt.second) {
 		    cout << "Warning: Called induced_subgraph with a nodeset containing at least one node not in g"<<endl;
 		} else {
 		    for(const auto& j : eIt.first) {
-		        if(u.find(g.target((*j)))!=u.end()) {
-		            s.add_edge(i, g.target(*j));
+		        if(u.find(j.first)!=u.end()) {
+		            s.add_edge(i, j.first);
+		            // Multiedges?
 		        }
 		    }
 		}
@@ -187,7 +189,7 @@ void fvs::maintain_integrity(Graph& g, set<Node>& u, Node aDeletedNode, directio
 * @returns A pair of a set of nodes and a bool. The set of nodes contains a part of the feedback
 *		vertex set. The bool will be false, if the algorithm decides that there is no fvs.
 */
-pair<set<Node>, bool> fvs::compute_fvs(const Graph& orig, Graph& g, set<Node>& f, set<Node>& v2, int k) {
+pair<set<Node>, bool> fvs::compute_fvs(Graph& orig, Graph& g, set<Node>& f, set<Node>& v2, int k) {
 	set<Node> fvs;
 	pair<set<Node>, bool> retValue;
 	
@@ -213,16 +215,13 @@ pair<set<Node>, bool> fvs::compute_fvs(const Graph& orig, Graph& g, set<Node>& f
 
 	Node w = two_neighbour_node(g, f, v2); // A vertex of f which has least two neighbors in g-f.
 //	cout << "w: " << w << endl;
-	if (w != graph_traits<Graph>::null_vertex()) {
+	if (w != INVALID_NODE) {
 		if (creates_circle(g, v2, w)) {
 //			cout << w << " creates a circle in g." << endl;
 			
 			Graph h(g);
 			f.erase(w);
-			clear_vertex(w, h);
-			remove_vertex(w, h);
-			maintain_integrity(h, f, w);
-			maintain_integrity(h, v2, w);
+			h.remove_node(w);
 			retValue = compute_fvs(orig, h, f, v2, k - 1);
 			
 //			cout << "Subcall retuned: " << (retValue.second ? "true" : "false") << endl;
@@ -248,15 +247,11 @@ pair<set<Node>, bool> fvs::compute_fvs(const Graph& orig, Graph& g, set<Node>& f
 		else {
 			Graph h(g);
 			f.erase(w);
-			clear_vertex(w, h);
-			remove_vertex(w, h);
-			maintain_integrity(h, f, w);
-			maintain_integrity(h, v2, w);
+			h.remove_node(w);
 			retValue = compute_fvs(orig, h, f, v2, k - 1);
 
 			if (true == retValue.second) {
 				fvs = retValue.first;
-				maintain_integrity(h, fvs, w, direction_tag::inverse);
 				
 				fvs.insert(w);
 				
@@ -273,18 +268,15 @@ pair<set<Node>, bool> fvs::compute_fvs(const Graph& orig, Graph& g, set<Node>& f
 	}
 	else {
 		w = get_lowest_degree_node(g, f);
-		if (graph_traits<Graph>::null_vertex() != w && out_degree(w, orig) < 2) {
+		if (INVALID_NODE != w && orig.get_single_degree(w) < 2) {
 //			cout << "Out degree of " << w << " is smaller than 2" << endl;
 			Graph h(g);
 			f.erase(w);
-			clear_vertex(w, h);
-			remove_vertex(w, h);
-			maintain_integrity(h, f, w);
-			maintain_integrity(h, v2, w);
+      h.remove_node(w);
 
 			return retValue = compute_fvs(orig, h, f, v2, k - 1);
 		} 
-		else if (w != graph_traits<Graph>::null_vertex()) {
+		else if (w != INVALID_NODE) {
 			f.erase(w);
 			v2.insert(w);
 
@@ -354,21 +346,22 @@ void fvs::read_graph(Graph &g, const char* filepath) {
 * @param [in] g The graph.
 * @param [in] weights The weights of the vertices.
 */
-void fvs::cleanup(Graph& g, map<Node, double>& weights)
+void fvs::cleanup(Graph& g)
 {
-	graph_traits<Graph>::vertex_iterator vi, vi_end;
-	for (tie(vi, vi_end) = vertices(g); vi != vi_end && num_vertices(g) > 0; ++vi)
-	{
-		if (in_degree(*vi, g) <= 1 && weights[*vi] >= 0)
-		{
-			// remove edges and delete
-			clear_vertex(*vi, g);
-			weights[*vi] = -1;
-			// check everything again
-			tie(vi, vi_end) = vertices(g);
-			// we can definitively save some runtime by just checking the neighbours we have already visited
-		}
-	}
+  set<Node> to_delete;
+  bool change = true;
+  while(change) {
+    change = false;
+    for(const auto &it : to_delete) {
+      g.remove_node(it);
+    }
+    for(const auto &it : g.get_adjacency_list()) {
+      if(it.second.size() < 2) {
+        change = true;
+        to_delete.insert(it.first);
+      }
+    }
+  }
 }
 
 /**
@@ -383,32 +376,30 @@ void fvs::cleanup(Graph& g, map<Node, double>& weights)
 * @param[in] orig The graph.
 * @returns The feedback vertex set.
 */
-set<Node> fvs::two_approx_fvs(const Graph& orig)
+
+set<Node> fvs::two_approx_fvs(Graph& orig)
 {
-	// initialize weights and f
 	Graph g(orig);
-	map<Node, double> weights;
-	graph_traits<Graph>::vertex_iterator vi, vi_end;
+	//graph_traits<Graph>::vertex_iterator vi, vi_end;
 	set<Node> f;
+	map<Node, double> weights;
 	stack<Node> s;
-	for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi)
-	{
-		if (in_degree(*vi, g) == 1)
-		{
-			f.insert(*vi);
-		}
-		weights[*vi] = *vi+1; // maybe there is a smarter way to initialize the weights
+	for(const auto &it : g.get_adjacency_list()) {
+	  if(g.get_single_degree(it.first) == 1) {
+	    f.insert(it.first);
+	  }
+	  weights[it.first] = it.first+1;
 	}
-	cleanup(g, weights);
+	
+	cleanup(g);
 	// count number of vertices with weight > 0
 	int active_vertices = 0;
-	for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi) {
-		if (weights[*vi] >= 0) {
+	for (const auto &it : g.get_adjacency_list()) {
+		if (weights[it.first] >= 0) {
 			active_vertices++;
 		}
 	}
-	while (active_vertices > 0)
-	{
+	while (active_vertices > 0) {
 		// contains a semidisjoint cycle?
 		pair<set<Node>, bool> sdcycle = find_semidisjoint_cycle(g);
 		if (sdcycle.second) {
@@ -421,35 +412,32 @@ set<Node> fvs::two_approx_fvs(const Graph& orig)
 			for (set<Node>::iterator it = sdcycle.first.begin(); it != sdcycle.first.end(); ++it) {
 				weights[*it] -= gamma;
 			}
-		}
-		else { // is clean and contains no semidisjoint cycle
+		} else { // is clean and contains no semidisjoint cycle
 			double gamma = 0;
-			for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi)
-			{
-				if ((weights[*vi] / (in_degree(*vi, g) - 1) < gamma || gamma == 0) && weights[*vi] >=0) {
-					gamma = weights[*vi]/(in_degree(*vi, g)-1);
+			for (const auto &it : g.get_adjacency_list()) {
+				if ((weights[it.first] / (g.get_single_degree(it.first)-1) < gamma || gamma == 0) && weights[it.first] >=0) {
+					gamma = weights[it.first]/(g.get_single_degree(it.first)-1);
 				}
 			}
-			for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi) {
-				if (weights[*vi] >= 0) {
-					weights[*vi] = weights[*vi] - gamma*(in_degree(*vi, g)-1);
+			for (const auto &it : g.get_adjacency_list()) {
+				if (weights[it.first] >= 0) {
+					weights[it.first] = weights[it.first] - gamma*(g.get_single_degree(it.first)-1);
 				}
 			}
 		}
 		// handle vertices with weight 0
-		for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi) {
-			if (weights[*vi] == 0) {
-				f.insert(*vi);
-				s.push(*vi);
-				clear_vertex(*vi, g);
-				weights[*vi] = -1; // this means that the vertex is considered to be deleted
+		for (const auto &it : g.get_adjacency_list()) {
+			if (weights[it.first] == 0) {
+				f.insert(it.first);
+				s.push(it.first);
+				g.remove_node(it.first);
 			}
 		}
-		cleanup(g, weights);
+		cleanup(g); // Redundant?
 		// count number of vertices with weight > 0
 		active_vertices = 0;
-		for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi) {
-			if (weights[*vi] >= 0) {
+		for (const auto &it : g.get_adjacency_list()) {
+			if (weights[it.first] >= 0) {
 				active_vertices++;
 			}
 		}
@@ -463,7 +451,7 @@ set<Node> fvs::two_approx_fvs(const Graph& orig)
 		set<Node>::iterator it_u;
 		for (set<Node>::iterator it = f.begin(); it != f.end(); ++it) {
 			if (*it != u) {
-				clear_vertex(*it, g); // the vertex does not need to be deleted
+			  g.remove_node(*it); // the vertex does not need to be deleted, but can
 			}
 			else {
 				it_u = it;
@@ -480,20 +468,19 @@ set<Node> fvs::two_approx_fvs(const Graph& orig)
 /**
 * @brief Print g to stdout.
 */
-void fvs::print_graph(const Graph& g) {
-	typedef graph_traits<Graph>::vertex_iterator node_iterator;
-	typedef graph_traits<Graph>::out_edge_iterator edge_iterator;
+void fvs::print_graph(Graph& g) {
 	
 	cout << "Printing a graph." << endl;
-	cout << "Number of nodes: " << num_vertices(g) << endl;
-	cout << "Number of edges: " << num_edges(g) << endl;
-	if(num_edges(g) > 1000 || num_vertices(g) > 500) return;
-	pair<node_iterator, node_iterator> nIt = vertices(g);
-	for (node_iterator it = nIt.first; it != nIt.second; ++it) {
-		cout << "Edges outgoing from " << (*it) << ":" << endl;
-		pair<edge_iterator, edge_iterator> eIt = out_edges((*it), g);
-		for (edge_iterator edgeIt = eIt.first; edgeIt != eIt.second; ++edgeIt) {
-			cout << source((*edgeIt), g) << " -> " << target((*edgeIt), g) << endl;
+	cout << "Number of nodes: " << g.n << endl;
+	cout << "Number of edges: " << g.m << endl;
+	if(g.m > 1000 || g.n > 500) {
+	  cout << "Graph too big, skipping complete printing."<<endl;
+	  return;
+	}
+	for (const auto &it : g.get_adjacency_list()) {
+		cout << "Edges outgoing from " << it.first << ":" << endl;
+		for (const auto &eit : it.second) {
+			cout << it.first << " -> " << eit.first << (eit.second?" M ":" S ") << endl;
 		}
 	}
 	cout << "---------------------------" << endl;

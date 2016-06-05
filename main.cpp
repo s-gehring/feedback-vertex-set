@@ -3,32 +3,24 @@
 #include "fvs_solver.h"
 
 using namespace fvs;
+using namespace FvsGraph;
 
 int main(int argc, char** argv) {
     const char* filepath = "graphs/mini_graph.txt";
     if(argc>1) {
         filepath = argv[1];
     }
-    fvs::Graph g;
-    fvs::read_graph(g, filepath);
-    fvs::print_graph(g);
+    Graph g;
+    read_graph(g, filepath);
+    print_graph(g);
+    std::pair<set<Node>, bool> feedback;
     
-    std::pair<set<fvs::Node>, bool> feedback;
-    
-    set<fvs::Node> v1, v2;
-    typedef boost::graph_traits<fvs::Graph>::vertex_iterator iterator;
-    std::pair<iterator, iterator> nIt = boost::vertices(g);
-    for (iterator it = nIt.first; it != nIt.second; ++it) {
-        v1.insert((*it));
-    }
-    /*
-    v1 = { 2, 7, 4, 6 };
-    v2 = { 0, 1, 3, 5 };
-    */
+    set<Node> v1, v2;
+
     v1 = two_approx_fvs(g);
-    // Slow, to refactor.
-    for(iterator it = nIt.first; it != nIt.second; ++it) {
-        if(v1.find(*it)==v1.end()) v2.insert(*it);
+
+    for(const auto &it : g.get_adjacency_list()) {
+        if(v1.find(it.first)==v1.end()) v2.insert(it.first);
     }
     cout << "Found approx. solution: "<<endl;
     for(const auto& i : v1) {
@@ -45,12 +37,14 @@ int main(int argc, char** argv) {
     int min = k/2;
     int max = k;
 
+    // TODO: Do this smarter. This implementation sucks and
+    // is not what we want. We want to use the approx solution.
     do {        
         k = (min + max) / 2;
         // Copy like hell!
         Graph h(g);
-        set<fvs::Node> x (v1);
-        set<fvs::Node> y (v2);
+        set<Node> x (v1);
+        set<Node> y (v2);
         
         feedback = fvs::compute_fvs(h, g, x, y, k);
         cout << "Finished calculation for k = "<<k<<" [min:"<<min<<"|max:"<<max<<"]"<<endl;
@@ -72,7 +66,7 @@ int main(int argc, char** argv) {
     // we're not guaranteed a result in currentSolution.
     Graph h(g);
     cout << "Found size of min FVS: "<<min<<", continue to compute min FVS."<<endl;
-    feedback = fvs::compute_fvs(h,g,v1,v2,min);
+    feedback = compute_fvs(h,g,v1,v2,min);
     
     // TODO: Sanity function.
     
