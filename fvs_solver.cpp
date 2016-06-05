@@ -487,11 +487,8 @@ set<Node> fvs::two_approx_fvs(const Graph& orig)
 	stack<Node> s;
 	for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi)
 	{
-		if (in_degree(*vi, g) == 1)
-		{
-			f.insert(*vi);
-		}
-		weights[*vi] = *vi+1; // maybe there is a smarter way to initialize the weights
+		weights[*vi] = in_degree(*vi, g) - 1;
+		// maybe there is a smarter way to initialize the weights, this seems to be reasonable fast due to its degree-proportionality
 	}
 	cleanup(g, weights);
 	// count number of vertices with weight > 0
