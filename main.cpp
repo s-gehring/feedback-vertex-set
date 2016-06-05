@@ -11,8 +11,12 @@ int main(int argc, char** argv) {
         filepath = argv[1];
     }
     Graph g;
+    
+    
     read_graph(g, filepath);
     print_graph(g);
+    
+    
     std::pair<set<Node>, bool> feedback;
     
     set<Node> v1, v2;

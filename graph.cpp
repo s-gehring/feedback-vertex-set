@@ -270,16 +270,19 @@ namespace FvsGraph {
           bool remove_node(const Node u) {
             if(!has_node(u)) return false;
             sizes.erase(adj[u]);
+            
             // Fuck. Go to each neighbor and inform him about the change.
             for(Neighborhood::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
                 if(it->second) {
                     std::set<Edge>::iterator e = all_multiedges.find(Edge(u, it->first));
                     if(e != all_multiedges.end()) {
                         --multiedges;
+                        --m;
                         all_multiedges.erase(e);
                     }
                 }
                 adj[it->first].erase(u);
+                --m;
             }
 
             adj[u].clear();

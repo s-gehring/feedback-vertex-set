@@ -193,54 +193,42 @@ pair<set<Node>, bool> fvs::compute_fvs(Graph& orig, Graph& g, set<Node>& f, set<
 	set<Node> fvs;
 	pair<set<Node>, bool> retValue;
 	
-/*	cout << "Number of Nodes: " << num_vertices(g) << endl;
-	cout << "k: " << k << endl;
-	cout << "FVS: ";
-	for (const auto& i : f) { cout << i << ", "; } cout << endl;
-	cout << "V2: ";
-	for (const auto& i : v2) { cout << i << ", "; } cout << endl;
-	
-	print_graph(g);*/
-
 	if (k < 0 || (k == 0 && has_cycle(g))) {
-//		cout << "Returning false, k got small and g has still cycles." << endl;
+		//cout << "Returning false, k got small and g has still cycles." << endl;
 		return make_pair(fvs, false);
 	}
 
 	if (!has_cycle(g)) {
-//		cout << "g has no cycle." << endl;
+	//	cout << "g has no cycle." << endl;
 		//print_graph(g);
 		return make_pair(fvs, true);
 	}
 
 	Node w = two_neighbour_node(g, f, v2); // A vertex of f which has least two neighbors in g-f.
-//	cout << "w: " << w << endl;
+	//cout << "w: " << w << endl;
 	if (w != INVALID_NODE) {
 		if (creates_circle(g, v2, w)) {
-//			cout << w << " creates a circle in g." << endl;
+			//cout << w << " creates a circle in g." << endl;
 			
 			Graph h(g);
 			f.erase(w);
 			h.remove_node(w);
 			retValue = compute_fvs(orig, h, f, v2, k - 1);
 			
-//			cout << "Subcall retuned: " << (retValue.second ? "true" : "false") << endl;
-//			cout << "Subcall-Set: "; for (const auto& i : retValue.first) { cout << i << ", "; } cout << endl;
+		//	cout << "Subcall retuned: " << (retValue.second ? "true" : "false") << endl;
+		//	cout << "Subcall-Set: "; for (const auto& i : retValue.first) { cout << i << ", "; } cout << endl;
 			
 			
 			if (false == retValue.second) {
-//				cout << "Returning false after subcall. " << endl;
+		//		cout << "Returning false after subcall. " << endl;
 				return make_pair(fvs, false);
 			}
 			else {
 				fvs = retValue.first;
-				
-				maintain_integrity(h, fvs, w, direction_tag::inverse);
-				
 				fvs.insert(w);
 				
-//				cout << "Returning from 3.1: ";
-//				for (const auto& i : fvs) { cout << i << ", "; } cout << endl;
+		//		cout << "Returning from 3.1: ";
+				//for (const auto& i : fvs) { cout << i << ", "; } cout << endl;
 				return make_pair(fvs, true);
 			}
 		}
@@ -255,13 +243,13 @@ pair<set<Node>, bool> fvs::compute_fvs(Graph& orig, Graph& g, set<Node>& f, set<
 				
 				fvs.insert(w);
 				
-//				cout << "Returning: ";
-//				for (const auto& i : f) { cout << i << ", "; } cout << endl;
+//cout << "Returning: ";
+			//	for (const auto& i : f) { cout << i << ", "; } cout << endl;
 				return make_pair(fvs, true);
 			}
 			else {
 				v2.insert(w);
-//				cout << "Removing " << w << " from the fvs." << endl;
+	//			cout << "Removing " << w << " from the fvs." << endl;
 				return compute_fvs(orig, g, f, v2, k);
 			}
 		}
@@ -384,6 +372,8 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 	set<Node> f;
 	map<Node, double> weights;
 	stack<Node> s;
+
+	cleanup(g);
 	for(const auto &it : g.get_adjacency_list()) {
 	  if(g.get_single_degree(it.first) == 1) {
 	    f.insert(it.first);
@@ -391,7 +381,6 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 	  weights[it.first] = it.first+1;
 	}
 	
-	cleanup(g);
 	// count number of vertices with weight > 0
 	int active_vertices = 0;
 	for (const auto &it : g.get_adjacency_list()) {
@@ -433,7 +422,6 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 				g.remove_node(it.first);
 			}
 		}
-		cleanup(g); // Redundant?
 		// count number of vertices with weight > 0
 		active_vertices = 0;
 		for (const auto &it : g.get_adjacency_list()) {
@@ -450,10 +438,7 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 		Graph g(orig);
 		set<Node>::iterator it_u;
 		for (set<Node>::iterator it = f.begin(); it != f.end(); ++it) {
-			if (*it != u) {
-			  g.remove_node(*it); // the vertex does not need to be deleted, but can
-			}
-			else {
+			if(*it == u) {
 				it_u = it;
 			}
 		}
