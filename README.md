@@ -8,11 +8,11 @@ make gprof    Compile for speed profiling with gprof (or similar). Uses flag -pg
 
 # gprof
 
-sudo apt-get install gprof
-make gprof
-./prog graphs/biggest_example.graph
-gprof prog > gprof_output.txt
-nano gprof_output.txt
+    sudo apt-get install gprof
+    make gprof
+    ./prog graphs/biggest_example.graph
+    gprof prog > gprof_output.txt
+    nano gprof_output.txt
 
 
 # NewGraph
