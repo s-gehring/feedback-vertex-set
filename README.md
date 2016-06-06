@@ -1,10 +1,19 @@
 # Compiling
 
-Use the makefile (just type 'make' as a command in shell). Alternatively, type the following command:
+Use the makefile. 
 
-g++ fvs_solver.cpp main.cpp -I ./ -O0 -Wall -Werror -std=c++11
+make          Compile for debugging. No speed ups, include debug symbols for gdb.
+make fast     Compile for speed tests only. This is basically how our program will be compiled at the end.
+make gprof    Compile for speed profiling with gprof (or similar). Uses flag -pg and debug symbols.
 
-The makefile has the advantage, that the project always gets compiled in the same way on every computer. Other than that, the makefile actually compiles and starts the program immediately. All errors (compiling or executing) are written in the file err.log, which gets opened if there were any errors. If there weren't any errors, the normal program output should appear.
+# gprof
+
+sudo apt-get install gprof
+make gprof
+./prog graphs/biggest_example.graph
+gprof prog > gprof_output.txt
+nano gprof_output.txt
+
 
 # NewGraph
 
