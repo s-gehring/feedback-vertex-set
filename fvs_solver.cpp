@@ -7,25 +7,11 @@
 
 using namespace fvs;
 
-/**
-* @brief Checks, wether the given graph contains a circle.
-*
-* This function uses dfs to check if the given graph contains circles. Right now
-* a circle is found, when the dfs finds a back, forward or cross edge (since the graph is undirected).
-* 
-* Boost's visitor concept is used to transport info.
-* 
-* @param [in] g The graph.
-* @returns True, if there is a circle in g (hopefully).
-*/
-bool fvs::has_cycle(const fvs::Graph& g) {
-//	cout << "FINDING CYCLES" << endl;
-  	bool b = false;
-	CycleVisitor cv(b);
-	depth_first_search<Graph, CycleVisitor>(g, visitor(cv));
-//	cout << "Has cycle: " << (b ? "true" : "false") << endl;
-	return b;
-}
+
+
+	bool fvs::has_cycle(Graph& g) {
+	  return g.has_cycle();
+	}
 
 
 /**
@@ -38,22 +24,17 @@ bool fvs::has_cycle(const fvs::Graph& g) {
 * @param [in] g The graph.
 * @returns The set of nodes forming the semidisjoint cycle in g and an indicator for the existence.
 */
-pair<set<Node>, bool> fvs::find_semidisjoint_cycle(const Graph& g)
+pair<set<Node>, bool> fvs::find_semidisjoint_cycle(Graph& g)
 {
-	bool b = false;
-	set<Node> sdc;
-	SemiDisjointCycleVisitor cv(b ,sdc);
-	depth_first_search<Graph, SemiDisjointCycleVisitor>(g, visitor(cv));
-	pair<set<Node>, bool> retValue = make_pair(sdc, b);
-	return retValue;
+	return g.find_semidisjoint_cycle();
 }
 
 /**
 * This is basically an example on how to do that with boost.
 * Dont use this method, just call the original.
 */
-bool fvs::edge_exists_between(const Graph& g, Node u, Node v) {
-	return edge(u, v, g).second;
+bool fvs::edge_exists_between(Graph& g, Node u, Node v) {
+	return g.has_edge(u,v);
 }
 
 /**
@@ -71,32 +52,8 @@ bool fvs::edge_exists_between(const Graph& g, Node u, Node v) {
 * @param [in] u A set of nodes. 
 * @returns The lowest degree node in u.
 */
-Node fvs::get_lowest_degree_node(const Graph &g, const set<Node>& u) {
-	typedef graph_traits<Graph>::vertices_size_type id;
-	if (u.size() == 0) {
-		return graph_traits<Graph>::null_vertex();
-//		throw runtime_error("Error: Searching lowest degree node in an empty set.");
-	}
-
-	typedef graph_traits<Graph>::out_edge_iterator edge_iterator;
-	pair<id, Node> lowestDegreeNode = make_pair(1000, graph_traits<Graph>::null_vertex());
-
-	for (const auto& i : u) {
-		if (u.end() != u.find(i)) {
-			size_t edgesToOtherUs = 0;
-			pair<edge_iterator, edge_iterator> eIt = out_edges(i, g);
-			for (edge_iterator it = eIt.first; it != eIt.second; ++it) {
-				if (u.end() != u.find(target((*it), g))) {
-					++edgesToOtherUs;
-				}
-			}
-
-			if (edgesToOtherUs < lowestDegreeNode.first) {
-				lowestDegreeNode = make_pair(edgesToOtherUs, i);
-			}
-		}
-	}
-	return lowestDegreeNode.second;
+Node fvs::get_lowest_degree_node(Graph &g, const set<Node>& u) {
+	return g.lowest_deg_node(u);
 }
 
 /**
@@ -111,37 +68,40 @@ Node fvs::get_lowest_degree_node(const Graph &g, const set<Node>& u) {
 * @param [in] v A node, which might connect a circle in g[u].
 * @returns True, if a neighbour of a neighbour of v is a neighbour of v.
 */
-bool fvs::creates_circle(const Graph& g, const set<Node>& u, const Node& v) {
-	//Make sure we dont call the rest on an invalid call.
-	if (v == graph_traits<Graph>::null_vertex()) {
-		//Might be useful to find a proper way for this...
-		return false; 
-	}
-	
+bool fvs::creates_circle(Graph& g, const set<Node>& u, const Node& v) {
+    if(v == INVALID_NODE) {
+        cout << "Warning: Called creates_circle() with invalid node." << endl;
+        return false;
+    }
 /*	cout << "Checking for circles." << endl;
 	cout << "Node that is checked: " << v << endl;
 	cout << "Set: "; for (const auto& i : u) { cout << i << ", "; } cout << endl;*/
 
-	typedef graph_traits<Graph>::out_edge_iterator edge_iterator;
-	pair<edge_iterator, edge_iterator> eIt = out_edges(v, g);
-
-	set<Node> neighbours;
-	for (edge_iterator it = eIt.first; it != eIt.second; ++it) {
-		if (u.end() != u.find(target((*it), g))) {
-			neighbours.insert(target((*it), g));
-		}
+	pair<Neighborhood, bool> neighbors = g.get_neighbors(v);
+    if(!neighbors.second) {
+        cout << "Warning: Called creates_circle() with a vertex (v) not being in the graph (g)."<<endl;
+        return false;
+    }
+    
+	set<Node> neighbors_in_u;
+	for(const auto &it : neighbors.first) {
+	    if(u.find(it.first) != u.end()) {
+	        neighbors_in_u.insert(it.first);
+	    }
 	}
 
-	for (const auto& i : neighbours) {
-		eIt = out_edges(i, g);
-		for (edge_iterator it = eIt.first; it != eIt.second; ++it) {
-			if (neighbours.end() != neighbours.find(target((*it), g))) {
-//				cout << "Circle found." << endl;
-				return true; //A neighbour of a neighbour of v is neighbour of v (in u).
-			}
+	for (const auto& i : neighbors_in_u) {
+		auto eIt = g.get_neighbors(i); // Neighborhood , bool
+		if(!eIt.second) {
+		    throw std::runtime_error("Error: There is a vertex which is in u, but not in g.");
+		    return false;
+		}
+		for (const auto& it : eIt.first) {
+		    if(neighbors_in_u.find(it.first) != neighbors_in_u.end()) {
+		        return true;
+		    }
 		}
 	}
-
 	return false;
 }
 
@@ -157,56 +117,36 @@ bool fvs::creates_circle(const Graph& g, const set<Node>& u, const Node& v) {
 * @returns A node of u with atleast two neighbours in v, if such a node exists or a null_vertex()
 *		otherwise.
 */
-Node fvs::two_neighbour_node(const Graph& g, const set<Node> &u, const set<Node> &v) {
-	typedef graph_traits<Graph>::out_edge_iterator edge_iterator;
-	typedef graph_traits<Graph>::adjacency_iterator adjacency_iterator;
+Node fvs::two_neighbour_node(Graph& g, const set<Node> &u, const set<Node> &v) {
 	
-/*	cout << "TWO NEIGHBOUR NODE:" << endl;
-	cout << "Set 1: ";
-	for (const auto& i : u) { cout << i << ", "; } cout << endl;
-	cout << "Set 2: ";
-	for (const auto& i : v) { cout << i << ", "; } cout << endl;
-	print_graph(g);*/
-	
-
-	pair<edge_iterator, edge_iterator> eIt;
-
 	for (const auto& i : u) {
-		eIt = out_edges(i, g);
-		
-		set<Node> neighbours;
-		pair<adjacency_iterator, adjacency_iterator> adj = adjacent_vertices(i, g);
-		for (adjacency_iterator aIt = adj.first; aIt != adj.second; ++aIt) {
-			neighbours.insert((*aIt));
-		}
-		
-		for (const auto& n : neighbours) {
-			pair<adjacency_iterator, adjacency_iterator> neighboursNeighbours = adjacent_vertices(n, g);
-			for (adjacency_iterator aIt = neighboursNeighbours.first; aIt != neighboursNeighbours.second; ++aIt) {
-				if (neighbours.find((*aIt)) != neighbours.end()) {
-//					cout << "Node found: " << i << endl;
-					return i;
-				}
-			}
+		int neighbors = 0;
+		Neighborhood n = g.get_neighbors(i).first;
+		for(const auto& j : n) {
+		    if(v.find(j.first) != v.end()) {
+		        if(++neighbors > 1) return i;
+		    }
 		}
 	}
-//	cout << "No node found: " << endl;
-	return graph_traits<Graph>::null_vertex();
+	return INVALID_NODE;
 }
 
 /**
 * @brief Creates the induced subgraph g[u].
 */
-void fvs::induced_subgraph(Graph &s, const Graph& g, const set<Node>& u) {
-	typedef graph_traits<Graph>::out_edge_iterator edge_iterator;
-	
+void fvs::induced_subgraph(Graph &s, Graph& g, const set<Node>& u) {
 	s.clear();
 	for (const auto& i : u) {
-		pair<edge_iterator, edge_iterator> eIt = out_edges(i, g);
-		for (edge_iterator it = eIt.first; it != eIt.second; ++it) {
-			if (u.end() != u.find(target((*it), g))) {
-				add_edge(i, target((*it), g), s);
-			}
+		std::pair<Neighborhood, bool> eIt = g.get_neighbors(i);
+		if(!eIt.second) {
+		    cout << "Warning: Called induced_subgraph with a nodeset containing at least one node not in g"<<endl;
+		} else {
+		    for(const auto& j : eIt.first) {
+		        if(u.find(j.first)!=u.end()) {
+		            s.add_edge(i, j.first);
+		            // Multiedges?
+		        }
+		    }
 		}
 	}
 }
@@ -229,36 +169,7 @@ void fvs::induced_subgraph(Graph &s, const Graph& g, const set<Node>& u) {
 * @param [in] dt A direction_tag, defaults to forward.
 */
 void fvs::maintain_integrity(Graph& g, set<Node>& u, Node aDeletedNode, direction_tag dt) {
-/*	cout << "Maintain integrity." << endl;
-	cout << "Deleted Node: " << aDeletedNode << endl;
-	cout << "U: ";				
-	for (const auto& i : u) { cout << i << ", "; } cout << endl;*/
-	
-	set<Node> newSet;
-	for (set<Node>::iterator it = u.begin(); it != u.end(); ++it) {
-		if (direction_tag::forward == dt) { 
-			if (*it > aDeletedNode && 0 < *it) {
-				newSet.insert(((*it) - 1));
-				//(*it) = (*it) - 1;
-			}
-			else if (*it < aDeletedNode || (0 == *it && 0 != aDeletedNode)) {
-				newSet.insert(((*it)));
-			}
-		}
-		else {
-			if (*it >= aDeletedNode) {
-				newSet.insert(((*it) + 1));
-			}
-			else if (*it < aDeletedNode) {
-				newSet.insert((*it));
-			}
-		}
-	}
-	
-	u = newSet;
-	
-	//cout << "New U: ";				
-	//for (const auto& i : u) { cout << i << ", "; } cout << endl << endl;
+    return; // Obsolete
 }
 
 
@@ -278,104 +189,82 @@ void fvs::maintain_integrity(Graph& g, set<Node>& u, Node aDeletedNode, directio
 * @returns A pair of a set of nodes and a bool. The set of nodes contains a part of the feedback
 *		vertex set. The bool will be false, if the algorithm decides that there is no fvs.
 */
-pair<set<Node>, bool> fvs::compute_fvs(const Graph& orig, Graph& g, set<Node>& f, set<Node>& v2, int k) {
+pair<set<Node>, bool> fvs::compute_fvs(Graph& orig, Graph& g, set<Node>& f, set<Node>& v2, int k) {
 	set<Node> fvs;
 	pair<set<Node>, bool> retValue;
 	
-/*	cout << "Number of Nodes: " << num_vertices(g) << endl;
-	cout << "k: " << k << endl;
-	cout << "FVS: ";
-	for (const auto& i : f) { cout << i << ", "; } cout << endl;
-	cout << "V2: ";
-	for (const auto& i : v2) { cout << i << ", "; } cout << endl;
-	
-	print_graph(g);*/
-
 	if (k < 0 || (k == 0 && has_cycle(g))) {
-//		cout << "Returning false, k got small and g has still cycles." << endl;
+		//cout << "Returning false, k got small and g has still cycles." << endl;
 		return make_pair(fvs, false);
 	}
 
 	if (!has_cycle(g)) {
-//		cout << "g has no cycle." << endl;
+	//	cout << "g has no cycle." << endl;
 		//print_graph(g);
 		return make_pair(fvs, true);
 	}
 
 	Node w = two_neighbour_node(g, f, v2); // A vertex of f which has least two neighbors in g-f.
-//	cout << "w: " << w << endl;
-	if (w != graph_traits<Graph>::null_vertex()) {
+	//cout << "w: " << w << endl;
+	if (w != INVALID_NODE) {
 		if (creates_circle(g, v2, w)) {
-//			cout << w << " creates a circle in g." << endl;
+			//cout << w << " creates a circle in g." << endl;
 			
 			Graph h(g);
 			f.erase(w);
-			clear_vertex(w, h);
-			remove_vertex(w, h);
-			maintain_integrity(h, f, w);
-			maintain_integrity(h, v2, w);
+			h.remove_node(w);
 			retValue = compute_fvs(orig, h, f, v2, k - 1);
 			
-//			cout << "Subcall retuned: " << (retValue.second ? "true" : "false") << endl;
-//			cout << "Subcall-Set: "; for (const auto& i : retValue.first) { cout << i << ", "; } cout << endl;
+		//	cout << "Subcall retuned: " << (retValue.second ? "true" : "false") << endl;
+		//	cout << "Subcall-Set: "; for (const auto& i : retValue.first) { cout << i << ", "; } cout << endl;
 			
 			
 			if (false == retValue.second) {
-//				cout << "Returning false after subcall. " << endl;
+		//		cout << "Returning false after subcall. " << endl;
 				return make_pair(fvs, false);
 			}
 			else {
 				fvs = retValue.first;
-				
-				maintain_integrity(h, fvs, w, direction_tag::inverse);
-				
 				fvs.insert(w);
 				
-//				cout << "Returning from 3.1: ";
-//				for (const auto& i : fvs) { cout << i << ", "; } cout << endl;
+		//		cout << "Returning from 3.1: ";
+				//for (const auto& i : fvs) { cout << i << ", "; } cout << endl;
 				return make_pair(fvs, true);
 			}
 		}
 		else {
 			Graph h(g);
 			f.erase(w);
-			clear_vertex(w, h);
-			remove_vertex(w, h);
-			maintain_integrity(h, f, w);
-			maintain_integrity(h, v2, w);
+			h.remove_node(w);
 			retValue = compute_fvs(orig, h, f, v2, k - 1);
 
 			if (true == retValue.second) {
 				fvs = retValue.first;
-				maintain_integrity(h, fvs, w, direction_tag::inverse);
 				
 				fvs.insert(w);
 				
-//				cout << "Returning: ";
-//				for (const auto& i : f) { cout << i << ", "; } cout << endl;
+//cout << "Returning: ";
+			//	for (const auto& i : f) { cout << i << ", "; } cout << endl;
 				return make_pair(fvs, true);
 			}
 			else {
 				v2.insert(w);
-//				cout << "Removing " << w << " from the fvs." << endl;
+	//			cout << "Removing " << w << " from the fvs." << endl;
 				return compute_fvs(orig, g, f, v2, k);
 			}
 		}
 	}
 	else {
 		w = get_lowest_degree_node(g, f);
-		if (graph_traits<Graph>::null_vertex() != w && out_degree(w, orig) < 2) {
+		if (INVALID_NODE != w && orig.get_single_degree(w) < 2) {
 //			cout << "Out degree of " << w << " is smaller than 2" << endl;
 			Graph h(g);
 			f.erase(w);
-			clear_vertex(w, h);
-			remove_vertex(w, h);
-			maintain_integrity(h, f, w);
-			maintain_integrity(h, v2, w);
+      h.remove_node(w);
 
 			return retValue = compute_fvs(orig, h, f, v2, k - 1);
 		} 
-		else if (w != graph_traits<Graph>::null_vertex()) {
+		else if (w != INVALID_NODE) {
 			f.erase(w);
 			v2.insert(w);
 
@@ -403,11 +292,8 @@ pair<string, string> explode(string s) {
 * @param [out] g The graph will be written to this object. All data will be cleared before reading the new graph.
 * @param [in] filepath The path to the file containing the graph.
 */
-void fvs::read_graph(Graph&g, const char* filepath) {
-	typedef graph_traits<Graph>::vertices_size_type NodeId;
-	//size_t invalid = (size_t)-1;
-  ifstream file(filepath, ios::in);
-	//Check if the file exists.
+void fvs::read_graph(Graph &g, const char* filepath) {
+    ifstream file(filepath, ios::in);
 	if (!file.is_open())
 	{
 		throw std::runtime_error("Cannot open file.");
@@ -424,18 +310,18 @@ void fvs::read_graph(Graph&g, const char* filepath) {
 	while (getline(file, line))
 	{
 		istringstream iss(line);
-	  int src, dst; 
-	  int x = sscanf(line.c_str(), "%d %d", &src, &dst);
-	  if(x != 2) {
-	    throw std::runtime_error("Can't parse file. Wrong format?");
-	    return;
-	  }
+	    int src, dst; 
+	    int x = sscanf(line.c_str(), "%d %d", &src, &dst);
+	    if(x != 2) {
+	      throw std::runtime_error("Can't parse file. Wrong format?");
+	      return;
+	    }
 
-	  // TODO: Add Lookup Table
-		add_edge(vertex(src, g), vertex(dst, g), g);
+	    // TODO: Add Lookup Table
+		g.add_edge(src, dst);
 
 	}
-  file.close();
+    file.close();
 	return;
 }
 
@@ -448,21 +334,22 @@ void fvs::read_graph(Graph&g, const char* filepath) {
 * @param [in] g The graph.
 * @param [in] weights The weights of the vertices.
 */
-void fvs::cleanup(Graph& g, map<Node, double>& weights)
+void fvs::cleanup(Graph& g)
 {
-	graph_traits<Graph>::vertex_iterator vi, vi_end;
-	for (tie(vi, vi_end) = vertices(g); vi != vi_end && num_vertices(g) > 0; ++vi)
-	{
-		if (in_degree(*vi, g) <= 1 && weights[*vi] >= 0)
-		{
-			// remove edges and delete
-			clear_vertex(*vi, g);
-			weights[*vi] = -1;
-			// check everything again
-			tie(vi, vi_end) = vertices(g);
-			// we can definitively save some runtime by just checking the neighbours we have already visited
-		}
-	}
+  set<Node> to_delete;
+  bool change = true;
+  while(change) {
+    change = false;
+    for(const auto &it : to_delete) {
+      g.remove_node(it);
+    }
+    for(const auto &it : g.get_adjacency_list()) {
+      if(it.second.size() < 2) {
+        change = true;
+        to_delete.insert(it.first);
+      }
+    }
+  }
 }
 
 /**
@@ -477,29 +364,28 @@ void fvs::cleanup(Graph& g, map<Node, double>& weights)
 * @param[in] orig The graph.
 * @returns The feedback vertex set.
 */
-set<Node> fvs::two_approx_fvs(const Graph& orig)
+
+set<Node> fvs::two_approx_fvs(Graph& orig)
 {
-	// initialize weights and f
 	Graph g(orig);
-	map<Node, double> weights;
-	graph_traits<Graph>::vertex_iterator vi, vi_end;
+	//graph_traits<Graph>::vertex_iterator vi, vi_end;
 	set<Node> f;
+	map<Node, double> weights;
 	stack<Node> s;
-	for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi)
-	{
-		weights[*vi] = in_degree(*vi, g) - 1;
-		// maybe there is a smarter way to initialize the weights, this seems to be reasonable fast due to its degree-proportionality
+
+
+	for(const auto &it : g.get_adjacency_list()) {
+	  weights[it.first] = g.get_single_degree(it.first) - 1;
 	}
-	cleanup(g, weights);
+	cleanup(g);	
 	// count number of vertices with weight > 0
 	int active_vertices = 0;
-	for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi) {
-		if (weights[*vi] >= 0) {
+	for (const auto &it : g.get_adjacency_list()) {
+		if (weights[it.first] >= 0) {
 			active_vertices++;
 		}
 	}
-	while (active_vertices > 0)
-	{
+	while (active_vertices > 0) {
 		// contains a semidisjoint cycle?
 		// Here, we do not the same as the algorithm in the paper: we only put the node with degree >2 into the fvs
 		// and delete all the others. In O notation this is no difference but in practice we safe a tiny bit of time.
@@ -530,35 +416,31 @@ set<Node> fvs::two_approx_fvs(const Graph& orig)
 					weights[*it] = -1;
 				}
 			}
-		}
-		else { // is clean and contains no semidisjoint cycle
+		} else { // is clean and contains no semidisjoint cycle
 			double gamma = 0;
-			for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi)
-			{
-				if ((weights[*vi] / (in_degree(*vi, g) - 1) < gamma || gamma == 0) && weights[*vi] >=0) {
-					gamma = weights[*vi]/(in_degree(*vi, g)-1);
+			for (const auto &it : g.get_adjacency_list()) {
+				if ((weights[it.first] / (g.get_single_degree(it.first)-1) < gamma || gamma == 0) && weights[it.first] >=0) {
+					gamma = weights[it.first]/(g.get_single_degree(it.first)-1);
 				}
 			}
-			for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi) {
-				if (weights[*vi] >= 0) {
-					weights[*vi] = weights[*vi] - gamma*(in_degree(*vi, g)-1);
+			for (const auto &it : g.get_adjacency_list()) {
+				if (weights[it.first] >= 0) {
+					weights[it.first] = weights[it.first] - gamma*(g.get_single_degree(it.first)-1);
 				}
 			}
 		}
 		// handle vertices with weight 0
-		for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi) {
-			if (weights[*vi] == 0) {
-				f.insert(*vi);
-				s.push(*vi);
-				clear_vertex(*vi, g);
-				weights[*vi] = -1; // this means that the vertex is considered to be deleted
+		for (const auto &it : g.get_adjacency_list()) {
+			if (weights[it.first] == 0) {
+				f.insert(it.first);
+				s.push(it.first);
+				g.remove_node(it.first);
 			}
 		}
-		cleanup(g, weights);
 		// count number of vertices with weight > 0
 		active_vertices = 0;
-		for (tie(vi, vi_end) = vertices(g); vi != vi_end; ++vi) {
-			if (weights[*vi] >= 0) {
+		for (const auto &it : g.get_adjacency_list()) {
+			if (weights[it.first] >= 0) {
 				active_vertices++;
 			}
 		}
@@ -571,10 +453,7 @@ set<Node> fvs::two_approx_fvs(const Graph& orig)
 		Graph g(orig);
 		set<Node>::iterator it_u;
 		for (set<Node>::iterator it = f.begin(); it != f.end(); ++it) {
-			if (*it != u) {
-				clear_vertex(*it, g); // the vertex does not need to be deleted
-			}
-			else {
+			if(*it == u) {
 				it_u = it;
 			}
 		}
@@ -589,20 +468,19 @@ set<Node> fvs::two_approx_fvs(const Graph& orig)
 /**
 * @brief Print g to stdout.
 */
-void fvs::print_graph(const Graph& g) {
-	typedef graph_traits<Graph>::vertex_iterator node_iterator;
-	typedef graph_traits<Graph>::out_edge_iterator edge_iterator;
+void fvs::print_graph(Graph& g) {
 	
 	cout << "Printing a graph." << endl;
-	cout << "Number of nodes: " << num_vertices(g) << endl;
-	cout << "Number of edges: " << num_edges(g) << endl;
-	if(num_edges(g) > 1000 || num_vertices(g) > 500) return;
-	pair<node_iterator, node_iterator> nIt = vertices(g);
-	for (node_iterator it = nIt.first; it != nIt.second; ++it) {
-		cout << "Edges outgoing from " << (*it) << ":" << endl;
-		pair<edge_iterator, edge_iterator> eIt = out_edges((*it), g);
-		for (edge_iterator edgeIt = eIt.first; edgeIt != eIt.second; ++edgeIt) {
-			cout << source((*edgeIt), g) << " -> " << target((*edgeIt), g) << endl;
+	cout << "Number of nodes: " << g.n << endl;
+	cout << "Number of edges: " << g.m << endl;
+	if(g.m > 1000 || g.n > 500) {
+	  cout << "Graph too big, skipping complete printing."<<endl;
+	  return;
+	}
+	for (const auto &it : g.get_adjacency_list()) {
+		cout << "Edges outgoing from " << it.first << ":" << endl;
+		for (const auto &eit : it.second) {
+			cout << it.first << " -> " << eit.first << (eit.second?" M ":" S ") << endl;
 		}
 	}
 	cout << "---------------------------" << endl;
