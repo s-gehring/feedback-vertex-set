@@ -93,6 +93,15 @@ namespace FvsGraph {
             n = m = multiedges = 0;
           }
           
+          void clear_node(const Node v) {
+            std::set<Node> targets;
+            for(const auto& it : adj[v]) {
+              targets.insert(it.first);
+            }
+            for(const auto& it : targets) {
+              remove_edge(v, it);
+            }
+          }
           
           bool has_node(const Node v) { return adj.find(v) != adj.end(); }                                        // O(1)
           bool has_edge(const Node u, const Node v) { return (has_node(u)) && (adj[u].find(v) != adj[u].end()); } // O(1) + O(1)

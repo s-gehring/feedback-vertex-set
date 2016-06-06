@@ -394,7 +394,8 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 			// find max element
 			bool true_cycle = true;
 			for (set<Node>::iterator it = sdcycle.first.begin(); it != sdcycle.first.end(); ++it) {
-				if (in_degree(*it, g) > 2) {
+				if (g.get_single_degree(*it) > 2) {
+				
 					weights[*it] = 0; // add to f
 					true_cycle = false;
 					sdcycle.first.erase(it);
@@ -408,11 +409,11 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 			// delete all the others
 			for (set<Node>::iterator it = sdcycle.first.begin(); it != sdcycle.first.end(); ++it) {
 				if (it == sdcycle.first.begin() && !true_cycle) {
-					clear_vertex(*sdcycle.first.begin(), g);
+					g.clear_node(*sdcycle.first.begin());
 					weights[*sdcycle.first.begin()] = -1;
 				}
 				else {
-					clear_vertex(*it, g);
+					g.clear_node(*it);
 					weights[*it] = -1;
 				}
 			}
