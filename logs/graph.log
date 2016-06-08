@@ -1,0 +1,122 @@
+[08.06.2016 19:25:55][DEBUG]: Created graph with pointer 0x7ffc2e7df3c0.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Clearing Graph.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Added note 4
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Added note 5
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 4
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Added note 7
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 5
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 7
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Added note 0
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 7
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Added note 1
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 5
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 0
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 4
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Added note 2
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Added note 3
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 1
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 7
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 0
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 2
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 1
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 2
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 1
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 3
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 2
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 7
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Added note 6
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 2
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 3
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 6
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 6
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 0
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 6
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Added node which is already existant: 4
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df040]: Clearing node 2: Cleared 5 edges.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df040]: Clearing node 3: Cleared 2 edges.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df040]: Clearing node 4: Cleared 4 edges.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df040]: Clearing node 32673: Cleared 0 edges.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df040]: Clearing node 0: Cleared 0 edges.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df040]: Clearing node 5: Cleared 2 edges.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df040]: Clearing node 32673: Cleared 0 edges.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df040]: Clearing node 32764: Cleared 0 edges.
+[08.06.2016 19:25:55][WARNING]: [Graph 0x7ffc2e7df040]: Trying to remove edge (0|7), but it doesn't exist.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df0c0]: Has_Cycle: Use heuristic: There is a cycle, because m [=16] >= n [=8]
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df0c0]: Has_Cycle: Use heuristic: There is a cycle, because m [=16] >= n [=8]
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df0c0]: Has_Cycle: Use heuristic: There is a cycle, because m [=16] >= n [=8]
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df0c0]: Has_Cycle: Use heuristic: There is a cycle, because m [=16] >= n [=8]
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Has_Cycle: Use heuristic: There is a cycle, because m [=16] >= n [=8]
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Requested Neighborhood of node 0. Node has degree 4.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Requested Neighborhood of node 0. Node has degree 4.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Requested Neighborhood of node 2. Node has degree 5.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Requested Neighborhood of node 4. Node has degree 4.
+[08.06.2016 19:25:55][WARNING]: [Graph 0x7ffc2e7df130]: Trying to remove edge (3|0), but it doesn't exist.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df130]: Has_Cycle: Use heuristic: There is a cycle, because m [=13] >= n [=7]
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df130]: Requested Neighborhood of node 1. Node has degree 4.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df130]: Requested Neighborhood of node 1. Node has degree 4.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df130]: Requested Neighborhood of node 2. Node has degree 4.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7def10]: Has_Cycle: Use heuristic: There is a cycle, because m [=11] >= n [=6]
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7def10]: Requested Neighborhood of node 6. Node has degree 3.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7def10]: Requested Neighborhood of node 6. Node has degree 3.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7def10]: Requested Neighborhood of node 2. Node has degree 3.
+[08.06.2016 19:25:55][WARNING]: [Graph 0x7ffc2e7decf0]: Trying to remove edge (0|6), but at least one of its nodes doesn't exist.
+[08.06.2016 19:25:55][WARNING]: [Graph 0x7ffc2e7decf0]: Trying to remove edge (5|6), but it doesn't exist.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7decf0]: Has_Cycle: Use heuristic: There is a cycle, because m [=10] >= n [=5]
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Has_Cycle: Use heuristic: There is a cycle, because m [=16] >= n [=8]
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Requested Neighborhood of node 7. Node has degree 5.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Requested Neighborhood of node 7. Node has degree 5.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Requested Neighborhood of node 0. Node has degree 4.
+[08.06.2016 19:25:55][WARNING]: [Graph 0x7ffc2e7def10]: Trying to remove edge (3|7), but it doesn't exist.
+[08.06.2016 19:25:55][WARNING]: [Graph 0x7ffc2e7def10]: Trying to remove edge (33|7), but at least one of its nodes doesn't exist.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7def10]: Has_Cycle: Use heuristic: There is a cycle, because m [=14] >= n [=7]
+[08.06.2016 19:25:55][WARNING]: [Graph 0x7ffc2e7def10]: lowest_deg_node called with an empty set. Returning invalid node (-1).
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Has_Cycle: Use heuristic: There is a cycle, because m [=16] >= n [=8]
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Requested Neighborhood of node 0. Node has degree 4.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Requested Neighborhood of node 0. Node has degree 4.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Requested Neighborhood of node 2. Node has degree 5.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Requested Neighborhood of node 4. Node has degree 4.
+[08.06.2016 19:25:55][WARNING]: [Graph 0x7ffc2e7df130]: Trying to remove edge (3|0), but it doesn't exist.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df130]: Has_Cycle: Use heuristic: There is a cycle, because m [=13] >= n [=7]
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df130]: Requested Neighborhood of node 1. Node has degree 4.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df130]: Requested Neighborhood of node 1. Node has degree 4.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df130]: Requested Neighborhood of node 2. Node has degree 4.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7def10]: Has_Cycle: Use heuristic: There is a cycle, because m [=11] >= n [=6]
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7def10]: Requested Neighborhood of node 6. Node has degree 3.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7def10]: Requested Neighborhood of node 6. Node has degree 3.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7def10]: Requested Neighborhood of node 2. Node has degree 3.
+[08.06.2016 19:25:55][WARNING]: [Graph 0x7ffc2e7decf0]: Trying to remove edge (0|6), but at least one of its nodes doesn't exist.
+[08.06.2016 19:25:55][WARNING]: [Graph 0x7ffc2e7decf0]: Trying to remove edge (5|6), but it doesn't exist.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7decf0]: Has_Cycle: Use heuristic: There is a cycle, because m [=10] >= n [=5]
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Has_Cycle: Use heuristic: There is a cycle, because m [=16] >= n [=8]
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Requested Neighborhood of node 7. Node has degree 5.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Requested Neighborhood of node 7. Node has degree 5.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Requested Neighborhood of node 0. Node has degree 4.
+[08.06.2016 19:25:55][WARNING]: [Graph 0x7ffc2e7def10]: Trying to remove edge (3|7), but it doesn't exist.
+[08.06.2016 19:25:55][WARNING]: [Graph 0x7ffc2e7def10]: Trying to remove edge (33|7), but at least one of its nodes doesn't exist.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7def10]: Has_Cycle: Use heuristic: There is a cycle, because m [=14] >= n [=7]
+[08.06.2016 19:25:55][WARNING]: [Graph 0x7ffc2e7def10]: lowest_deg_node called with an empty set. Returning invalid node (-1).
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Has_Cycle: Use heuristic: There is a cycle, because m [=16] >= n [=8]
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Requested Neighborhood of node 0. Node has degree 4.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Requested Neighborhood of node 0. Node has degree 4.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Requested Neighborhood of node 2. Node has degree 5.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df3c0]: Requested Neighborhood of node 4. Node has degree 4.
+[08.06.2016 19:25:55][WARNING]: [Graph 0x7ffc2e7df130]: Trying to remove edge (3|0), but it doesn't exist.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df130]: Has_Cycle: Use heuristic: There is a cycle, because m [=13] >= n [=7]
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df130]: Requested Neighborhood of node 1. Node has degree 4.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df130]: Requested Neighborhood of node 1. Node has degree 4.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7df130]: Requested Neighborhood of node 2. Node has degree 4.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7def10]: Has_Cycle: Use heuristic: There is a cycle, because m [=11] >= n [=6]
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7def10]: Requested Neighborhood of node 6. Node has degree 3.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7def10]: Requested Neighborhood of node 6. Node has degree 3.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7def10]: Requested Neighborhood of node 2. Node has degree 3.
+[08.06.2016 19:25:55][WARNING]: [Graph 0x7ffc2e7decf0]: Trying to remove edge (0|6), but at least one of its nodes doesn't exist.
+[08.06.2016 19:25:55][WARNING]: [Graph 0x7ffc2e7decf0]: Trying to remove edge (5|6), but it doesn't exist.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7decf0]: Has_Cycle: Use heuristic: There is a cycle, because m [=10] >= n [=5]
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7decf0]: Requested Neighborhood of node 7. Node has degree 4.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7decf0]: Requested Neighborhood of node 7. Node has degree 4.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7decf0]: Requested Neighborhood of node 2. Node has degree 3.
+[08.06.2016 19:25:55][DEBUG]: [Graph 0x7ffc2e7decf0]: Requested Neighborhood of node 4. Node has degree 3.
+[08.06.2016 19:25:55][WARNING]: [Graph 0x7ffc2e7dead0]: Trying to remove edge (3|7), but it doesn't exist.
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7dead0]: Has_Cycle: Use heuristic: There is a cycle, because m [=9] >= n [=4]
+[08.06.2016 19:25:55][NOTE]: [Graph 0x7ffc2e7df3c0]: Has_Cycle: Use heuristic: There is a cycle, because m [=16] >= n [=8]
+[08.06.2016 19:25:55][WARNING]: [Graph 0x7ffc2e7df3c0]: lowest_deg_node called with an empty set. Returning invalid node (-1).

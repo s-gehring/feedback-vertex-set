@@ -17,7 +17,7 @@
 #include <string>
 #include <random>
 #include <math.h>
-
+#include "debugger.hpp"
 
 
 
@@ -51,21 +51,50 @@ namespace FvsGraph {
           AdjacencyList adj;          
 
           Sizes sizes;
+          Debugger* d;
+        
+          void note(string s) {
+            d->log("[Graph "+get_name() + "]: "+s, Debugger::NOTE); 
+          }
           
-          
+          void warn(string s) {
+            d->log("[Graph "+get_name() + "]: "+s, Debugger::WARNING); 
+          }
+    
+          void err(string s) {
+            d->log("[Graph "+get_name() + "]: "+s, Debugger::ERROR); 
+          }
+    
+          void debug(string s) {
+            d->log("[Graph "+get_name() + "]: "+s, Debugger::DEBUG); 
+          }
       public:
           
+          string get_name() {
+            char s[80];
+            sprintf(s, "%p", this);
+            return string(s);
+          }
+    
           Graph() {
+            d = Debugger::get_instance("logs/graph.log", Debugger::ALL);
             n = m;
+            d->log("Created graph with pointer " + get_name() + ".", Debugger::DEBUG);
           }
           
           void clear_node(const Node v) {
             std::set<Node> targets;
-            for(const auto& it : adj[v]) {
-              targets.insert(it);
-            }
-            for(const auto& it : targets) {
-              remove_edge(v, it);
+            string tmp = "Clearing node "+std::to_string(v)+ ": ";
+            if(!has_node(v)) {
+              warn(tmp+ "Node doesn't exist."); 
+            } else {
+              for(const auto& it : adj[v]) {
+                targets.insert(it);
+              }
+              for(const auto& it : targets) {
+                remove_edge(v, it);
+              }
+              note(tmp+"Cleared "+std::to_string(targets.size())+" edges.");
             }
           }
           
@@ -130,8 +159,13 @@ namespace FvsGraph {
               return std::make_pair(std::set<Node>(), false);
           }
           
-          bool has_cycle() {
-              if(m >= n) return true;
+          bool has_cycle() {            
+              if(m >= n) {
+                note("Has_Cycle: Use heuristic: There is a cycle, because m [="+to_string(m)+"] >= n [="+to_string(n)+"]");
+                return true;
+              }
+              string tmp = "Has_Cycle: Don't use heuristic, because m [="+to_string(m)+"] < n [="+to_string(n)+"]: DFS ";
+              
               std::unordered_set<Node> done = std::unordered_set<Node>();
               std::stack<std::pair<Node, Node> > S;
               for(AdjacencyList::iterator it = adj.begin(); it != adj.end(); ++it) {
@@ -149,6 +183,7 @@ namespace FvsGraph {
                         done.insert(w);
                       } else {
                         if(w != f) {
+                          note(tmp+"found a cycle.");
                           return true;
                         }
                       }
@@ -156,12 +191,14 @@ namespace FvsGraph {
                   }
                 }
               }
+              note(tmp+" found no cycle.");
               return false;
           }
           
           
           std::pair<std::list<Node>, bool> get_cycle() {
               //if(m < n) return std::pair<std::list<Node>, bool>(std::list<Node>(), false);
+              string tmp = "Get_Cycle: Don't use heuristic, because not yet implemente. DFS ";
               
               std::unordered_set<Node> done = std::unordered_set<Node>();
               std::stack<std::pair<Node, Node> > S;
@@ -186,6 +223,7 @@ namespace FvsGraph {
                             x.push_back(S.top().first);
                             S.pop();
                           }
+                          note(tmp+"found a cycle.");
                           return std::pair<std::list<Node>, bool>(x, true);
                         }
                       }
@@ -193,6 +231,8 @@ namespace FvsGraph {
                   }
                 }
               }
+            
+              note(tmp+"found no cycle.");
               return std::make_pair<std::list<Node>, bool>(std::list<Node>(), false);
           }
           
@@ -202,7 +242,9 @@ namespace FvsGraph {
           Node trg(const Edge &e) { return target(e); }
           
           Node lowest_deg_node(const std::set<Node> &candidates) {
-
+            if(candidates.size() == 0) {
+              warn("lowest_deg_node called with an empty set. Returning invalid node (-1).");
+            }
             // Iterate over candidates
             size_t max = 0;
             Node maxCan = INVALID_NODE;
@@ -216,21 +258,32 @@ namespace FvsGraph {
           }
           
           bool add_node(const Node u) { // O(1)
-            if(has_node(u)) return false;
+            if(has_node(u)) {
+              note("Added node which is already existant: "+std::to_string(u));
+              return false;
+            }
             adj[u] = Neighborhood();
             sizes.insert(adj[u]);
             ++n;
+            debug("Added note "+std::to_string(u));
             return true;
           }
           
           std::pair<Neighborhood, bool> get_neighbors(Node u) {
           /* O(1) */
-              if(!has_node(u)) return std::pair<Neighborhood, bool>(Neighborhood(), false);
+              if(!has_node(u)) {
+                warn("Requested Neighborhood of a node, which doesn't exist. Node("+std::to_string(u)+")");
+                return std::pair<Neighborhood, bool>(Neighborhood(), false);
+              }
+              debug("Requested Neighborhood of node "+std::to_string(u)+". Node has degree "+std::to_string(get_single_degree(u))+".");
               return std::pair<Neighborhood, bool>(adj[u], true);
           }
           
           bool remove_node(const Node u) {
-            if(!has_node(u)) return false;
+            if(!has_node(u)) {
+              warn("Removing node, which doesn't exist: Node("+std::to_string(u)+").");
+              return false;
+            }
             sizes.erase(adj[u]);
             
             // Fuck. Go to each neighbor and inform him about the change.
@@ -282,25 +335,30 @@ namespace FvsGraph {
             /* 
               O(1)
             */
-              if(u==v) return false;
-              add_node(u);// +1
-              add_node(v);// +1
-              
-              sizes.erase(adj[u]);
-              sizes.erase(adj[v]);
-              
+              if(u==v) {
+                warn("Trying to add recursive edge, which is not allowed. Recursion on node "+std::to_string(u)+".");
+                return false;
+              }
               if(!has_edge(u,v)) {
+                add_node(u);// +1
+                add_node(v);// +1
+
+                sizes.erase(adj[u]);
+                sizes.erase(adj[v]);
+
                 adj[u].insert(v);
                 adj[v].insert(u);
-              } 
 
-              ++m;
+                ++m;
 
-              
-              sizes.insert(adj[u]);
-              sizes.insert(adj[v]);
-               
-              return true;
+
+                sizes.insert(adj[u]);
+                sizes.insert(adj[v]);
+                return true;
+              } else {
+                warn("Trying to add existant edge. Edge in question: ("+std::to_string(u)+"|"+std::to_string(v)+").");
+                return false;
+              }
           }
           
           void clear() {
@@ -308,6 +366,7 @@ namespace FvsGraph {
             sizes.clear();
             n = m = 0;
             sizes.clear();
+            note("Clearing Graph.");
           }
             
           void remove_edges(const std::set<Edge> &E) {
@@ -333,8 +392,14 @@ namespace FvsGraph {
           }
     
           bool remove_edge(const Node u, const Node v) {
-            if(!has_node(u) || !has_node(v)) return false;
-            if(adj[u].find(v) == adj[u].end()) return false;
+            if(!has_node(u) || !has_node(v)) {
+              warn("Trying to remove edge ("+std::to_string(u)+"|"+std::to_string(v)+"), but at least one of its nodes doesn't exist.");
+              return false;
+            }
+            if(adj[u].find(v) == adj[u].end()) {
+              warn("Trying to remove edge ("+std::to_string(u)+"|"+std::to_string(v)+"), but it doesn't exist.");
+              return false;
+            }
             
             sizes.erase(adj[u]);
             sizes.erase(adj[v]);
