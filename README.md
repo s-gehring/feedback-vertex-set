@@ -17,4 +17,4 @@ make gprof    Compile for speed profiling with gprof (or similar). Uses flag -pg
 
 # NewGraph
 
-I finished working on the branch NewGraph and merged everything into master. The algorithm should work now. Boost is still necessary, because the graph structure needs flat_set, hash and property_map... or needed that at some point in development and were forgotten. Who cares?
+I finished working on the branch NewGraph and merged everything into master. The algorithm should ~~work now~~ be fixed to actually work. Boost is still necessary, because the graph structure needs flat_set, hash and property_map... or needed that at some point in development and were forgotten. Who cares?
