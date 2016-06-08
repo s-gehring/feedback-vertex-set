@@ -309,7 +309,29 @@ namespace FvsGraph {
             n = m = 0;
             sizes.clear();
           }
-          
+            
+          void remove_edges(const std::set<Edge> &E) {
+            std::unordered_set<Node> to_update;
+            for(const auto &e : E) {
+              if(e.first == e.second) continue;
+              if(e.first == INVALID_NODE || e.second == INVALID_NODE) continue;
+              if(!has_edge(e)) continue;
+              Node u = e.first;
+              Node v = e.second;
+              if(sizes.find(adj[u]) != sizes.end()) sizes.erase(adj[u]);
+              if(sizes.find(adj[v]) != sizes.end()) sizes.erase(adj[v]);
+              
+              adj[u].erase(v);
+              adj[v].erase(u);
+              to_update.insert(u);
+              to_update.insert(v);
+              --m;
+            }
+            for(const auto &v : to_update) {
+              sizes.insert(adj[v]);
+            }
+          }
+    
           bool remove_edge(const Node u, const Node v) {
             if(!has_node(u) || !has_node(v)) return false;
             if(adj[u].find(v) == adj[u].end()) return false;
