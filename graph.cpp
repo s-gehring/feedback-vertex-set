@@ -32,7 +32,7 @@ namespace FvsGraph {
 
   typedef int Node;
   typedef std::pair<int,int> Edge;
-  typedef std::unordered_map<Node, bool> Neighborhood; 
+  typedef std::unordered_set<Node> Neighborhood; 
   typedef std::unordered_map<Node, Neighborhood> AdjacencyList;  // A hashtable.
   
   typedef std::unordered_set<Node> NodeVector;
@@ -52,51 +52,19 @@ namespace FvsGraph {
       private:
           AdjacencyList adj;          
 
-          int multiedges;
-          std::set<Edge> all_multiedges;
           Sizes sizes;
-          
-          std::string toString2(const NodeVector &x) {
-              std::string res = "";
-              bool first = true;
-              int s = 0;
-              for(NodeVector::const_iterator it = x.begin(); it != x.end(); ++it ) {
-                  ++s;
-                  if(first) {
-                    first = false;
-                    res += std::to_string(*it);
-                  } else {
-                    res += ","+std::to_string(*it);
-                  }
-                  if(s == 30) return res + std::string(", ...");
-              }
-              return res;
-          }
-          std::string toString(const Neighborhood &x) {
-              std::string res = "";
-              bool first = true;
-              for(Neighborhood::const_iterator it = x.begin(); it != x.end(); ++it ) {
-                  if(first) {
-                    first = false;
-                    res = std::to_string(it->first)+std::string(it->second?"M":"S");
-                  } else {
-                    res += std::string(",")+std::to_string(it->first)+std::string(it->second?"M":"S");
-                  }
-              }
-              return res;
-          }
           
           
       public:
           
           Graph() {
-            n = m = multiedges = 0;
+            n = m;
           }
           
           void clear_node(const Node v) {
             std::set<Node> targets;
             for(const auto& it : adj[v]) {
-              targets.insert(it.first);
+              targets.insert(it);
             }
             for(const auto& it : targets) {
               remove_edge(v, it);
@@ -105,8 +73,6 @@ namespace FvsGraph {
           
           bool has_node(const Node v) { return adj.find(v) != adj.end(); }                                        // O(1)
           bool has_edge(const Node u, const Node v) { return (has_node(u)) && (adj[u].find(v) != adj[u].end()); } // O(1) + O(1)
-          bool has_multiedge(const Node u, const Node v) { return has_edge(u, v) && adj[u][v]; }                  // O(1) + O(1)
-          bool has_multiedge(const Edge &e) { return has_multiedge(e.first, e.second); }                          // Alias to (const Node, const Node)
           bool has_edge(const Edge &e) { return has_edge(e.first, e.second); }                                    // Alias to (const Node, const Node)
           AdjacencyList get_adjacency_list() {
             return adj;
@@ -168,7 +134,6 @@ namespace FvsGraph {
           
           bool has_cycle() {
               if(m >= n) return true;
-              if(multiedges > 0) return true;
               std::unordered_set<Node> done = std::unordered_set<Node>();
               std::stack<std::pair<Node, Node> > S;
               for(AdjacencyList::iterator it = adj.begin(); it != adj.end(); ++it) {
@@ -198,21 +163,11 @@ namespace FvsGraph {
           
           
           std::pair<std::list<Node>, bool> get_cycle() {
-              if(m < n) return std::pair<std::list<Node>, bool>(std::list<Node>(), false);
-              #ifndef SKIP_MULTIEDGES
-              if(multiedges > 0) {
-                // Return this multiedge. Nothing fancy.
-                std::list<Node> x;
-                Edge e = *(all_multiedges.begin());
-                x.push_back(e.first);
-                x.push_back(e.second);
-                return std::pair<std::list<Node>, bool>(x, true);
-              }
-              #endif
+              //if(m < n) return std::pair<std::list<Node>, bool>(std::list<Node>(), false);
+              
               std::unordered_set<Node> done = std::unordered_set<Node>();
               std::stack<std::pair<Node, Node> > S;
-           
-	bool has_cycle(Graph& g);   for(AdjacencyList::iterator it = adj.begin(); it != adj.end(); ++it) {
+              for(AdjacencyList::iterator it = adj.begin(); it != adj.end(); ++it) {
                 if(done.find(it->first) == done.end()) {
                   S.push(std::make_pair(it->first, INVALID_NODE));
                   done.insert(it->first); 
@@ -282,14 +237,6 @@ namespace FvsGraph {
             
             // Fuck. Go to each neighbor and inform him about the change.
             for(Neighborhood::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
-                if(it->second) {
-                    std::set<Edge>::iterator e = all_multiedges.find(Edge(u, it->first));
-                    if(e != all_multiedges.end()) {
-                        --multiedges;
-                        --m;
-                        all_multiedges.erase(e);
-                    }
-                }
                 adj[it->first].erase(u);
                 --m;
             }
@@ -312,20 +259,15 @@ namespace FvsGraph {
                 add_node(it->first);
                 add_node(it->second);
                 if(it->first == it->second) continue;
-                if(has_multiedge(it->first, it->second)) continue;
+                
                 s.insert(it->first);
                 s.insert(it->second);
-                ++added;
+                
                 ++m;
-                if(has_edge(it->first, it->second)) {
-                    adj[it->first][it->second] = true;
-                    adj[it->second][it->first] = true;
-                } else {
-                    adj[it->first][it->second] = false;
-                    adj[it->second][it->first] = false;
-                    all_multiedges.insert(*it);
-                    ++multiedges;
-                }
+                
+                adj[it->first].insert(it->second);
+                adj[it->second].insert(it->first);
+                
                 
             }
             // Now repair sizes.
