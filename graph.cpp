@@ -23,8 +23,6 @@
 
 
 #define INVALID_NODE -1
-#define SKIP_MULTIEDGES
-#define TEST_NUMBER 2000000
 
 
 
@@ -94,7 +92,7 @@ namespace FvsGraph {
                     Node f = S.top().second;
                     S.pop();
                     for(Neighborhood::const_iterator neighbor = adj[v].begin(); neighbor != adj[v].end(); ++neighbor) {
-                      Node w = neighbor->first;
+                      Node w = *neighbor;
                       if(done.find(w) == done.end()) {
                         // Tree edge
                         foundEdges.push_back(std::make_pair(v, w));
@@ -145,7 +143,7 @@ namespace FvsGraph {
                     Node f = S.top().second;
                     S.pop();
                     for(Neighborhood::const_iterator neighbor = adj[v].begin(); neighbor != adj[v].end(); ++neighbor) {
-                      Node w = neighbor->first;
+                      Node w = *neighbor;
                       if(done.find(w) == done.end()) {
                         S.push(std::make_pair(w, v));
                         done.insert(w);
@@ -176,7 +174,7 @@ namespace FvsGraph {
                     Node f = S.top().second;
                     S.pop();
                     for(Neighborhood::const_iterator neighbor = adj[v].begin(); neighbor != adj[v].end(); ++neighbor) {
-                      Node w = neighbor->first;
+                      Node w = *neighbor;
                       if(done.find(w) == done.end()) {
                         S.push(std::make_pair(w, v));
                         done.insert(w);
@@ -237,8 +235,8 @@ namespace FvsGraph {
             
             // Fuck. Go to each neighbor and inform him about the change.
             for(Neighborhood::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
-                adj[it->first].erase(u);
-                --m;
+                remove_edge(*it, u);
+                // remove_edges()
             }
 
             adj[u].clear();
@@ -253,7 +251,6 @@ namespace FvsGraph {
           }
           
           void add_edges(const std::list<Edge> &E) {
-            int added = 0;
             std::unordered_set<Node> s;
             for(std::list<Edge>::const_iterator it = E.begin(); it != E.end(); ++it) {
                 add_node(it->first);
@@ -293,22 +290,9 @@ namespace FvsGraph {
               sizes.erase(adj[v]);
               
               if(!has_edge(u,v)) {
-                //increment_size(u);
-                //increment_size(v);
-                adj[u][v] = false;
-                adj[v][u] = false;
-              } else {
-                if(has_multiedge(u,v)) {
-                  return false;
-                }
-
-                //increment_size(u);
-                //increment_size(v);
-                adj[u][v] = true;
-                adj[v][u] = true;
-                all_multiedges.insert(std::pair<Node, Node>(u,v));
-                ++multiedges;
-              }
+                adj[u].insert(v);
+                adj[v].insert(u);
+              } 
 
               ++m;
 
@@ -322,38 +306,30 @@ namespace FvsGraph {
           void clear() {
             adj.clear();
             sizes.clear();
-            multiedges = n = m = 0;
-            all_multiedges.clear();
+            n = m = 0;
             sizes.clear();
           }
           
           bool remove_edge(const Node u, const Node v) {
             if(!has_node(u) || !has_node(v)) return false;
             if(adj[u].find(v) == adj[u].end()) return false;
-            sizes.erase(adj[u]);sizes.erase(adj[v]);
+            
+            sizes.erase(adj[u]);
+            sizes.erase(adj[v]);
+            
             adj[u].erase(v);
             adj[v].erase(u);
+            
             --m;
-            std::set<Edge>::iterator e = all_multiedges.find(Edge(u, v));
-            if(e != all_multiedges.end()) {
-                --multiedges;
-                --m;
-                all_multiedges.erase(e);
-            }
-            sizes.insert(adj[u]);sizes.insert(adj[v]);
+            
+            sizes.insert(adj[u]);
+            sizes.insert(adj[v]);
             return true;
           }
 
           
           
-          void print_all_edges() {
-              for(AdjacencyList::iterator it = adj.begin(); it != adj.end(); ++it) {
-                  // it-> first = key;
-                  // it-> second= value;
-                  std::string s = toString(it->second);
-                  printf("[%i:[%s]]\n", it->first, s.c_str());
-              }
-          }
+          
   };
   
 }

@@ -85,8 +85,8 @@ bool fvs::creates_circle(Graph& g, const set<Node>& u, const Node& v) {
     
 	set<Node> neighbors_in_u;
 	for(const auto &it : neighbors.first) {
-	    if(u.find(it.first) != u.end()) {
-	        neighbors_in_u.insert(it.first);
+	    if(u.find(it) != u.end()) {
+	        neighbors_in_u.insert(it);
 	    }
 	}
 
@@ -97,7 +97,7 @@ bool fvs::creates_circle(Graph& g, const set<Node>& u, const Node& v) {
 		    return false;
 		}
 		for (const auto& it : eIt.first) {
-		    if(neighbors_in_u.find(it.first) != neighbors_in_u.end()) {
+		    if(neighbors_in_u.find(it) != neighbors_in_u.end()) {
 		        return true;
 		    }
 		}
@@ -123,7 +123,7 @@ Node fvs::two_neighbour_node(Graph& g, const set<Node> &u, const set<Node> &v) {
 		int neighbors = 0;
 		Neighborhood n = g.get_neighbors(i).first;
 		for(const auto& j : n) {
-		    if(v.find(j.first) != v.end()) {
+		    if(v.find(j) != v.end()) {
 		        if(++neighbors > 1) return i;
 		    }
 		}
@@ -142,9 +142,8 @@ void fvs::induced_subgraph(Graph &s, Graph& g, const set<Node>& u) {
 		    cout << "Warning: Called induced_subgraph with a nodeset containing at least one node not in g"<<endl;
 		} else {
 		    for(const auto& j : eIt.first) {
-		        if(u.find(j.first)!=u.end()) {
-		            s.add_edge(i, j.first);
-		            // Multiedges?
+		        if(u.find(j)!=u.end()) {
+		            s.add_edge(i, j);
 		        }
 		    }
 		}
@@ -481,7 +480,7 @@ void fvs::print_graph(Graph& g) {
 	for (const auto &it : g.get_adjacency_list()) {
 		cout << "Edges outgoing from " << it.first << ":" << endl;
 		for (const auto &eit : it.second) {
-			cout << it.first << " -> " << eit.first << (eit.second?" M ":" S ") << endl;
+			cout << it.first << " -> " << eit << endl;
 		}
 	}
 	cout << "---------------------------" << endl;
