@@ -20,10 +20,6 @@
 
 
 
-#define INVALID_NODE -1
-
-
-
 using namespace FvsGraph;
 
   
