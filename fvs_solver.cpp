@@ -347,10 +347,10 @@ void fvs::cleanup(Graph& g)
 			g.remove_node(it.first);
 		}
 		else if (it.second.size() == 1) {
+			// check the neighbour and his neighbours
 			neighbour = *(it.second.begin());
 			g.remove_node(it.first);
-			// check all the neighbouring nodes we have already checked
-			while (g.get_single_degree(neighbour) < 2 && neighbour < it.first) {
+			while (g.get_single_degree(neighbour) < 2) {
 				if (g.get_single_degree(neighbour) == 0) {
 					g.remove_node(neighbour);
 					neighbour = it.first; // stop checking neighbours
