@@ -343,11 +343,11 @@ void fvs::cleanup(Graph& g)
 	Node neighbour;
 	Node help;
 	set<Node> processed;
-	for(const auto &it : g.get_adjacency_list()) {
-		if(it.second.size() == 0) {
+	for(auto &it : g.get_adjacency_list()) {
+		if(g.get_single_degree(it.first) == 0) {
 			g.remove_node(it.first);
 		}
-		else if (it.second.size() == 1) {
+		else if (g.get_single_degree(it.first) == 1) {
 			// check the neighbour and his neighbours if they were already processed
 			neighbour = *(it.second.begin());
 			g.remove_node(it.first);
