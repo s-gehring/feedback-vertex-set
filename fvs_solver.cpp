@@ -2,17 +2,23 @@
 #include <utility>
 #include <limits.h>
 #include <fstream>
+#include <sstream>
 
 #include "fvs_solver.h"
 
 using namespace fvs;
 
-
-
-	bool fvs::has_cycle(Graph& g) {
-	  return g.has_cycle();
-	}
-
+/**
+* @brief Checks, wether the given graph contains a cycle.
+*
+* This function uses dfs and some shortcuts to check if the given graph contains cycles.
+*
+* @param [in] g The graph.
+* @returns True, if there is a cycle in g.
+*/
+bool fvs::has_cycle(Graph& g) {
+	return g.has_cycle();
+}
 
 /**
 * @brief Checks, whether a given graph contains a semidisjoint cycle.
