@@ -458,6 +458,7 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 				active_vertices++;
 			}
 		}
+		cleanup(g);
 	}
 	// shrink the approximation of the fvs set
 	Graph h(orig);
