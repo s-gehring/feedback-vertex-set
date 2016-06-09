@@ -380,25 +380,17 @@ void fvs::cleanup(Graph& g)
 
 set<Node> fvs::two_approx_fvs(Graph& orig)
 {
-	Graph g(orig);
-	//graph_traits<Graph>::vertex_iterator vi, vi_end;
-	set<Node> f;
-	map<Node, double> weights;
-	stack<Node> s;
-
-
-	for(const auto &it : g.get_adjacency_list()) {
-	  weights[it.first] = g.get_single_degree(it.first) - 1;
-	}
-	cleanup(g);	
-	// count number of vertices with weight > 0
-	int active_vertices = 0;
+	Graph g(orig); // our working copy
+	set<Node> f; // the approx of the fvs
+	map<Node, double> weights; // individual weights for each node
+	stack<Node> s; // here we save all nodes of the fvs for checking their neccessarity in the end
+	cleanup(g);
+	// initialize weights
 	for (const auto &it : g.get_adjacency_list()) {
-		if (weights[it.first] >= 0) {
-			active_vertices++;
-		}
+		weights[it.first] = g.get_single_degree(it.first) - 1;
+		// maybe there is a faster way to do it but this is reasonable fast due to its degree proportionality
 	}
-	while (active_vertices > 0) {
+	while (g.n > 0) {
 		// contains a semidisjoint cycle?
 		// Here, we do not the same as the algorithm in the paper: we only put the node with degree >2 into the fvs
 		// and delete all the others. In O notation this is no difference but in practice we safe a tiny bit of time.
@@ -422,28 +414,26 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 			// delete all the others
 			for (set<Node>::iterator it = sdcycle.first.begin(); it != sdcycle.first.end(); ++it) {
 				if (it == sdcycle.first.begin() && !true_cycle) {
-					g.clear_node(*sdcycle.first.begin());
-					weights[*sdcycle.first.begin()] = -1;
+					g.remove_node(*sdcycle.first.begin());
 				}
 				else {
-					g.clear_node(*it);
-					weights[*it] = -1;
+					g.remove_node(*it);
 				}
 			}
 		} else { // is clean and contains no semidisjoint cycle
 			double gamma = 0;
+			// find minimum
 			for (const auto &it : g.get_adjacency_list()) {
-				if ((weights[it.first] / (g.get_single_degree(it.first)-1) < gamma || gamma == 0) && weights[it.first] >=0) {
+				if ((weights[it.first] / (g.get_single_degree(it.first)-1) < gamma || gamma == 0)) {
 					gamma = weights[it.first]/(g.get_single_degree(it.first)-1);
 				}
 			}
+			// update weights
 			for (const auto &it : g.get_adjacency_list()) {
-				if (weights[it.first] >= 0) {
-					weights[it.first] = weights[it.first] - gamma*(g.get_single_degree(it.first)-1);
-				}
+				weights[it.first] = weights[it.first] - gamma*(g.get_single_degree(it.first)-1);
 			}
 		}
-		// handle vertices with weight 0
+		// handle remaining vertices with weight 0
 		for (const auto &it : g.get_adjacency_list()) {
 			if (weights[it.first] == 0) {
 				f.insert(it.first);
@@ -451,34 +441,30 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 				g.remove_node(it.first);
 			}
 		}
-		// count number of vertices with weight > 0
-		active_vertices = 0;
-		for (const auto &it : g.get_adjacency_list()) {
-			if (weights[it.first] >= 0) {
-				active_vertices++;
-			}
-		}
 		cleanup(g);
 	}
 	// shrink the approximation of the fvs set
-	Graph h(orig);
+	//Graph h(orig);
 	stack<Node> nodes_to_reset;
 	stack<Edge> edges_to_reset;
 	Node u;
 	set<Node>::iterator it_u;
 	Neighborhood neighbours;
 	while (!s.empty()) {
+		Graph h(orig); // # copy whole graph
 		u = s.top();
 		s.pop();
 		// construct graph to be checked
 		for (set<Node>::iterator it = f.begin(); it != f.end(); ++it) {
 			if (*it != u) {
+				/*
 				// save Node and all its incident edges, to be able to reset it again
 				nodes_to_reset.push(*it);
 				neighbours = h.get_neighbors(*it).first;
 				for (Neighborhood::iterator it1 = neighbours.begin(); it1 != neighbours.end(); ++it1) {
 					edges_to_reset.push(make_pair(*it, *it1));
 				}
+				*/
 				h.remove_node(*it);
 			}
 			else {
@@ -489,6 +475,7 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 		if (!has_cycle(h)) {
 			f.erase(it_u);
 		}
+		/*
 		// reset graph again
 		while (!nodes_to_reset.empty()) {
 			h.add_node(nodes_to_reset.top());
@@ -498,6 +485,7 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 			h.add_edge(edges_to_reset.top().first, edges_to_reset.top().second);
 			edges_to_reset.pop();
 		}
+		*/
 	}
 	return f;
 }
