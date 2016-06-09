@@ -342,15 +342,16 @@ void fvs::cleanup(Graph& g)
 {
 	Node neighbour;
 	Node help;
+	set<Node> processed;
 	for(const auto &it : g.get_adjacency_list()) {
 		if(it.second.size() == 0) {
 			g.remove_node(it.first);
 		}
 		else if (it.second.size() == 1) {
-			// check the neighbour and his neighbours
+			// check the neighbour and his neighbours if they were already processed
 			neighbour = *(it.second.begin());
 			g.remove_node(it.first);
-			while (g.get_single_degree(neighbour) < 2) {
+			while (g.get_single_degree(neighbour) < 2 && processed.find(neighbour) != processed.end()) {
 				if (g.get_single_degree(neighbour) == 0) {
 					g.remove_node(neighbour);
 					neighbour = it.first; // stop checking neighbours
@@ -362,6 +363,7 @@ void fvs::cleanup(Graph& g)
 				}
 			}
 		}
+		processed.insert(it.first);
 	}
 }
 
