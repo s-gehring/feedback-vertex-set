@@ -20,7 +20,7 @@
 
 
 
-using namespace FvsGraph;
+namespace FvsGraph{
 
   
 
@@ -379,5 +379,5 @@ using namespace FvsGraph;
 
     
 
-
+}
 #endif
