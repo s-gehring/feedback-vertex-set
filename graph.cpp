@@ -227,7 +227,7 @@ namespace FvsGraph{
             return true;
           }
           
-          std::pair<Neighborhood, bool> Graph::get_neighbors(Node u) {
+          std::pair<Neighborhood, bool> Graph::get_neighbors(const Node u) {
           /* O(1) */
               if(!has_node(u)) {
                 warn("Requested Neighborhood of a node, which doesn't exist. Node("+std::to_string(u)+")");
