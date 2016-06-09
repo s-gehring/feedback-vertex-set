@@ -334,27 +334,35 @@ void fvs::read_graph(Graph &g, const char* filepath) {
 * @brief: Deletes all vertices of degree at most 1 along with all incident edges from a given graph.
 *
 * As long as a given graph has vertices of degree at most 1, all incident edges and all vertices
-* are deleted (by setting their weight to -1). We need this as a subroutine for the 2-approx-algo.
+* are deleted. We need this as a subroutine for the 2-approx-algo.
 *
 * @param [in] g The graph.
-* @param [in] weights The weights of the vertices.
 */
 void fvs::cleanup(Graph& g)
 {
-  set<Node> to_delete;
-  bool change = true;
-  while(change) {
-    change = false;
-    for(const auto &it : to_delete) {
-      g.remove_node(it);
-    }
-    for(const auto &it : g.get_adjacency_list()) {
-      if(it.second.size() < 2) {
-        change = true;
-        to_delete.insert(it.first);
-      }
-    }
-  }
+	Node neighbour;
+	Node help;
+	for(const auto &it : g.get_adjacency_list()) {
+		if(it.second.size() == 0) {
+			g.remove_node(it.first);
+		}
+		else if (it.second.size() == 1) {
+			neighbour = *(it.second.begin());
+			g.remove_node(it.first);
+			// check all the neighbouring nodes we have already checked
+			while (g.get_single_degree(neighbour) < 2 && neighbour < it.first) {
+				if (g.get_single_degree(neighbour) == 0) {
+					g.remove_node(neighbour);
+					neighbour = it.first; // stop checking neighbours
+				}
+				else if (g.get_single_degree(neighbour) == 1) {
+					help = neighbour;
+					neighbour = *(g.get_neighbors(help).first.begin()); // for repeating the process
+					g.remove_node(help);
+				}
+			}
+		}
+	}
 }
 
 /**
