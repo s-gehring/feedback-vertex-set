@@ -16,8 +16,7 @@
 #include "boost/graph/undirected_dfs.hpp"
 #include "boost/graph/graph_traits.hpp"
 */
-
-#include "graph.cpp"
+#include "graph.hpp"
 
 using namespace std;
 using namespace FvsGraph;

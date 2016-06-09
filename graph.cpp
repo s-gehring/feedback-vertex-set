@@ -1,9 +1,6 @@
 #ifndef _GRAPH_CPP
 #define _GRAPH_CPP
 
-#include <boost/container/flat_set.hpp>
-#include <boost/functional/hash.hpp>
-#include <boost/property_map/property_map.hpp>
 #include <vector>
 #include <time.h>
 
@@ -17,7 +14,8 @@
 #include <string>
 #include <random>
 #include <math.h>
-#include "debugger.hpp"
+
+#include "graph.hpp"
 
 
 
@@ -26,63 +24,24 @@
 
 
 
-namespace FvsGraph {
+using namespace FvsGraph;
 
-  typedef int Node;
-  typedef std::pair<int,int> Edge;
-  typedef std::unordered_set<Node> Neighborhood; 
-  typedef std::unordered_map<Node, Neighborhood> AdjacencyList;  // A hashtable.
   
-  typedef std::unordered_set<Node> NodeVector;
-  struct compareNeighborhoods {
-      bool operator()(const Neighborhood &u,const Neighborhood &v) {
-        return u.size() < v.size();
-      };
-    };
-  typedef std::multiset<Neighborhood, compareNeighborhoods> Sizes;  
 
 
-  class Graph {
-      public:
-          int n;
-          int m;
-
-      private:
-          AdjacencyList adj;          
-
-          Sizes sizes;
-          Debugger* d;
-        
-          void note(string s) {
-            d->log("[Graph "+get_name() + "]: "+s, Debugger::NOTE); 
-          }
-          
-          void warn(string s) {
-            d->log("[Graph "+get_name() + "]: "+s, Debugger::WARNING); 
-          }
-    
-          void err(string s) {
-            d->log("[Graph "+get_name() + "]: "+s, Debugger::ERROR); 
-          }
-    
-          void debug(string s) {
-            d->log("[Graph "+get_name() + "]: "+s, Debugger::DEBUG); 
-          }
-      public:
-          
-          string get_name() {
+          std::string Graph::get_name() {
             char s[80];
             sprintf(s, "%p", this);
             return string(s);
           }
     
-          Graph() {
+          Graph::Graph() {
             d = Debugger::get_instance("logs/graph.log", Debugger::ALL);
             n = m;
             d->log("Created graph with pointer " + get_name() + ".", Debugger::DEBUG);
           }
           
-          void clear_node(const Node v) {
+          void Graph::clear_node(const Node v) {
             std::set<Node> targets;
             string tmp = "Clearing node "+std::to_string(v)+ ": ";
             if(!has_node(v)) {
@@ -98,19 +57,21 @@ namespace FvsGraph {
             }
           }
           
-          bool has_node(const Node v) { return adj.find(v) != adj.end(); }                                        // O(1)
-          bool has_edge(const Node u, const Node v) { return (has_node(u)) && (adj[u].find(v) != adj[u].end()); } // O(1) + O(1)
-          bool has_edge(const Edge &e) { return has_edge(e.first, e.second); }                                    // Alias to (const Node, const Node)
-          AdjacencyList get_adjacency_list() {
+          bool Graph::has_node(const Node v) { return adj.find(v) != adj.end(); }                                        // O(1)
+          bool Graph::has_edge(const Node u, const Node v) { return (has_node(u)) && (adj[u].find(v) != adj[u].end()); } // O(1) + O(1)
+          bool Graph::has_edge(const Edge &e) { return has_edge(e.first, e.second); }                                    // Alias to (const Node, const Node)
+          AdjacencyList Graph::get_adjacency_list() {
             return adj;
           }
           
           
-          std::pair<std::set<Node>, bool> find_semidisjoint_cycle() {
+          std::pair<std::set<Node>, bool> Graph::find_semidisjoint_cycle() {
+            return std::make_pair(std::set<Node>(), false);
+            /*
               std::unordered_set<Node> done = std::unordered_set<Node>();
               std::stack<std::pair<Node, Node> > S;
               std::set<Node> sd_cycle;
-              std::vector<Edge> foundEdges;
+              std::set<Edge> foundEdges;
               for(AdjacencyList::iterator it = adj.begin(); it != adj.end(); ++it) {
                 if(done.find(it->first) == done.end()) {
                   // connected_components++;
@@ -124,17 +85,17 @@ namespace FvsGraph {
                       Node w = *neighbor;
                       if(done.find(w) == done.end()) {
                         // Tree edge
-                        foundEdges.push_back(std::make_pair(v, w));
+                        foundEdges.insert(std::make_pair(v, w));
                         S.push(std::make_pair(w, v));
                         done.insert(w);
                       } else {
                         if(w != f) {
                         // Target(e) == w
                         // Source(e) == v
-                          if(find(foundEdges.begin(), foundEdges.end(), std::make_pair(w, v)) == foundEdges.end()) {
-                            foundEdges.push_back(std::make_pair(v,w));
+                          if(foundEdges.find(std::make_pair(w, v)) == foundEdges.end()) {
+                            foundEdges.insert(std::make_pair(v,w));
                             // found cycle, check if semi-disjoint
-                            std::vector<std::pair<Node, Node> >::iterator it2 = foundEdges.end() -1;
+                            const auto &it2 = foundEdges.end() -1;
                             int nodes_with_high_deg = 0;
                             while(it2->first != w) {
                               sd_cycle.insert(it2->second);
@@ -157,9 +118,10 @@ namespace FvsGraph {
                 }
               }
               return std::make_pair(std::set<Node>(), false);
+              */
           }
           
-          bool has_cycle() {            
+          bool Graph::has_cycle() {            
               if(m >= n) {
                 note("Has_Cycle: Use heuristic: There is a cycle, because m [="+to_string(m)+"] >= n [="+to_string(n)+"]");
                 return true;
@@ -196,7 +158,7 @@ namespace FvsGraph {
           }
           
           
-          std::pair<std::list<Node>, bool> get_cycle() {
+          std::pair<std::list<Node>, bool> Graph::get_cycle() {
               //if(m < n) return std::pair<std::list<Node>, bool>(std::list<Node>(), false);
               string tmp = "Get_Cycle: Don't use heuristic, because not yet implemente. DFS ";
               
@@ -236,12 +198,12 @@ namespace FvsGraph {
               return std::make_pair<std::list<Node>, bool>(std::list<Node>(), false);
           }
           
-          Node source(const Edge &e) { return e.first; }
-          Node src(const Edge &e) {return source(e);}
-          Node target(const Edge &e) { return e.second; }
-          Node trg(const Edge &e) { return target(e); }
+          Node Graph::source(const Edge &e) { return e.first; }
+          Node Graph::src(const Edge &e) {return source(e);}
+          Node Graph::target(const Edge &e) { return e.second; }
+          Node Graph::trg(const Edge &e) { return target(e); }
           
-          Node lowest_deg_node(const std::set<Node> &candidates) {
+          Node Graph::lowest_deg_node(const std::set<Node> &candidates) {
             if(candidates.size() == 0) {
               warn("lowest_deg_node called with an empty set. Returning invalid node (-1).");
             }
@@ -257,7 +219,7 @@ namespace FvsGraph {
             return maxCan;
           }
           
-          bool add_node(const Node u) { // O(1)
+          bool Graph::add_node(const Node u) { // O(1)
             if(has_node(u)) {
               note("Added node which is already existant: "+std::to_string(u));
               return false;
@@ -269,7 +231,7 @@ namespace FvsGraph {
             return true;
           }
           
-          std::pair<Neighborhood, bool> get_neighbors(Node u) {
+          std::pair<Neighborhood, bool> Graph::get_neighbors(Node u) {
           /* O(1) */
               if(!has_node(u)) {
                 warn("Requested Neighborhood of a node, which doesn't exist. Node("+std::to_string(u)+")");
@@ -279,7 +241,7 @@ namespace FvsGraph {
               return std::pair<Neighborhood, bool>(adj[u], true);
           }
           
-          bool remove_node(const Node u) {
+          bool Graph::remove_node(const Node u) {
             if(!has_node(u)) {
               warn("Removing node, which doesn't exist: Node("+std::to_string(u)+").");
               return false;
@@ -287,10 +249,11 @@ namespace FvsGraph {
             sizes.erase(adj[u]);
             
             // Fuck. Go to each neighbor and inform him about the change.
+            std::set<Edge> to_remove;
             for(Neighborhood::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
-                remove_edge(*it, u);
-                // remove_edges()
+                to_remove.insert(std::make_pair(*it, u));
             }
+            remove_edges(to_remove);
 
             adj[u].clear();
             adj.erase(u);
@@ -299,11 +262,15 @@ namespace FvsGraph {
           }
           
                    
-          int get_single_degree(const Node u) {
+          int Graph::get_single_degree(const Node u) {
+            if(!has_node(u)) {
+              err("Get degree of a non-existant node "+std::to_string(u)+".");
+              return -1;
+            }
             return adj[u].size();
           }
           
-          void add_edges(const std::list<Edge> &E) {
+          void Graph::add_edges(const std::list<Edge> &E) {
             std::unordered_set<Node> s;
             for(std::list<Edge>::const_iterator it = E.begin(); it != E.end(); ++it) {
                 add_node(it->first);
@@ -331,7 +298,7 @@ namespace FvsGraph {
             }
           }
           
-          bool add_edge(const Node u, const Node v) {
+          bool Graph::add_edge(const Node u, const Node v) {
             /* 
               O(1)
             */
@@ -361,7 +328,7 @@ namespace FvsGraph {
               }
           }
           
-          void clear() {
+          void Graph::clear() {
             adj.clear();
             sizes.clear();
             n = m = 0;
@@ -369,7 +336,7 @@ namespace FvsGraph {
             note("Clearing Graph.");
           }
             
-          void remove_edges(const std::set<Edge> &E) {
+          void Graph::remove_edges(const std::set<Edge> &E) {
             std::unordered_set<Node> to_update;
             for(const auto &e : E) {
               if(e.first == e.second) continue;
@@ -391,7 +358,7 @@ namespace FvsGraph {
             }
           }
     
-          bool remove_edge(const Node u, const Node v) {
+          bool Graph::remove_edge(const Node u, const Node v) {
             if(!has_node(u) || !has_node(v)) {
               warn("Trying to remove edge ("+std::to_string(u)+"|"+std::to_string(v)+"), but at least one of its nodes doesn't exist.");
               return false;
@@ -414,11 +381,7 @@ namespace FvsGraph {
             return true;
           }
 
-          
-          
-          
-  };
-  
-}
+    
+
 
 #endif
