@@ -194,7 +194,7 @@ void fvs::maintain_integrity(Graph& g, set<Node>& u, Node aDeletedNode, directio
 * @returns A pair of a set of nodes and a bool. The set of nodes contains a part of the feedback
 *		vertex set. The bool will be false, if the algorithm decides that there is no fvs.
 */
-pair<set<Node>, bool> fvs::compute_fvs(Graph& orig, Graph& g, set<Node>& f, set<Node>& v2, int k) {
+pair<set<Node>, bool> fvs::forest_bipartition_fvs(Graph& orig, Graph& g, set<Node>& f, set<Node>& v2, int k) {
 	set<Node> fvs;
 	pair<set<Node>, bool> retValue;
 	
@@ -218,7 +218,7 @@ pair<set<Node>, bool> fvs::compute_fvs(Graph& orig, Graph& g, set<Node>& f, set<
 			Graph h(g);
 			f.erase(w);
 			h.remove_node(w);
-			retValue = compute_fvs(orig, h, f, v2, k - 1);
+			retValue = forest_bipartition_fvs(orig, h, f, v2, k - 1);
 			
 		//	cout << "Subcall retuned: " << (retValue.second ? "true" : "false") << endl;
 		//	cout << "Subcall-Set: "; for (const auto& i : retValue.first) { cout << i << ", "; } cout << endl;
@@ -241,7 +241,7 @@ pair<set<Node>, bool> fvs::compute_fvs(Graph& orig, Graph& g, set<Node>& f, set<
 			Graph h(g);
 			f.erase(w);
 			h.remove_node(w);
-			retValue = compute_fvs(orig, h, f, v2, k - 1);
+			retValue = forest_bipartition_fvs(orig, h, f, v2, k - 1);
 
 			if (true == retValue.second) {
 				fvs = retValue.first;
@@ -255,7 +255,7 @@ pair<set<Node>, bool> fvs::compute_fvs(Graph& orig, Graph& g, set<Node>& f, set<
 			else {
 				v2.insert(w);
 	//			cout << "Removing " << w << " from the fvs." << endl;
-				return compute_fvs(orig, g, f, v2, k);
+				return forest_bipartition_fvs(orig, g, f, v2, k);
 			}
 		}
 	}
@@ -267,14 +267,14 @@ pair<set<Node>, bool> fvs::compute_fvs(Graph& orig, Graph& g, set<Node>& f, set<
 			f.erase(w);
       h.remove_node(w);
 
-			return retValue = compute_fvs(orig, h, f, v2, k - 1);
+			return retValue = forest_bipartition_fvs(orig, h, f, v2, k - 1);
 		} 
 		else if (w != INVALID_NODE) {
 			f.erase(w);
 			v2.insert(w);
 
 //			cout << "Removing " << w << " from the fvs." << endl;
-			return compute_fvs(orig, g, f, v2, k);
+			return forest_bipartition_fvs(orig, g, f, v2, k);
 		}
 	}
 	
