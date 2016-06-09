@@ -11,20 +11,12 @@
 #include <set>
 #include <vector>
 #include <stack>
-/*
-#include "boost/graph/adjacency_list.hpp"
-#include "boost/graph/undirected_dfs.hpp"
-#include "boost/graph/graph_traits.hpp"
-*/
 #include "graph.hpp"
 
 using namespace std;
 using namespace FvsGraph;
 
 namespace fvs {
-
-	
-
 	bool has_cycle(Graph& g);
 	
 	pair<set<Node>, bool> find_semidisjoint_cycle(Graph& g);
@@ -38,7 +30,8 @@ namespace fvs {
 	set<Node> two_approx_fvs(const Graph& orig);
 	bool is_fvs(const Graph& g, const set<Node>& fvs);
 
-	pair<set<Node>, bool> compute_fvs(Graph& orig, Graph& g, set<Node>& f, set<Node>& v2, int k); ///< DESCRIPTIVE NAMES PLS
+	pair<set<Node>, bool> forest_bipartition_fvs(Graph& orig, Graph& g, set<Node>& f, set<Node>& v2, int k);
+	pair<set<Node>, bool> compression_fvs(const Graph& orig, const set<Node> S);
 
 	void read_graph(Graph& g, const char* filepath);
 	void print_graph(Graph& g);
@@ -47,7 +40,6 @@ namespace fvs {
 	
 	enum direction_tag { forward, inverse };
 	void maintain_integrity(Graph& g, set<Node>& u, Node aDeletedNode, direction_tag dt = forward);
-
 }
 
 #endif /* FVS_SOLVER_H */
