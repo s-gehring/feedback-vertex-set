@@ -42,6 +42,7 @@ class Graph {
       
       
       public:
+          
           /**
           * @brief The number of vertices. Shouldn't be changed.
           */
@@ -51,6 +52,13 @@ class Graph {
           */
           int m;
           
+          /**
+          * @brief Deletes all nodes with degree at most one.
+          *
+          * @returns The number of nodes deleted.
+          */
+          int delete_low_degree_nodes();
+  
           /**
           * @brief Returns a unique name for the current graph instance.
           *
@@ -120,7 +128,17 @@ class Graph {
           * @returns An object of type AdjacencyList
           */
           AdjacencyList get_adjacency_list();
-          
+              
+          /**
+          * @brief Returns a bridge edge.
+          *
+          * Returns an edge which divides the graph
+          * into two connected components.
+          *
+          * @returns An edge which divides the graph.
+          */
+          std::pair<Edge, bool> get_bridge();
+  
           /**
           * @brief Returns a semidisjoint cycle if there exists one.
           *

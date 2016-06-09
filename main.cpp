@@ -11,9 +11,19 @@ int main(int argc, char** argv) {
         filepath = argv[1];
     }
     Graph g;
-    
-    
     read_graph(g, filepath);
+    g.clear();
+    
+    g.add_edge(1,2);
+    g.add_edge(2,3);
+    g.add_edge(1,3);
+    g.add_edge(4,5);
+    g.add_edge(5,6);
+    g.add_edge(4,6);
+    g.add_edge(1,5);
+    
+    
+    
     print_graph(g);
     
     
@@ -72,7 +82,12 @@ int main(int argc, char** argv) {
     cout << "Found size of min FVS: "<<min<<", continue to compute min FVS."<<endl;
     feedback = forest_bipartition_fvs(h,g,v1,v2,min);
     
-    // TODO: Sanity function.
+    // Sanity function
+    if(is_fvs(g, feedback.first)) {
+        cout << "Is a FVS." << endl;
+    } else {
+        cout << "Is not a FVS." << endl;   
+    }
     
     cout << "Feedback Vertex Set: " << (feedback.second ? "Found" : "Not found!") << endl;
     for (const auto& i : feedback.first) {

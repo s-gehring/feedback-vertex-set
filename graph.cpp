@@ -36,6 +36,32 @@ namespace FvsGraph{
             n = m;
             d->log("Created graph with pointer " + get_name() + ".", Debugger::DEBUG);
           }
+  
+          int Graph::delete_low_degree_nodes() {
+            bool changes_occur = true;
+            int changes = 0;
+            do {
+              changes_occur = false;
+              std::set<Node> to_remove;
+              for(const auto& it : adj) {
+                if(it.second.size() < 2) {
+                  changes_occur = true;
+                  to_remove.insert(it.first);
+                }
+              }
+              changes = changes + to_remove.size();
+              for(const auto &it : to_remove) {
+                remove_node(it); 
+                
+              }
+               
+            } while(changes_occur);
+            debug("Deleted "+std::to_string(changes)+ " nodes with degree at most one.");
+            
+            return changes;
+          }
+            
+  
           
           void Graph::clear_node(const Node v) {
             std::set<Node> targets;
@@ -60,14 +86,14 @@ namespace FvsGraph{
             return adj;
           }
           
-          
+          // The DFS algorithms
           std::pair<std::list<Node>, bool> Graph::find_semidisjoint_cycle() {
             
             std::set<Node> candidates;
             std::unordered_set<Node> no;
             
             for(const auto &v : adj) { // v.first == Node, v.second == Neighborhood
-              if(no.find(v.first) == no.end()) continue;
+              if(no.find(v.first) != no.end()) continue;
               if(get_single_degree(v.first) != 2) continue;
               std::list<Node> semi_disjoint_path_one;
               semi_disjoint_path_one.push_back(v.first);
@@ -178,7 +204,6 @@ namespace FvsGraph{
               return false;
           }
           
-          
           std::pair<std::list<Node>, bool> Graph::get_cycle() {
               //if(m < n) return std::pair<std::list<Node>, bool>(std::list<Node>(), false);
               string tmp = "Get_Cycle: Don't use heuristic, because not yet implemente. DFS ";
@@ -219,6 +244,47 @@ namespace FvsGraph{
               return std::make_pair<std::list<Node>, bool>(std::list<Node>(), false);
           }
           
+          std::pair<Edge, bool> Graph::get_bridge() {
+              return make_pair(make_pair(INVALID_NODE, INVALID_NODE), false);/*
+              string tmp = "Get Bridge: Don't use heuristic, because not yet implemente. DFS ";
+              std::unordered_set<Node> done = std::unordered_set<Node>();
+              std::stack<std::pair<Node, Node> > S;
+              for(AdjacencyList::iterator it = adj.begin(); it != adj.end(); ++it) {
+                if(done.find(it->first) == done.end()) {
+                  S.push(std::make_pair(it->first, INVALID_NODE));
+                  done.insert(it->first); 
+                  while(!S.empty()) {
+                    Node v = S.top().first;
+                    Node f = S.top().second;
+                    S.pop();
+                    for(Neighborhood::const_iterator neighbor = adj[v].begin(); neighbor != adj[v].end(); ++neighbor) {
+                      Node w = *neighbor;
+                      if(done.find(w) == done.end()) {
+                        S.push(std::make_pair(w, v));
+                        done.insert(w);
+                      } else {
+                        if(w != f) {
+                          S.push(std::make_pair(v,f));
+                          std::list<Node> x;
+                          while(!S.empty()) {
+                            x.push_back(S.top().first);
+                            S.pop();
+                          }
+                          note(tmp+"found a cycle.");
+                          return std::pair<std::list<Node>, bool>(x, true);
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            
+              note(tmp+"found no cycle.");
+              return std::make_pair<std::list<Node>, bool>(std::list<Node>(), false);
+              */
+          }
+  
+          // /The DFS algorithms
           Node Graph::source(const Edge &e) { return e.first; }
           Node Graph::src(const Edge &e) {return source(e);}
           Node Graph::target(const Edge &e) { return e.second; }
@@ -282,7 +348,6 @@ namespace FvsGraph{
             return true;
           }
           
-                   
           int Graph::get_single_degree(const Node u) {
             if(!has_node(u)) {
               err("Get degree of a non-existant node "+std::to_string(u)+".");
