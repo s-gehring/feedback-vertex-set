@@ -61,60 +61,85 @@ namespace FvsGraph{
           }
           
           
-          std::pair<std::set<Node>, bool> Graph::find_semidisjoint_cycle() {
-            return std::make_pair(std::set<Node>(), false);
-            /*
-              std::unordered_set<Node> done = std::unordered_set<Node>();
-              std::stack<std::pair<Node, Node> > S;
-              std::set<Node> sd_cycle;
-              std::set<Edge> foundEdges;
-              for(AdjacencyList::iterator it = adj.begin(); it != adj.end(); ++it) {
-                if(done.find(it->first) == done.end()) {
-                  // connected_components++;
-                  S.push(std::make_pair(it->first, INVALID_NODE));
-                  done.insert(it->first); 
-                  while(!S.empty()) {
-                    Node v = S.top().first;
-                    Node f = S.top().second;
-                    S.pop();
-                    for(Neighborhood::const_iterator neighbor = adj[v].begin(); neighbor != adj[v].end(); ++neighbor) {
-                      Node w = *neighbor;
-                      if(done.find(w) == done.end()) {
-                        // Tree edge
-                        foundEdges.insert(std::make_pair(v, w));
-                        S.push(std::make_pair(w, v));
-                        done.insert(w);
-                      } else {
-                        if(w != f) {
-                        // Target(e) == w
-                        // Source(e) == v
-                          if(foundEdges.find(std::make_pair(w, v)) == foundEdges.end()) {
-                            foundEdges.insert(std::make_pair(v,w));
-                            // found cycle, check if semi-disjoint
-                            const auto &it2 = foundEdges.end() -1;
-                            int nodes_with_high_deg = 0;
-                            while(it2->first != w) {
-                              sd_cycle.insert(it2->second);
-                              if(get_single_degree(it2->second) > 2) {
-                                nodes_with_high_deg = 0;
-                              }
-                              --it2;
-                            }
-                            sd_cycle.insert(it2->second);
-                            if(nodes_with_high_deg <= 1) {
-                              return std::make_pair(sd_cycle, true);
-                            } else {
-                              sd_cycle.clear();
-                            }
-                          }
-                        }
-                      }
-                    }
+          std::pair<std::list<Node>, bool> Graph::find_semidisjoint_cycle() {
+            
+            std::set<Node> candidates;
+            std::unordered_set<Node> no;
+            
+            for(const auto &v : adj) { // v.first == Node, v.second == Neighborhood
+              if(no.find(v.first) == no.end()) continue;
+              if(get_single_degree(v.first) != 2) continue;
+              std::list<Node> semi_disjoint_path_one;
+              semi_disjoint_path_one.push_back(v.first);
+              no.insert(v.first);
+              
+              Node current_node = v.first;
+              Node last_node = INVALID_NODE;
+              
+              bool not_done = true;
+              while(not_done) {
+                Neighborhood::const_iterator it = adj[current_node].begin();
+                Node next_node = *(it);
+                if(next_node == last_node) {
+                  std::advance(it, 1);
+                  next_node = *(it); 
+                  
+                }
+                last_node = current_node;
+                current_node = next_node;
+                no.insert(current_node);
+                semi_disjoint_path_one.push_front(current_node);
+                // TODO: Remove unnecessary check.
+                if(get_single_degree(current_node) < 2) {
+                  warn("Trying to find a semidisjoint cycle, and found a node with degree 1: "+std::to_string(current_node)+" this will still work, but may need some unnecessary time.");
+                  not_done = false;
+                } else if(get_single_degree(current_node) > 2) {
+                  not_done = false;
+                } else {
+                  if(current_node == semi_disjoint_path_one.front()) {
+                    warn("Found a full disjoint cycle. I don't really believe this.");
+                    return std::make_pair(semi_disjoint_path_one, true);
+                    
                   }
                 }
               }
-              return std::make_pair(std::set<Node>(), false);
-              */
+              not_done = true;
+              std::list<Node> semi_disjoint_path_two;
+              
+              while(not_done) {
+                Neighborhood::const_iterator it = adj[current_node].begin();
+                std::advance(it, 1);
+                Node next_node = *it;
+                if(next_node == last_node) {
+                  next_node = *(adj[current_node].begin()); 
+                }
+                last_node = current_node;
+                current_node = next_node;
+                no.insert(current_node);
+                semi_disjoint_path_two.push_back(current_node);
+                if(get_single_degree(current_node) < 2) {
+                  warn("Trying to find a semidisjoint cycle, and found a node with degree 1: "+std::to_string(current_node)+" this will still work, but may need some unnecessary time.");
+                  not_done = false;
+                } else if(get_single_degree(current_node) > 2) {
+                  not_done = false;
+                } else {
+                  if(current_node == semi_disjoint_path_two.back()) {
+                    // This is not possible.
+                    err("Logic error. Got to source node without returning before.");
+                    return std::make_pair(semi_disjoint_path_two, true);
+                  }
+                }
+              }
+              
+              if(semi_disjoint_path_one.front() == semi_disjoint_path_two.back()) {
+                semi_disjoint_path_two.pop_back();
+                semi_disjoint_path_one.splice(semi_disjoint_path_one.end(), semi_disjoint_path_two);
+                return std::make_pair(semi_disjoint_path_one, true);
+              }
+              
+              
+            }
+            return std::make_pair(std::list<Node>(), false);
           }
           
           bool Graph::has_cycle() {            

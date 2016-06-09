@@ -30,7 +30,7 @@ bool fvs::has_cycle(Graph& g) {
 * @param [in] g The graph.
 * @returns The set of nodes forming the semidisjoint cycle in g and an indicator for the existence.
 */
-pair<set<Node>, bool> fvs::find_semidisjoint_cycle(Graph& g)
+pair<list<Node>, bool> fvs::find_semidisjoint_cycle(Graph& g)
 {
 	return g.find_semidisjoint_cycle();
 }
@@ -394,11 +394,11 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 		// contains a semidisjoint cycle?
 		// Here, we do not the same as the algorithm in the paper: we only put the node with degree >2 into the fvs
 		// and delete all the others. In O notation this is no difference but in practice we safe a tiny bit of time.
-		pair<set<Node>, bool> sdcycle = find_semidisjoint_cycle(g);
+		pair<list<Node>, bool> sdcycle = find_semidisjoint_cycle(g);
 		if (sdcycle.second) {
 			// find max element
 			bool true_cycle = true;
-			for (set<Node>::iterator it = sdcycle.first.begin(); it != sdcycle.first.end(); ++it) {
+			for (list<Node>::iterator it = sdcycle.first.begin(); it != sdcycle.first.end(); ++it) {
 				if (g.get_single_degree(*it) > 2) {
 				
 					weights[*it] = 0; // add to f
@@ -412,7 +412,7 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 				weights[*sdcycle.first.begin()] = 0; // just any of them will do the job
 			}
 			// delete all the others
-			for (set<Node>::iterator it = sdcycle.first.begin(); it != sdcycle.first.end(); ++it) {
+			for (list<Node>::iterator it = sdcycle.first.begin(); it != sdcycle.first.end(); ++it) {
 				if (it == sdcycle.first.begin() && !true_cycle) {
 					g.remove_node(*sdcycle.first.begin());
 				}

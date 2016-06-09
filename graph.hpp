@@ -128,12 +128,15 @@ class Graph {
           * degree at most two. For FVS it is easy to see, that
           * you'll only need to include the vertex with highest degree
           * in such a set. However, this function will return false
-          * if no such cycle exists. Runtime of O(|V|+|E|).
+          * if no such cycle exists. Runtime of O(|V|) if no semi-disjoint
+          * cycle exists.
+          * The front entry in the returned list will be the node with
+          * higher degree, if such a node exists.
           *
           * @returns A pair, where the second entry is true iff there is a semidisjoint cycle in the first entry.
           * 
           */
-          std::pair<std::set<Node>, bool> find_semidisjoint_cycle(); 
+          std::pair<std::list<Node>, bool> find_semidisjoint_cycle(); 
           
           /**
           * @brief Returns whether the graph has a cycle.
