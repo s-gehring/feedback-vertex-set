@@ -444,50 +444,34 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 		cleanup(g);
 	}
 	// shrink the approximation of the fvs set
-	//Graph h(orig);
-	stack<Node> nodes_to_reset;
-	stack<Edge> edges_to_reset;
 	Node u;
-	set<Node>::iterator it_u;
-	Neighborhood neighbours;
 	while (!s.empty()) {
-		Graph h(orig); // # copy whole graph
 		u = s.top();
+		f.erase(u);
 		s.pop();
-		// construct graph to be checked
-		for (set<Node>::iterator it = f.begin(); it != f.end(); ++it) {
-			if (*it != u) {
-				/*
-				// save Node and all its incident edges, to be able to reset it again
-				nodes_to_reset.push(*it);
-				neighbours = h.get_neighbors(*it).first;
-				for (Neighborhood::iterator it1 = neighbours.begin(); it1 != neighbours.end(); ++it1) {
-					edges_to_reset.push(make_pair(*it, *it1));
-				}
-				*/
-				h.remove_node(*it);
-			}
-			else {
-				it_u = it;
-			}
+		// insert u again into the fvs if we have cycles without it
+		if (!is_fvs(orig,f)) {
+			f.insert(u);
 		}
-		// is f without u an fvs in the original g?
-		if (!has_cycle(h)) {
-			f.erase(it_u);
-		}
-		/*
-		// reset graph again
-		while (!nodes_to_reset.empty()) {
-			h.add_node(nodes_to_reset.top());
-			nodes_to_reset.pop();
-		}
-		while (!edges_to_reset.empty()) {
-			h.add_edge(edges_to_reset.top().first, edges_to_reset.top().second);
-			edges_to_reset.pop();
-		}
-		*/
 	}
 	return f;
+}
+
+/**
+*@brief: Checks whether a given set is a feedback vertex set in a given graph.
+*
+* @param[in] g The graph.
+* @param[in] fvs The set to be checked.
+* @returns True, if the given set is a feedback vertex set in g.
+*/
+bool fvs::is_fvs(const Graph& g, const set<Node>& fvs)
+{
+	// copy graph
+	Graph h(g);
+	for (set<Node>::iterator it = fvs.begin(); it != fvs.end(); ++it) {
+		h.remove_node(*it);
+	}
+	return !has_cycle(h);
 }
 
 /**
