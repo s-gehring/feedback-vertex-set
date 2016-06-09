@@ -349,7 +349,7 @@ void fvs::cleanup(Graph& g)
 		}
 		else if (g.get_single_degree(it.first) == 1) {
 			// check the neighbour and his neighbours if they were already processed
-			neighbour = *(it.second.begin());
+			neighbour = *(g.get_neighbors(it.first).first.begin());
 			g.remove_node(it.first);
 			while (g.get_single_degree(neighbour) < 2 && processed.find(neighbour) != processed.end()) {
 				if (g.get_single_degree(neighbour) == 0) {
@@ -389,8 +389,7 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 	cleanup(g);
 	// initialize weights
 	for (const auto &it : g.get_adjacency_list()) {
-		weights[it.first] = g.get_single_degree(it.first) - 1;
-		// maybe there is a faster way to do it but this is reasonable fast due to its degree proportionality
+		weights[it.first] = 1; // weights all need to be the same s.t. nodes with high degree are preferred later
 	}
 	while (g.n > 0) {
 		// contains a semidisjoint cycle?
