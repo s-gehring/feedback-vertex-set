@@ -35,7 +35,8 @@ namespace fvs {
 	Node two_neighbour_node(Graph& g, const set<Node> &u, const set<Node>& v); //Removed second set. Some1 previously forgot that?
 
 	void cleanup(Graph& g);
-	set<Node> two_approx_fvs(Graph& orig);
+	set<Node> two_approx_fvs(const Graph& orig);
+	bool is_fvs(const Graph& g, const set<Node>& fvs);
 
 	pair<set<Node>, bool> compute_fvs(Graph& orig, Graph& g, set<Node>& f, set<Node>& v2, int k); ///< DESCRIPTIVE NAMES PLS
 
