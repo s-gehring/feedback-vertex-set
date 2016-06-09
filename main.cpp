@@ -41,7 +41,7 @@ int main(int argc, char** argv) {
     int min = k/2;
     int max = k;
 
-    // TODO: Do this smarter. This implementation sucks and
+   // TODO: Do this smarter. This implementation sucks and
     // is not what we want. We want to use the approx solution.
     do {        
         k = (min + max) / 2;
@@ -50,7 +50,7 @@ int main(int argc, char** argv) {
         set<Node> x (v1);
         set<Node> y (v2);
         
-        feedback = fvs::compute_fvs(h, g, x, y, k);
+        feedback = fvs::forest_bipartition_fvs(h, g, x, y, k);
         cout << "Finished calculation for k = "<<k<<" [min:"<<min<<"|max:"<<max<<"]"<<endl;
         
         if(feedback.second) {
@@ -70,7 +70,7 @@ int main(int argc, char** argv) {
     // we're not guaranteed a result in currentSolution.
     Graph h(g);
     cout << "Found size of min FVS: "<<min<<", continue to compute min FVS."<<endl;
-    feedback = compute_fvs(h,g,v1,v2,min);
+    feedback = forest_bipartition_fvs(h,g,v1,v2,min);
     
     // TODO: Sanity function.
     
