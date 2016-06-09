@@ -122,7 +122,7 @@ namespace FvsGraph{
                 } else if(get_single_degree(current_node) > 2) {
                   not_done = false;
                 } else {
-                  if(current_node == semi_disjoint_path_one.front()) {
+                  if(current_node == semi_disjoint_path_one.back()) {
                     warn("Found a full disjoint cycle. I don't really believe this.");
                     return std::make_pair(semi_disjoint_path_one, true);
                     
@@ -149,9 +149,10 @@ namespace FvsGraph{
                 } else if(get_single_degree(current_node) > 2) {
                   not_done = false;
                 } else {
-                  if(current_node == semi_disjoint_path_two.back()) {
+                  if(current_node == semi_disjoint_path_two.front()) {
                     // This is not possible.
                     err("Logic error. Got to source node without returning before.");
+                    
                     return std::make_pair(semi_disjoint_path_two, true);
                   }
                 }
@@ -160,6 +161,7 @@ namespace FvsGraph{
               if(semi_disjoint_path_one.front() == semi_disjoint_path_two.back()) {
                 semi_disjoint_path_two.pop_back();
                 semi_disjoint_path_one.splice(semi_disjoint_path_one.end(), semi_disjoint_path_two);
+                debug("Found a disjoint cycle of size "+std::to_string(semi_disjoint_path_one.size())+".");
                 return std::make_pair(semi_disjoint_path_one, true);
               }
               
