@@ -98,9 +98,8 @@ namespace FvsGraph{
               std::list<Node> semi_disjoint_path_one;
               semi_disjoint_path_one.push_back(v.first);
               no.insert(v.first);
-              
-              Node current_node = v.first;
               Node last_node = INVALID_NODE;
+              Node current_node = v.first;
               
               bool not_done = true;
               while(not_done) {
@@ -131,7 +130,8 @@ namespace FvsGraph{
               }
               not_done = true;
               std::list<Node> semi_disjoint_path_two;
-              
+              last_node = INVALID_NODE;
+              current_node = v.first;
               while(not_done) {
                 Neighborhood::const_iterator it = adj[current_node].begin();
                 std::advance(it, 1);
