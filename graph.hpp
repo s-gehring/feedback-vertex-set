@@ -33,7 +33,7 @@ namespace FvsGraph {
 
   typedef std::unordered_set<Node> NodeVector;
   struct compareNeighborhoods {
-      bool operator()(const Neighborhood &u,const Neighborhood &v) {
+      bool operator()(const Neighborhood &u,const Neighborhood &v) const {
         return u.size() < v.size();
       };
     };
@@ -217,7 +217,7 @@ class Graph {
           * @param [in] u The node whose neighborhood to return.
           * @returns A pair whose second entry is true iff the first entry is a neighborhood of u.
           */    
-          std::pair<Neighborhood, bool> get_neighbors(Node u);        
+          std::pair<Neighborhood, bool> get_neighbors(const Node u);        
   
           
           /**
