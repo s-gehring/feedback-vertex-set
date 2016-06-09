@@ -347,10 +347,10 @@ void fvs::cleanup(Graph& g)
 			g.remove_node(it.first);
 		}
 		else if (it.second.size() == 1) {
+			// check the neighbour and his neighbours
 			neighbour = *(it.second.begin());
 			g.remove_node(it.first);
-			// check all the neighbouring nodes we have already checked
-			while (g.get_single_degree(neighbour) < 2 && neighbour < it.first) {
+			while (g.get_single_degree(neighbour) < 2) {
 				if (g.get_single_degree(neighbour) == 0) {
 					g.remove_node(neighbour);
 					neighbour = it.first; // stop checking neighbours
@@ -393,34 +393,19 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 	while (g.n > 0) {
 		// contains a semidisjoint cycle?
 		// Here, we do not the same as the algorithm in the paper: we only put the node with degree >2 into the fvs
-		// and delete all the others. In O notation this is no difference but in practice we safe a tiny bit of time.
 		pair<list<Node>, bool> sdcycle = find_semidisjoint_cycle(g);
 		if (sdcycle.second) {
-			// find max element
-			bool true_cycle = true;
-			for (list<Node>::iterator it = sdcycle.first.begin(); it != sdcycle.first.end(); ++it) {
-				if (g.get_single_degree(*it) > 2) {
-				
-					weights[*it] = 0; // add to f
-					true_cycle = false;
-					sdcycle.first.erase(it);
-					it = sdcycle.first.end(); // stop searching
-					it--;
-				}
+			// take high degree element of semidisjoint cycle, if its a true disjoint cycle any element is fine, thus this will always do the job
+			weights[sdcycle.first.front()] = 0;
+			sdcycle.first.pop_front();
+			// delete all other elements from the graph
+			for (list<Node>::iterator it = sdcycle.first.begin(); it != sdcycle.first.end(); ++it)
+			{
+				g.remove_node(*it);
+				sdcycle.first.erase(it);
 			}
-			if (true_cycle) {
-				weights[*sdcycle.first.begin()] = 0; // just any of them will do the job
-			}
-			// delete all the others
-			for (list<Node>::iterator it = sdcycle.first.begin(); it != sdcycle.first.end(); ++it) {
-				if (it == sdcycle.first.begin() && !true_cycle) {
-					g.remove_node(*sdcycle.first.begin());
-				}
-				else {
-					g.remove_node(*it);
-				}
-			}
-		} else { // is clean and contains no semidisjoint cycle
+		}
+		else { // is clean and contains no semidisjoint cycle
 			double gamma = 0;
 			// find minimum
 			for (const auto &it : g.get_adjacency_list()) {
