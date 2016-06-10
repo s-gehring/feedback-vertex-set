@@ -88,10 +88,7 @@ namespace FvsGraph{
           
           // The DFS algorithms
           std::pair<std::list<Node>, bool> Graph::find_semidisjoint_cycle() {
-            
-            std::set<Node> candidates;
             std::unordered_set<Node> no;
-            
             for(const auto &v : adj) { // v.first == Node, v.second == Neighborhood
               if(no.find(v.first) != no.end()) continue;
               if(get_single_degree(v.first) != 2) continue;
@@ -108,7 +105,6 @@ namespace FvsGraph{
                 if(next_node == last_node) {
                   std::advance(it, 1);
                   next_node = *(it); 
-                  
                 }
                 last_node = current_node;
                 current_node = next_node;
@@ -123,13 +119,14 @@ namespace FvsGraph{
                 } else {
                   if(current_node == semi_disjoint_path_one.back()) {
                     warn("Found a full disjoint cycle. I don't really believe this.");
+					          semi_disjoint_path_one.pop_back();
                     return std::make_pair(semi_disjoint_path_one, true);
-                    
-                  }
+                    }
                 }
               }
               not_done = true;
               std::list<Node> semi_disjoint_path_two;
+			        semi_disjoint_path_two.push_back(v.first);
               last_node = INVALID_NODE;
               current_node = v.first;
               while(not_done) {
@@ -152,7 +149,6 @@ namespace FvsGraph{
                   if(current_node == semi_disjoint_path_two.front()) {
                     // This is not possible.
                     err("Logic error. Got to source node without returning before.");
-                    
                     return std::make_pair(semi_disjoint_path_two, true);
                   }
                 }
@@ -160,12 +156,11 @@ namespace FvsGraph{
               
               if(semi_disjoint_path_one.front() == semi_disjoint_path_two.back()) {
                 semi_disjoint_path_two.pop_back();
+				        semi_disjoint_path_two.pop_front();
                 semi_disjoint_path_one.splice(semi_disjoint_path_one.end(), semi_disjoint_path_two);
                 debug("Found a disjoint cycle of size "+std::to_string(semi_disjoint_path_one.size())+".");
                 return std::make_pair(semi_disjoint_path_one, true);
               }
-              
-              
             }
             return std::make_pair(std::list<Node>(), false);
           }
