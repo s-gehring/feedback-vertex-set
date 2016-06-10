@@ -400,10 +400,19 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 			weights[sdcycle.first.front()] = 0;
 			sdcycle.first.pop_front();
 			// delete all other elements from the graph
-			for (list<Node>::iterator it = sdcycle.first.begin(); it != sdcycle.first.end(); ++it)
+			for (list<Node>::const_iterator it = sdcycle.first.begin(); it != sdcycle.first.end(); ++it)
 			{
+			    /**
+			    ** Don't change the set you're iterating over!
+			    ** You can invoke sdcycle.clear() after this loop
+			    ** terminates, but keep your filthy hands off
+			    ** the list while you're using its iterators!
+			    */
 				g.remove_node(*it);
-				sdcycle.first.erase(it);
+				// <evil>
+    			//	sdcycle.first.erase(it);
+    			// </evil>
+			
 			}
 		}
 		else { // is clean and contains no semidisjoint cycle
