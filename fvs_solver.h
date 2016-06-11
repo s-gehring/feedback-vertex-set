@@ -29,9 +29,9 @@ namespace fvs {
 	void cleanup(Graph& g);
 	set<Node> two_approx_fvs(Graph& orig);
 	bool is_fvs(const Graph& g, const set<Node>& fvs);
-
+	set<Node> set_union(const set<Node> S, const set<Node> T);
 	pair<set<Node>, bool> forest_bipartition_fvs(Graph& orig, Graph& g, set<Node>& f, set<Node>& v2, int k);
-	pair<set<Node>, bool> compression_fvs(const Graph& orig, const set<Node> S);
+	pair<set<Node>, bool> compression_fvs(const Graph& orig, const set<Node>& S);
 	set<Node> compute_min_fvs(const Graph& orig);
 	set<Node> set_minus(const set<Node> S, const set<Node> T);
 
