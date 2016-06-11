@@ -470,6 +470,67 @@ bool fvs::is_fvs(const Graph& g, const set<Node>& fvs)
 }
 
 /**
+*@brief: Tries to decrease the size of a given fvs in a given graph by 1.
+*
+* @param[in] orig The graph.
+* @param[in] S The feedback vertex set which will be compressed.
+* @returns A new fvs with size of the old fvs -1 if it exists, otherwise false.
+*/
+pair<set<Node>, bool> fvs::compression_fvs(const Graph& orig, const set<Node>& S) {
+	Graph g(orig);
+	int k = S.size() - 1;
+	int n = pow(2, S.size() - 1);
+	set<Node> D; // the guessed intersection
+	// get nodes of the graph
+	set<Node> V;
+	for (const auto &it : g.get_adjacency_list()) {
+		V.insert(it.first);
+	}
+	bool current;
+	// convert set S to a vector
+	vector<Node> T;
+	for (set<Node>::iterator it = S.begin(); it != S.end(); ++it) {
+		T.push_back(*it);
+	}
+	pair<set<Node>, bool> result;
+	int h;
+	for (int j = 0; j < n; j++) {
+		// guess intersection using binary coding
+		h = j;
+		for (int l = 0; l < k; l++) {
+			current = h % 2;
+			if (current) {
+				D.insert(T[l]);
+			}
+			h = (h - current) / 2;
+		}
+		set<Node> H = set_minus(S, D);
+		Graph g(orig);
+		for (const auto &it : g.get_adjacency_list()) {
+			if (H.find(it.first) == H.end()) {
+				g.remove_node(it.first);
+			}
+		}
+		if (!has_cycle(g)) {
+			// compute G without D
+			Graph g(orig);
+			for (set<Node>::iterator it = D.begin(); it != D.end(); ++it) {
+				g.remove_node(*it);
+			}
+			result = forest_bipartition_fvs(g,g,set_minus(V,S),set_minus(S,D),k-D.size());
+			if (result.second) {
+				for (set<Node>::iterator it = result.first.begin(); it != result.first.end(); ++it) {
+					D.insert(*it);
+				}
+				return make_pair(D, true);
+			}
+		}
+		D.clear();
+	}
+	return make_pair(S, false);
+}
+
+/**
 *@brief: Computes the difference set of two given sets.
 *
 * @param[in] S The first set.
