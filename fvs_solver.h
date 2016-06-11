@@ -32,6 +32,8 @@ namespace fvs {
 
 	pair<set<Node>, bool> forest_bipartition_fvs(Graph& orig, Graph& g, set<Node>& f, set<Node>& v2, int k);
 	pair<set<Node>, bool> compression_fvs(const Graph& orig, const set<Node> S);
+	set<set<Node>> compute_power_set(const set<Node> S);
+	set<Node> set_minus(const set<Node> S, const set<Node> T);
 
 	void read_graph(Graph& g, const char* filepath);
 	void print_graph(Graph& g);
