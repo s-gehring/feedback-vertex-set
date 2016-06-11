@@ -519,10 +519,7 @@ pair<set<Node>, bool> fvs::compression_fvs(const Graph& orig, const set<Node>& S
 			}
 			result = forest_bipartition_fvs(g,g,set_minus(V,S),set_minus(S,D),k-D.size());
 			if (result.second) {
-				for (set<Node>::iterator it = result.first.begin(); it != result.first.end(); ++it) {
-					D.insert(*it);
-				}
-				return make_pair(D, true);
+				return make_pair(set_union(result.first, D), true);
 			}
 		}
 		D.clear();
@@ -545,6 +542,30 @@ set<Node> fvs::set_minus(const set<Node> S, const set<Node> T) {
 		}
 	}
 	return difference;
+}
+
+/**
+*@brief: Computes the union of two given sets.
+*
+* @param[in] S The first set.
+* @param[in] T The second set.
+* @returns The union of the sets.
+*/
+set<Node> fvs::set_union(const set<Node> S, const set<Node> T) {
+	set<Node> uni;
+	set<Node> smaller_set;
+	if (S.size() <= T.size()) {
+		uni = T;
+		smaller_set = S;
+	}
+	else {
+		uni = S;
+		smaller_set = T;
+	}
+	for (set<Node>::iterator it = smaller_set.begin(); it != smaller_set.end(); ++it) {
+		uni.insert(*it);
+	}
+	return uni;
 }
 
 /**
