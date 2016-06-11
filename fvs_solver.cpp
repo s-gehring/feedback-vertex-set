@@ -470,6 +470,23 @@ bool fvs::is_fvs(const Graph& g, const set<Node>& fvs)
 }
 
 /**
+*@brief: Computes the difference set of two given sets.
+*
+* @param[in] S The first set.
+* @param[in] T The set the will be substracted from the first one.
+* @returns The difference of the sets.
+*/
+set<Node> fvs::set_minus(const set<Node> S, const set<Node> T) {
+	set<Node> difference;
+	for (set<Node>::iterator it = S.begin(); it != S.end(); ++it){
+		if (T.find(*it) == T.end()) {
+			difference.insert(*it);
+		}
+	}
+	return difference;
+}
+
+/**
 * @brief Print g to stdout.
 */
 void fvs::print_graph(Graph& g) {
