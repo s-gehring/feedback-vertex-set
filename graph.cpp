@@ -27,7 +27,7 @@ namespace FvsGraph{
 
           std::string Graph::get_name() {
             char s[80];
-            sprintf(s, "%p", this);
+            sprintf(s, "%p", (void*) this);
             return string(s);
           }
     
@@ -206,27 +206,48 @@ namespace FvsGraph{
               string tmp = "Get_Cycle: Don't use heuristic, because not yet implemente. DFS ";
               
               std::unordered_set<Node> done = std::unordered_set<Node>();
-              std::stack<std::pair<Node, Node> > S;
-              for(AdjacencyList::iterator it = adj.begin(); it != adj.end(); ++it) {
-                if(done.find(it->first) == done.end()) {
-                  S.push(std::make_pair(it->first, INVALID_NODE));
-                  done.insert(it->first); 
+              std::stack<Node> S;
+              std::unordered_map<Node, Node> pre;
+              for(const auto &it : adj) {
+                if(done.find(it.first) == done.end()) {
+                  
+                  S.push(it.first);
+                  pre[it.first] = INVALID_NODE;
+                  done.insert(it.first); 
+                  
                   while(!S.empty()) {
-                    Node v = S.top().first;
-                    Node f = S.top().second;
+                    Node v = S.top();
                     S.pop();
-                    for(Neighborhood::const_iterator neighbor = adj[v].begin(); neighbor != adj[v].end(); ++neighbor) {
-                      Node w = *neighbor;
+                    for(const auto &neighbor : adj[v]) {
+                      Node w = neighbor;
                       if(done.find(w) == done.end()) {
-                        S.push(std::make_pair(w, v));
+                        S.push(w);
+                        pre[w] = v;
                         done.insert(w);
                       } else {
-                        if(w != f) {
-                          S.push(std::make_pair(v,f));
+                        if(w != pre[v]) {
+                          // (v, w) creates a cycle.
+                          // The cycle lies in v, pre[v], pre[pre[v]], ... pre[...pre[v]...]=w
+                          
                           std::list<Node> x;
-                          while(!S.empty()) {
-                            x.push_back(S.top().first);
-                            S.pop();
+                          bool not_done = true;
+                          while(not_done) {
+                            if(pre.find(v) == pre.end()) {
+                              err("Found a cycle, but can't follow back to original node.");
+                              return std::pair<std::list<Node>, bool>(std::list<Node>(), true);
+                            }
+                            v = pre[v];
+                            if(v == INVALID_NODE) {
+                              err("Found a cycle, but can't follow back to original node. Found invalid node."); 
+                              return std::pair<std::list<Node>, bool>(std::list<Node>(), true);
+                            }
+                            if(v == w) {
+                               note("Found a cycle, and found its origin. Returning cycle.");
+                               x.push_back(w);
+                               not_done = false;
+                               return std::pair<std::list<Node>, bool>(x, true);
+                            }
+                            x.push_back(v);
                           }
                           note(tmp+"found a cycle.");
                           return std::pair<std::list<Node>, bool>(x, true);
@@ -234,7 +255,7 @@ namespace FvsGraph{
                       }
                     }
                   }
-                }
+                } // else { Node has already been found. }
               }
             
               note(tmp+"found no cycle.");

@@ -1,7 +1,7 @@
 all:
 	clear
 	clear
-	g++ graph.cpp debugger.cpp fvs_solver.cpp main.cpp -I ./ -g -Og -Wall -Werror -std=c++11 2>err.log -o prog && ./prog 2>err.log || nano err.log
+	g++ graph.cpp debugger.cpp fvs_solver.cpp main.cpp -I ./ -g -Og -Wpedantic -Wall -Werror -std=c++11 2>err.log -o prog && ./prog 2>err.log || nano err.log
 	
 clean:
 	rm prog

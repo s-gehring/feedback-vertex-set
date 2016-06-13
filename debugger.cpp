@@ -22,7 +22,7 @@ Debugger* Debugger::get_instance(string filename, level l) {
     instances.insert(make_pair(filename, d));
   }
   return instances[filename];  
-};
+}
 
 Debugger* Debugger::get_instance(string filename) {
   return get_instance(filename, DEFAULT_LEVEL); 
@@ -44,7 +44,7 @@ void Debugger::log(string s, level l){
     strftime(tmp, 80, "%d.%m.%Y %T", ti);
     output << "[" << tmp << "][" << pre <<"]: "<<s<<endl;
   }
-};
+}
 
 /*int main() {
   Debugger* x = Debugger::get_instance("./file.log", Debugger::ALL);
