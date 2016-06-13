@@ -41,7 +41,6 @@ namespace fvs {
 	void induced_subgraph(Graph& s, Graph& g, const set<Node>& u);
 	
 	enum direction_tag { forward, inverse };
-	void maintain_integrity(Graph& g, set<Node>& u, Node aDeletedNode, direction_tag dt = forward);
 }
 
 #endif /* FVS_SOLVER_H */

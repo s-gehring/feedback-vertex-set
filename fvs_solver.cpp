@@ -156,27 +156,6 @@ void fvs::induced_subgraph(Graph &s, Graph& g, const set<Node>& u) {
 	}
 }
 
-/**
-* @brief Maintains integrity in the node set, s.t. the nodes remain correct references when another node is deleted.
-*
-* This method move all references of nodes in u, s.t. those references will still be correct, when `aDeletedNode` is
-* deleted. The function assumes, that `u` does not contain `aDeletedNode`.
-*
-* References are updated in the same way that bgl uses when removing a vertex, all indices greater than `aDeletedNode`
-* will be decremented by one.
-*
-* The direction_tag denotes wether this operation is performed upon deletion of a node (direction_tag::forward), or if
-* the indices should be recomputed (when going up the recursion tree).
-*
-* @param [in] g A graph. (Might not be necessary).
-* @param [in, out] u A set of nodes. It will be updated.
-* @param [in] aDeletedNode The node that will be deleted soon.
-* @param [in] dt A direction_tag, defaults to forward.
-*/
-void fvs::maintain_integrity(Graph& g, set<Node>& u, Node aDeletedNode, direction_tag dt) {
-    return; // Obsolete
-}
-
 
 /**
 * @brief Computes a feedback vertex set.
@@ -281,9 +260,6 @@ pair<set<Node>, bool> fvs::forest_bipartition_fvs(Graph& orig, Graph& g, set<Nod
 	return make_pair(fvs, false);
 }
 
-pair<string, string> explode(string s) {
-  return make_pair("", "");
-}
 
 /**
 * @brief Reads in a graph from a standard text format.
