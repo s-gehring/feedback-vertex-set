@@ -22,8 +22,9 @@
 
 #define INVALID_NODE -1
 
-
+#ifdef __DEBUG
 #include "debugger.hpp"
+#endif
 
 namespace FvsGraph {
   typedef int Node;
@@ -321,22 +322,32 @@ class Graph {
       private:
           AdjacencyList adj;
           Sizes sizes;
+          #ifdef __DEBUG
           Debugger* d;
+          #endif
         
-          void note(string s) {
+          void note(std::string s) {
+            #ifdef __DEBUG
             d->log("[Graph "+get_name() + "]: "+s, Debugger::NOTE); 
+            #endif
           }
           
-          void warn(string s) {
+          void warn(std::string s) {
+            #ifdef __DEBUG
             d->log("[Graph "+get_name() + "]: "+s, Debugger::WARNING); 
+            #endif
           }
     
-          void err(string s) {
+          void err(std::string s) {
+            #ifdef __DEBUG
             d->log("[Graph "+get_name() + "]: "+s, Debugger::ERROR); 
+            #endif
           }
     
-          void debug(string s) {
+          void debug(std::string s) {
+            #ifdef __DEBUG
             d->log("[Graph "+get_name() + "]: "+s, Debugger::DEBUG); 
+            #endif
           }
   
 };

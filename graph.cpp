@@ -28,13 +28,16 @@ namespace FvsGraph{
           std::string Graph::get_name() {
             char s[80];
             sprintf(s, "%p", (void*) this);
-            return string(s);
+            return std::string(s);
           }
     
           Graph::Graph() {
+            #ifdef __DEBUG
             d = Debugger::get_instance("logs/graph.log", Debugger::ALL);
-            n = m;
             d->log("Created graph with pointer " + get_name() + ".", Debugger::DEBUG);
+            #endif
+            n = m;
+            
           }
   
           int Graph::delete_low_degree_nodes() {
@@ -65,7 +68,7 @@ namespace FvsGraph{
           
           void Graph::clear_node(const Node v) {
             std::set<Node> targets;
-            string tmp = "Clearing node "+std::to_string(v)+ ": ";
+            std::string tmp = "Clearing node "+std::to_string(v)+ ": ";
             if(!has_node(v)) {
               warn(tmp+ "Node doesn't exist."); 
             } else {
@@ -167,10 +170,10 @@ namespace FvsGraph{
           
           bool Graph::has_cycle() {            
               if(m >= n) {
-                note("Has_Cycle: Use heuristic: There is a cycle, because m [="+to_string(m)+"] >= n [="+to_string(n)+"]");
+                note("Has_Cycle: Use heuristic: There is a cycle, because m [="+std::to_string(m)+"] >= n [="+std::to_string(n)+"]");
                 return true;
               }
-              string tmp = "Has_Cycle: Don't use heuristic, because m [="+to_string(m)+"] < n [="+to_string(n)+"]: DFS ";
+              std::string tmp = "Has_Cycle: Don't use heuristic, because m [="+std::to_string(m)+"] < n [="+std::to_string(n)+"]: DFS ";
               
               std::unordered_set<Node> done = std::unordered_set<Node>();
               std::stack<std::pair<Node, Node> > S;
@@ -203,7 +206,7 @@ namespace FvsGraph{
           
           std::pair<std::list<Node>, bool> Graph::get_cycle() {
               //if(m < n) return std::pair<std::list<Node>, bool>(std::list<Node>(), false);
-              string tmp = "Get_Cycle: Don't use heuristic, because not yet implemente. DFS ";
+              std::string tmp = "Get_Cycle: Don't use heuristic, because not yet implemente. DFS ";
               
               std::unordered_set<Node> done = std::unordered_set<Node>();
               std::stack<Node> S;
@@ -263,8 +266,8 @@ namespace FvsGraph{
           }
           
           std::pair<Edge, bool> Graph::get_bridge() {
-              return make_pair(make_pair(INVALID_NODE, INVALID_NODE), false);/*
-              string tmp = "Get Bridge: Don't use heuristic, because not yet implemente. DFS ";
+              return std::make_pair(std::make_pair(INVALID_NODE, INVALID_NODE), false);/*
+              std::string tmp = "Get Bridge: Don't use heuristic, because not yet implemente. DFS ";
               std::unordered_set<Node> done = std::unordered_set<Node>();
               std::stack<std::pair<Node, Node> > S;
               for(AdjacencyList::iterator it = adj.begin(); it != adj.end(); ++it) {

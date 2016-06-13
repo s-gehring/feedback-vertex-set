@@ -1,5 +1,6 @@
-
+#ifdef __DEBUG
 #include "debugger.hpp"
+
 #include <string>
 
 using namespace std;
@@ -51,3 +52,4 @@ void Debugger::log(string s, level l){
   cout << Debugger::ALL << endl;
   x->log("adsjfklasd", Debugger::NOTE);
 }*/
+#endif
