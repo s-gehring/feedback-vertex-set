@@ -38,7 +38,6 @@ namespace FvsGraph {
         return u.size() < v.size();
       };
     };
-  typedef std::multiset<Neighborhood, compareNeighborhoods> Sizes;  
 class Graph {
       
       
@@ -105,6 +104,7 @@ class Graph {
           *
           * Returns the existance of an edge in time O(1).
           *
+          Sizes sizes;
           * @param [in] u The source node of the edge.
           * @param [in] v The target node of the edge.
           * @returns True iff (u,v) exists in the graph.
@@ -321,7 +321,6 @@ class Graph {
 
       private:
           AdjacencyList adj;
-          Sizes sizes;
           #ifdef __DEBUG
           Debugger* d;
           #endif

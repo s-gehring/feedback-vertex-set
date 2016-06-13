@@ -333,7 +333,6 @@ namespace FvsGraph{
               return false;
             }
             adj[u] = Neighborhood();
-            sizes.insert(adj[u]);
             ++n;
             debug("Added note "+std::to_string(u));
             return true;
@@ -354,7 +353,6 @@ namespace FvsGraph{
               warn("Removing node, which doesn't exist: Node("+std::to_string(u)+").");
               return false;
             }
-            sizes.erase(adj[u]);
             
             // Fuck. Go to each neighbor and inform him about the change.
             std::set<Edge> to_remove;
@@ -394,15 +392,7 @@ namespace FvsGraph{
                 
                 
             }
-            // Now repair sizes.
-            Sizes::iterator found;
-            for(std::unordered_set<Node>::const_iterator it = s.begin(); it != s.end(); ++it) {
-                found = sizes.find(adj[*it]);
-                if(found != sizes.end()) {
-                    sizes.erase(found);
-                }
-                sizes.insert(adj[*it]);
-            }
+            
           }
           
           bool Graph::add_edge(const Node u, const Node v) {
@@ -417,8 +407,6 @@ namespace FvsGraph{
                 add_node(u);// +1
                 add_node(v);// +1
 
-                sizes.erase(adj[u]);
-                sizes.erase(adj[v]);
 
                 adj[u].insert(v);
                 adj[v].insert(u);
@@ -426,8 +414,6 @@ namespace FvsGraph{
                 ++m;
 
 
-                sizes.insert(adj[u]);
-                sizes.insert(adj[v]);
                 return true;
               } else {
                 warn("Trying to add existant edge. Edge in question: ("+std::to_string(u)+"|"+std::to_string(v)+").");
@@ -437,9 +423,7 @@ namespace FvsGraph{
           
           void Graph::clear() {
             adj.clear();
-            sizes.clear();
             n = m = 0;
-            sizes.clear();
             note("Clearing Graph.");
           }
             
@@ -451,8 +435,6 @@ namespace FvsGraph{
               if(!has_edge(e)) continue;
               Node u = e.first;
               Node v = e.second;
-              if(sizes.find(adj[u]) != sizes.end()) sizes.erase(adj[u]);
-              if(sizes.find(adj[v]) != sizes.end()) sizes.erase(adj[v]);
               
               adj[u].erase(v);
               adj[v].erase(u);
@@ -460,9 +442,7 @@ namespace FvsGraph{
               to_update.insert(v);
               --m;
             }
-            for(const auto &v : to_update) {
-              sizes.insert(adj[v]);
-            }
+            
           }
     
           bool Graph::remove_edge(const Node u, const Node v) {
@@ -475,16 +455,12 @@ namespace FvsGraph{
               return false;
             }
             
-            sizes.erase(adj[u]);
-            sizes.erase(adj[v]);
             
             adj[u].erase(v);
             adj[v].erase(u);
             
             --m;
             
-            sizes.insert(adj[u]);
-            sizes.insert(adj[v]);
             return true;
           }
 

@@ -14,6 +14,6 @@ fast:
 gprof:
 	clear
 	clear
-	g++ graph.cpp debugger.cpp fvs_solver.cpp main.cpp -I ./ -Ofast -pg -Wall -Werror -std=c++11 2>err.log || nano err.log
+	g++ graph.cpp debugger.cpp fvs_solver.cpp main.cpp -I ./ -Ofast -pg -Wall -Werror -std=c++11 -o prog 2>err.log || nano err.log
 
 
