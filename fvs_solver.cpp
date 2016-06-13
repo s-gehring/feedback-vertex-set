@@ -517,7 +517,15 @@ pair<set<Node>, bool> fvs::compression_fvs(const Graph& orig, const set<Node>& S
 			for (set<Node>::iterator it = D.begin(); it != D.end(); ++it) {
 				g.remove_node(*it);
 			}
-			result = forest_bipartition_fvs(g,g,set_minus(V,S),set_minus(S,D),k-D.size());
+			// Invalid Initialization of non-const reference of type set.
+			// This is why we have to save the two set_minus :/
+			// However, I just called these sets v1 and v2, this is
+			// an arbritrary choice I made and these names
+			// don't correspond to any meaning of any paper.
+			set<Node> v1 = set_minus(V, S);
+			set<Node> v2 = set_minus(S, D);
+			
+			result = forest_bipartition_fvs(g,g,v1,v2,k-D.size());
 			if (result.second) {
 				return make_pair(set_union(result.first, D), true);
 			}

@@ -12,15 +12,6 @@ int main(int argc, char** argv) {
     }
     Graph g;
     read_graph(g, filepath);
-    g.clear();
-    
-    g.add_edge(1,2);
-    g.add_edge(2,3);
-    g.add_edge(1,3);
-    g.add_edge(4,5);
-    g.add_edge(5,6);
-    g.add_edge(4,6);
-    g.add_edge(1,5);
     
     
     
@@ -44,8 +35,6 @@ int main(int argc, char** argv) {
     cout << "Total size: "<<v1.size()<<endl;
     cout << (0.5*v1.size()) << " <= MinFVS <= "<< v1.size() <<endl;
     int k = v1.size();
-  //  int n = num_vertices(g);
-//    int m = num_edges(g);
     
 
     int min = k/2;
@@ -82,14 +71,24 @@ int main(int argc, char** argv) {
     cout << "Found size of min FVS: "<<min<<", continue to compute min FVS."<<endl;
     feedback = forest_bipartition_fvs(h,g,v1,v2,min);
     
-    // Sanity function
-    if(is_fvs(g, feedback.first)) {
-        cout << "Is a FVS." << endl;
-    } else {
-        cout << "Is not a FVS." << endl;   
-    }
     
-    cout << "Feedback Vertex Set: " << (feedback.second ? "Found" : "Not found!") << endl;
+    cout << "Algorithm claims, that he " << (feedback.second ? "found" : "didn't find") << " a feedback vertex set." << endl;
+    cout << "However, the sanity function tells us that ";
+    if(is_fvs(g, feedback.first)) {
+        cout << "it did indeed find a FVS." << endl;
+    } else {
+        cout << "it didn't find a FVS, because there exists a cycle: ";   
+        for(const auto &it : feedback.first) {
+            h.remove_node(it);
+        }
+        list<Node> cycle = h.get_cycle().first;
+        cout << "{";
+        for(const auto &it : cycle) {
+            cout << to_string(it)<< "; ";
+        }
+        cout << "}"<<endl;
+    }
+        cout <<endl << "FVS in question: "<<endl;
     for (const auto& i : feedback.first) {
         cout << i << ", ";
     }
