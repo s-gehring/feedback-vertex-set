@@ -14,19 +14,67 @@ int main(int argc, char** argv) {
     read_graph(g, filepath);
     
     
+  
+    /*
+    **  Test whether the graph has been read correctly.
+    */ 
     
     print_graph(g);
     
+    /*
+    **  Output all articulation vertices and bridges.
+    **  Note, that I defined that
+    **  "And element is an articulation element iff
+    **  it is an articulation node or a bridge."
+    **
+    **  Basically something we can cut the graph at
+    **  to simplify computation (hopefully by
+    **  an exponential factor).
+    */
+    pair<list<Node>, list<Edge> > master_of_arts = g.get_articulation_elements();
     
-    std::pair<set<Node>, bool> feedback;
+  
+    /*
+    **  Output all artiulcation elements.
+    */
+    cout << "Articulation Vertices:"<<endl <<"{";
+    bool first_out = true;
+    for(const auto &it : master_of_arts.first) {
+      if(first_out) {
+        first_out = false;
+        cout << it;
+      } else {
+        cout << ", " << it;
+      }
+    }
+    cout << "}" << endl <<endl;
+    
+    cout << "Bridges:"<<endl <<"{";
+    first_out = true;
+    for(const auto &it : master_of_arts.second) {
+      if(first_out) {
+        first_out = false;
+        cout << "("<<it.first<< ","<<it.second<<")";
+      } else {
+        cout << ", ("<<it.first<< ","<<it.second<<")";
+      }
+    }
+    cout <<"}" <<endl <<endl;
+    /*
+    **  Do the two approximation, store 
+    **  the forest decomposition in v1, v2.
+    */
     
     set<Node> v1, v2;
-
     v1 = two_approx_fvs(g);
-
     for(const auto &it : g.get_adjacency_list()) {
+        // Fill v2
         if(v1.find(it.first)==v1.end()) v2.insert(it.first);
     }
+  
+    /*
+    **  Print out the approximate solution. With some stats.
+    */
     cout << "Found approx. solution: "<<endl;
     for(const auto& i : v1) {
         cout << i << ", ";
@@ -34,17 +82,19 @@ int main(int argc, char** argv) {
     cout << endl;
     cout << "Total size: "<<v1.size()<<endl;
     cout << (0.5*v1.size()) << " <= MinFVS <= "<< v1.size() <<endl;
-    int k = v1.size();
     
-
+    /*
+    **  Binary search the minimal k in a range
+    **  from 'size of approx solution * 0.5' to 'size of approx solution * 1.0'.
+    **  TODO: This is the wrong way to do this.
+    */ 
+    int k = v1.size();
     int min = k/2;
     int max = k;
-
-   // TODO: Do this smarter. This implementation sucks and
-    // is not what we want. We want to use the approx solution.
+    std::pair<set<Node>, bool> feedback;
     do {        
         k = (min + max) / 2;
-        // Copy like hell!
+        // TODO: Not copy!
         Graph h(g);
         set<Node> x (v1);
         set<Node> y (v2);
