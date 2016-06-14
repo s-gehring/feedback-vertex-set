@@ -75,7 +75,7 @@ int get_random_value(int max){
  
 //uint64_t** create_Y(mat M, vec *random_values, int max_random_value){
 uint64_t** create_Y(Galois gal, uint64_t **M, int row, int col, uint64_t *random_values){
-
+	
 	//create a new row x row matrix (will be Y, the result)
 	uint64_t** result_matrix= new uint64_t*[row];
 	for (int i=0; i<row; i++){
@@ -138,7 +138,7 @@ uint64_t** create_Y_naive(Galois gal, uint64_t **M, int row, int col, uint64_t *
 		while (random_values[i/2] == 0 ) {
 			random_values[i/2] = gal.uniform_random_element(); // if no specific random_value vector is handed, a new random value is assigned (!=0)
 		}
-		//random_values[i/2] = (uint64_t) 1;
+		random_values[i/2] = (uint64_t) 1;
 		cout << "Random value ist " << gal.to_string(random_values[i/2]) << endl;	//if something goes wrong, you can see the random value on the console
 
 		uint64_t* b = new uint64_t[row];
@@ -175,107 +175,45 @@ uint64_t** create_Y_naive(Galois gal, uint64_t **M, int row, int col, uint64_t *
 	return result_matrix;
 }
 
-/*
- * returns a size-1 dimensional vector (0,1,...,i-1,i+1,..size)
- */
- /*
-Col<uword> every_column_except(int col, int size){//vector muss <uword> sein, um in funktion Y.cols(hilfsvec) eingesetzt werden zu können
-	Col<uword> vector(size-1);
-	int counter = 0;
-	for (int i = 0; i < size; i++ ){
-		if ( i != col){
-		  	vector(counter) = i;
-		  	counter++;
-		}
+int* simple_parity(Galois gal, uint64_t** M, int row, int col){
+	Gauss gauss;
+	uint64_t* random_values = new uint64_t[col/2]; 		//stores the randomvalues x_i, created in create_Y (needed later on) 
+	for (int i = 0; i < col/2; i++){
+		random_values[i] = 0;
 	}
-	return vector;
-}
-
-
-mat delete_column(int col, mat matrix){
-	Col<uword> vector = every_column_except(col, matrix.n_cols);
-	return matrix.cols(vector);
-}
-
-
-/*
- * return the vector of indices, which, if we delete all the columns indices with the return indices, is still of full rank
- * therefor it goes through all columns, checks if we can delete this column without decreasing the rank
- */
- /*
-Col<uword> find_max_submatrix(mat Y){
-	int counter = 0; //counter for the amount of deleted columns
-	int rank_Y = arma::rank(Y);
-
-	Col<uword> deleted_cols(Y.n_cols - rank_Y);
-	int pos = 0;
-	int columns = Y.n_cols;
-	for(int i = 0; i < columns; i++){
-		
-		mat help = delete_column(i-counter, Y);
-	
-		if (arma::rank(help) == rank_Y){
-			//we can delete column i without loosing rank
-			//store this information
-			deleted_cols(pos) = i;  
-			pos++;
-			//update the Matrix
-			Y = help;
-			counter++;  //store the information, that we deleted a column (so the next col to check is (i-counter))
-		}
-
-		//otherwise if the rank differs, we do nothing and check the next column
-
-	}
-	return deleted_cols;
-
-}
-
-
-/*
- * input is a vector of indices 
- * outputs a vector of all indices ascending from 0 to size-1 without those in vec_not
- */
- /*
-Col<uword> all_except(Col<uword> vec_not, int size){
-	Col<uword> vec_result(size-vec_not.n_elem);
-	int pos = 0;			//to count up the vec_not vector (the forbidden indices in vec_not are ascending)
-	int counter = 0;		//to count up the vec_result vector
-
-	for (int i = 0; i < size ; i++){
-		
-		if ((vec_not.n_elem > pos) && (vec_not(pos) == i)){   //the first condition takes care of the problem, that after the last forbidden index, pos is still increased
-			//i is skipped, increase pos to the next forbidden index
-			pos++;
-		}
-		else{
-			//index i is not forbidden, write it to the result-vertex
-			vec_result(counter) = i;
-			counter++;
-		}
-	}
-	return vec_result;
-}
-/*
- * The main algorithm 4.1 with handeliing of no parity-basis (section 6.5)
- */
-
- /*
-std::vector<int> simple_parity(mat M, int max_random_value){
-	vec random_values(M.n_cols/2, fill::zeros); 		//stores the randomvalues x_i, created in create_Y (needed later on) 
 	int counter = 0;			   						//for positioning vector_parity 
 
 	cout<<"Algorithm start"<< endl;
-	mat Y = create_Y(M, &random_values, max_random_value);
 
-	M.print("Startmatrix M :");
-	Y.print("Computed Y :");
 
-	int rank_Y = arma::rank(Y);
+	uint64_t** Y = create_Y( gal, M, row, col, random_values);
+
+	cout << "Startmatrix M :"<<endl;
+	print_matrix(gal,row, col, M);
+	cout << "Computed Y :" << endl;
+	print_matrix(gal, row, row, Y);
+
+	uint64_t det = gauss.determinant(gal, row, Y);	
+	//int rank_Y = rank(Y);
 	
-	if (rank_Y != Y.n_cols) {
+	if (det == 0) {
 		cout << endl << endl << "THERE IS NO PARITY BASIS" << endl << "Searching for max rank submatrix of Y" << endl;
+
+
+
+
+
+		//STILL TO BE IMPLEMENTED (Section 6.5 in paper)
 		
+
+
+
+
+
+
+
+
+		/*
 		Col<uword> deleted_cols = find_max_submatrix(Y);   //all columns that can be deleted (and still remain full-rank)
 	
 		deleted_cols = all_except(deleted_cols, Y.n_cols); //all columns that can stay (and still remain full-rank)
@@ -283,31 +221,61 @@ std::vector<int> simple_parity(mat M, int max_random_value){
 		M = M.rows(deleted_cols);
 
 		M.print("Reduced M (and new instance for parity-basis-algo with less rows):");
+		*/
 	}
 
-	Y = create_Y(M, &random_values, max_random_value);
+	Y = create_Y( gal, M, row, col, random_values);
 
-	//vec parity_basis(M.n_rows, fill::zeros);		    //in here we will store the indices of the columns that built the parity basis
-	std::vector<int>parity_basis(M.n_rows,0);
+	int* parity_basis = new int[row];		    //in here we will store the indices of the columns that built the parity basis
+	for (int i = 0; i < row; i++){
+		parity_basis[i] = 0;
+	}
 
-	for(int i = 0; i < M.n_cols; i = i+2){
+	for(int i = 0; i < col; i = i+2){
 
-		mat Y_prime = Y - random_values(i/2) *  (M.col(i) * M.col(i+1).t() - M.col(i+1)* M.col(i).t() );
+		//mat Y_prime = Y - random_values(i/2) *  (M.col(i) * M.col(i+1).t() - M.col(i+1)* M.col(i).t() );
 
-		if (arma::rank(Y_prime) == Y_prime.n_cols){ //if det(Y_prime) != 0
+
+
+		uint64_t** Y_prime= new uint64_t*[row];
+		for (int i=0; i<row; i++){
+    		Y_prime[i]= new uint64_t[row];
+		}
+ 	
+		
+		
+		for(int row_index = 0 ; row_index < row; row_index++){		//row ist die dimension von Y (Y is row x row matrix, want to update Y)
+			for (int col_index = 0; col_index < row ; col_index++){
+				//want to add x_i (M[][i] ^ M[][i+1]) to Y
+				Y_prime[row_index][col_index] =gal.add(Y[row_index][col_index], gal.multiply(random_values[i/2], gal.add(gal.multiply(M[row_index][i], M[col_index][i+1]), gal.multiply(M[row_index][i+1], M[col_index][i] ) )  ));
+			}
+		}
+
+		uint64_t det_y_prime = gauss.determinant(gal, row, Y_prime);
+		//jetzt ist y_prime aber kaputt, neu berechnen
+
+		for(int row_index = 0 ; row_index < row; row_index++){		//row ist die dimension von Y (Y is row x row matrix, want to update Y)
+			for (int col_index = 0; col_index < row ; col_index++){
+				//want to add x_i (M[][i] ^ M[][i+1]) to Y
+				Y_prime[row_index][col_index] =gal.add(Y[row_index][col_index], gal.multiply(random_values[i/2], gal.add(gal.multiply(M[row_index][i], M[col_index][i+1]), gal.multiply(M[row_index][i+1], M[col_index][i] ) )  ));
+			}
+		}
+
+
+		if (det_y_prime != 0){ //if det(Y_prime) != 0
+			
 			Y = Y_prime;
 		}
 		else{
-			//parity_basis(counter) = i;
-			//parity_basis(counter+1) = i+1;
-			parity_basis[counter]=i;
-			parity_basis[counter+1]=i+1;
+			
+			parity_basis[counter] = i;
+			parity_basis[counter+1] = i+1;
 			counter = counter + 2;
 		}
 	}
 	return parity_basis;
 }
-*/
+
 
 uint64_t** wedge_product(Galois gal, uint64_t *b, uint64_t *c, int size){
 	//construct a size x size matrix
@@ -389,9 +357,7 @@ void print_vector(Galois g, int size, uint64_t* vector)
   for (int i = 0; i < size; i++){
   	
   		cout << g.to_string(vector[i]) << endl;
-  	
-  	
-    
+ 
   }
   
 }
@@ -409,59 +375,6 @@ void print_vector_normal(int size, int* vector)
   
 }
 
-int linear_dependent(Galois gal, uint64_t** matrix, int size, int* coef){
-	bool all_zero = true;
-	for (int i = 0; i < size; i++){
-		//check if linear combination in i-th row is 0 or not
-		uint64_t help = (uint64_t) 0;
-		for (int j = 0; j < size; j++){
-			if (coef[j] ==1) help = gal.add(help, matrix[i][j]);
-		}
-		if (help != 0){
-			cout << "reject because row " << i << " sums up to " << gal.to_string(help) << endl;
-		 	return 0;
-		}
-		else help = (uint64_t) 0;
-	}
-	return 1;
-}
-
-int mat_lin_dep(Galois gal, uint64_t** matrix, int size){
-	int* coef = new int[size];
-	for (int i = 0; i < size; i++){
-		coef[i] = 0;
-	}
-	coef[0] = 1;
-	bool check = true;
-
-	cout<<"zu checkende matrix" << endl;
-	print_matrix(gal, size, size,  matrix);
-
-	while (check){
-		cout << "check with coef " ;
-		print_vector_normal(size, coef);
-		if (linear_dependent(gal, matrix, size, coef) == 1) {
-			print_vector_normal(size,coef);
-			return 1;
-		}
-		//hochzählen
-		for (int j = 0; j< size; j++){
-			if (coef[j] != 1) {
-				coef[j] ++;
-				break;
-			}
-			else {
-				coef[j] = 0;
-			}
-			if (j == size-1) check = false;
-		}
-
-
-	}
-
-	return 0;
-
-}
 
 
 int main(){
@@ -507,6 +420,7 @@ int main(){
     	for(int j=0; j<col; j++){
         	
         	matrix[i][j]= gal.uniform_random_element();
+        	
  			
     	}
 	}
@@ -568,9 +482,9 @@ int main(){
 
 	//cout << "det ist hier " << gal.to_string(test) << endl << endl;
 
-
+/*
 	uint64_t* vector = new uint64_t[col/2];
-
+	cout << "row ist " << row << "und col ist " <<col << endl;
 	uint64_t** Y = create_Y( gal, matrix, row, col, vector);
 	cout << "Y = " << endl;
 	print_matrix(gal, row, row , Y);
@@ -578,6 +492,14 @@ int main(){
 	uint64_t det = gauss.determinant(gal, row, Y);
 
 	cout << "Det ist " << gal.to_string(det);
+*/	
+	
+	int* result = simple_parity(gal, matrix, row, col);
+
+	cout << "ENDERGEBNIS " << endl;
+	print_vector_normal(row, result);
+
+
 /*
 	uint64_t zahl1 = gal.uniform_random_element();
   	uint64_t zahl2 = gal.uniform_random_element();
