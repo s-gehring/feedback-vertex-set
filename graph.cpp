@@ -316,15 +316,16 @@ namespace FvsGraph{
               warn("lowest_deg_node called with an empty set. Returning invalid node (-1).");
             }
             // Iterate over candidates
-            size_t max = 0;
-            Node maxCan = INVALID_NODE;
+            Node minCan = *(candidates.begin());
+            size_t min = adj[minCan].size();
+            
             for(const auto& it : candidates) {
-                if(adj[it].size() > max) {
-                    max = adj[it].size();
-                    maxCan = it;
+                if(adj[it].size() < min) {
+                    min = adj[it].size();
+                    minCan = it;
                 }
             }
-            return maxCan;
+            return minCan;
           }
           
           bool Graph::add_node(const Node u) { // O(1)
