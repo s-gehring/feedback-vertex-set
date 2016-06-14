@@ -4,6 +4,7 @@
 
 using namespace fvs;
 using namespace FvsGraph;
+#define MAX_OUTPUT_ARTICULATION 40
 
 int main(int argc, char** argv) {
     const char* filepath = "graphs/mini_graph.txt";
@@ -24,14 +25,14 @@ int main(int argc, char** argv) {
     /*
     **  Output all articulation vertices and bridges.
     **  Note, that I defined that
-    **  "And element is an articulation element iff
+    **  "An element is an articulation element iff
     **  it is an articulation node or a bridge."
     **
     **  Basically something we can cut the graph at
     **  to simplify computation (hopefully by
     **  an exponential factor).
     */
-    pair<list<Node>, list<Edge> > master_of_arts = g.get_articulation_elements();
+    pair<unordered_set<Node>, unordered_set<Edge> > master_of_arts = g.get_articulation_elements();
     
   
     /*
@@ -39,7 +40,9 @@ int main(int argc, char** argv) {
     */
     cout << "Articulation Vertices:"<<endl <<"{";
     bool first_out = true;
+    int max_output = MAX_OUTPUT_ARTICULATION;
     for(const auto &it : master_of_arts.first) {
+      if(--max_output == 0) { cout << "...["<<master_of_arts.first.size()-MAX_OUTPUT_ARTICULATION<<" more]"; break; }
       if(first_out) {
         first_out = false;
         cout << it;
@@ -51,7 +54,9 @@ int main(int argc, char** argv) {
     
     cout << "Bridges:"<<endl <<"{";
     first_out = true;
+    max_output = MAX_OUTPUT_ARTICULATION;
     for(const auto &it : master_of_arts.second) {
+      if(--max_output == 0) { cout << "...["<<master_of_arts.second.size()-MAX_OUTPUT_ARTICULATION<<" more]"; break; }
       if(first_out) {
         first_out = false;
         cout << "("<<it.first<< ","<<it.second<<")";

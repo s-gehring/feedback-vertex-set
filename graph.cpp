@@ -40,6 +40,10 @@ namespace FvsGraph{
             
           }
   
+          std::unordered_set<Node> Graph::get_low_degree_nodes() const {
+            return low_deg_nodes;
+          }
+  
           int Graph::delete_low_degree_nodes() {
             bool changes_occur = true;
             int changes = 0;
@@ -97,14 +101,14 @@ namespace FvsGraph{
           // The DFS algorithms
           std::pair<std::list<Node>, bool> Graph::find_semidisjoint_cycle() const {
             std::unordered_set<Node> no;
-            for(const auto &v : adj) { // v.first == Node, v.second == Neighborhood
-              if(no.find(v.first) != no.end()) continue;
-              if(get_single_degree(v.first) != 2) continue;
+            for(const auto &v : low_deg_nodes) { 
+              if(no.find(v) != no.end()) continue;
+              if(get_single_degree(v) != 2) continue;
               std::list<Node> semi_disjoint_path_one;
-              semi_disjoint_path_one.push_back(v.first);
-              no.insert(v.first);
+              semi_disjoint_path_one.push_back(v);
+              no.insert(v);
               Node last_node = INVALID_NODE;
-              Node current_node = v.first;
+              Node current_node = v;
               
               bool not_done = true;
               while(not_done) {
@@ -138,9 +142,9 @@ namespace FvsGraph{
               }
               not_done = true;
               std::list<Node> semi_disjoint_path_two;
-			        semi_disjoint_path_two.push_back(v.first);
+			        semi_disjoint_path_two.push_back(v);
               last_node = INVALID_NODE;
-              current_node = v.first;
+              current_node = v;
               while(not_done) {
                 Neighborhood::const_iterator it = adj.find(current_node)->second.begin();
                 std::advance(it, 1);
@@ -292,7 +296,7 @@ namespace FvsGraph{
               return std::make_pair<std::list<Node>, bool>(std::list<Node>(), false);
           }
           
-          int Graph::articulate(const Node u, bool vis[], int dsc[], int low[], int par[], std::list<Node> &a_n, std::list<Edge> &a_e, int time) const {
+          int Graph::articulate(const Node u, bool vis[], int dsc[], int low[], int par[], std::unordered_set<Node> &a_n, std::unordered_set<Edge> &a_e, int time) const {
             vis[u] = true;
             dsc[u] = time++;
             int min = dsc[u];
@@ -316,28 +320,28 @@ namespace FvsGraph{
             }
             
             if(min == dsc[u] && par[u] != INVALID_NODE) {
-              a_e.push_back(std::make_pair(par[u], u));
+              a_e.insert(std::make_pair(par[u], u));
             }
             
             const bool first  = (par[u] == INVALID_NODE && children > 1);
             const bool second = (par[u] != INVALID_NODE && dsc[par[u]] < min);
 
             if (first || second) {
-              a_n.push_back(par[u]);
+              a_n.insert(par[u]);
             }
             
             return min;
           }
           
-          std::pair<std::list<Node>, std::list<Edge> > Graph::get_articulation_elements() const {
+          std::pair<std::unordered_set<Node>, std::unordered_set<Edge> > Graph::get_articulation_elements() const {
             // TODO: n = max|V| over all time
             bool *vis = new bool[n];
             int *dsc = new int[n];
             int *low = new int[n];
             int *par = new int[n];
             
-            std::list<Node> art_nodes;
-            std::list<Edge> art_edges;
+            std::unordered_set<Node> art_nodes;
+            std::unordered_set<Edge> art_edges;
             
             for(const auto &i : adj) {
               par[i.first] = INVALID_NODE;
@@ -386,6 +390,7 @@ namespace FvsGraph{
             }
             adj[u] = Neighborhood();
             ++n;
+            low_deg_nodes.insert(u);
             #ifdef __DEBUG
             debug("Added note "+std::to_string(u));
             #endif
@@ -413,7 +418,7 @@ namespace FvsGraph{
               #endif
               return false;
             }
-            
+            low_deg_nodes.erase(u);
             // Fuck. Go to each neighbor and inform him about the change.
             std::set<Edge> to_remove;
             for(Neighborhood::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
@@ -440,22 +445,26 @@ namespace FvsGraph{
           
           void Graph::add_edges(const std::list<Edge> &E) {
             std::unordered_set<Node> s;
-            for(std::list<Edge>::const_iterator it = E.begin(); it != E.end(); ++it) {
-                add_node(it->first);
-                add_node(it->second);
-                if(it->first == it->second) continue;
+            for(const auto &it : E) {
+                add_node(it.first);
+                add_node(it.second);
+                if(it.first == it.second) continue;
                 
-                s.insert(it->first);
-                s.insert(it->second);
+                s.insert(it.first);
+                s.insert(it.second);
                 
                 ++m;
                 
-                adj[it->first].insert(it->second);
-                adj[it->second].insert(it->first);
-                
-                
+                adj[it.first].insert(it.second);
+                adj[it.second].insert(it.first);
             }
-            
+            for(const auto &it : s) {
+              if(get_single_degree(it) < 4) {
+                low_deg_nodes.insert(it); 
+              } else {
+                low_deg_nodes.erase(it);
+              }
+            }
           }
           
           bool Graph::add_edge(const Node u, const Node v) {
@@ -477,7 +486,12 @@ namespace FvsGraph{
                 adj[v].insert(u);
 
                 ++m;
-
+                if(get_single_degree(u) > 3) {
+                  low_deg_nodes.erase(u);
+                }
+                if(get_single_degree(v) > 3) {
+                  low_deg_nodes.erase(v); 
+                }
 
                 return true;
               } else {
@@ -491,6 +505,7 @@ namespace FvsGraph{
           void Graph::clear() { 
             adj.clear();
             n = m = 0;
+            low_deg_nodes.clear();
             #ifdef __DEBUG
             note("Clearing Graph.");
             #endif
@@ -510,6 +525,11 @@ namespace FvsGraph{
               to_update.insert(u);
               to_update.insert(v);
               --m;
+            }
+            for(const auto &v : to_update) {
+              if(get_single_degree(v) < 4) {
+                low_deg_nodes.insert(v); 
+              } 
             }
             
           }
@@ -533,7 +553,12 @@ namespace FvsGraph{
             adj[v].erase(u);
             
             --m;
-            
+            if(get_single_degree(u) < 4) {
+              low_deg_nodes.insert(u);
+            }
+            if(get_single_degree(v) < 4) {
+              low_deg_nodes.insert(v); 
+            }
             return true;
           }
 

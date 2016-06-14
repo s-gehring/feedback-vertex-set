@@ -26,6 +26,8 @@
 #include "debugger.hpp"
 #endif
 
+
+
 namespace FvsGraph {
   typedef int Node;
   typedef std::pair<int,int> Edge;
@@ -322,15 +324,25 @@ class Graph {
           * if and only if removal of this element
           * increases the number of connected components in G.
           */
-          std::pair<std::list<Node>, std::list<Edge> > get_articulation_elements() const;
+          std::pair<std::unordered_set<Node>, std::unordered_set<Edge> > get_articulation_elements() const;
+  
+          
+          /*
+          * @brief Returns all low degree nodes.
+          *
+          * Returns an unordered set in constant time, containing
+          * all nodes with degree at most three.
+          */
+          std::unordered_set<Node> get_low_degree_nodes() const;
   
       private:
           AdjacencyList adj;
+          std::unordered_set<Node> low_deg_nodes;
           #ifdef __DEBUG
           Debugger* d;
           #endif
         
-          int articulate(const Node u, bool vis[], int dsc[], int low[], int par[], std::list<Node> &a_n, std::list<Edge> &a_e, int time) const;
+          int articulate(const Node u, bool vis[], int dsc[], int low[], int par[], std::unordered_set<Node> &a_n, std::unordered_set<Edge> &a_e, int time) const;
           
   
           void note(std::string s) const {
@@ -360,5 +372,14 @@ class Graph {
 };
 
 
+}
+
+namespace std {
+  template <> struct hash<FvsGraph::Edge> {
+    size_t operator()(const FvsGraph::Edge &e) const {
+      std::hash<FvsGraph::Node> node_hasher;
+      return node_hasher(e.first) ^ node_hasher(e.second);
+    }
+  }; 
 }
 #endif
