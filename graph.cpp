@@ -25,7 +25,7 @@ namespace FvsGraph{
   
 
 
-          std::string Graph::get_name() {
+          std::string Graph::get_name() const {
             char s[80];
             sprintf(s, "%p", (void*) this);
             return std::string(s);
@@ -59,8 +59,9 @@ namespace FvsGraph{
               }
                
             } while(changes_occur);
+            #ifdef __DEBUG
             debug("Deleted "+std::to_string(changes)+ " nodes with degree at most one.");
-            
+            #endif
             return changes;
           }
             
@@ -70,7 +71,9 @@ namespace FvsGraph{
             std::set<Node> targets;
             std::string tmp = "Clearing node "+std::to_string(v)+ ": ";
             if(!has_node(v)) {
+              #ifdef __DEBUG
               warn(tmp+ "Node doesn't exist."); 
+              #endif
             } else {
               for(const auto& it : adj[v]) {
                 targets.insert(it);
@@ -78,19 +81,21 @@ namespace FvsGraph{
               for(const auto& it : targets) {
                 remove_edge(v, it);
               }
+              #ifdef __DEBUG
               note(tmp+"Cleared "+std::to_string(targets.size())+" edges.");
+              #endif
             }
           }
           
-          bool Graph::has_node(const Node v) { return adj.find(v) != adj.end(); }                                        // O(1)
-          bool Graph::has_edge(const Node u, const Node v) { return (has_node(u)) && (adj[u].find(v) != adj[u].end()); } // O(1) + O(1)
-          bool Graph::has_edge(const Edge &e) { return has_edge(e.first, e.second); }                                    // Alias to (const Node, const Node)
-          AdjacencyList Graph::get_adjacency_list() {
+          bool Graph::has_node(const Node v) const { return adj.find(v) != adj.end(); }                                        // O(1)
+          bool Graph::has_edge(const Node u, const Node v) const { return (has_node(u)) && (adj.find(u)->second.find(v) != adj.find(u)->second.end()); } // O(1) + O(1)
+          bool Graph::has_edge(const Edge &e) const { return has_edge(e.first, e.second); }                                    // Alias to (const Node, const Node) 
+          AdjacencyList Graph::get_adjacency_list() const {
             return adj;
           }
           
           // The DFS algorithms
-          std::pair<std::list<Node>, bool> Graph::find_semidisjoint_cycle() {
+          std::pair<std::list<Node>, bool> Graph::find_semidisjoint_cycle() const {
             std::unordered_set<Node> no;
             for(const auto &v : adj) { // v.first == Node, v.second == Neighborhood
               if(no.find(v.first) != no.end()) continue;
@@ -103,7 +108,7 @@ namespace FvsGraph{
               
               bool not_done = true;
               while(not_done) {
-                Neighborhood::const_iterator it = adj[current_node].begin();
+                Neighborhood::const_iterator it = adj.find(current_node)->second.begin();
                 Node next_node = *(it);
                 if(next_node == last_node) {
                   std::advance(it, 1);
@@ -115,13 +120,17 @@ namespace FvsGraph{
                 semi_disjoint_path_one.push_front(current_node);
                 // TODO: Remove unnecessary check.
                 if(get_single_degree(current_node) < 2) {
+                  #ifdef __DEBUG
                   warn("Trying to find a semidisjoint cycle, and found a node with degree 1: "+std::to_string(current_node)+" this will still work, but may need some unnecessary time.");
+                  #endif
                   not_done = false;
                 } else if(get_single_degree(current_node) > 2) {
                   not_done = false;
                 } else {
                   if(current_node == semi_disjoint_path_one.back()) {
+                    #ifdef __DEBUG
                     warn("Found a full disjoint cycle. I don't really believe this.");
+                    #endif
 					          semi_disjoint_path_one.pop_back();
                     return std::make_pair(semi_disjoint_path_one, true);
                     }
@@ -133,25 +142,29 @@ namespace FvsGraph{
               last_node = INVALID_NODE;
               current_node = v.first;
               while(not_done) {
-                Neighborhood::const_iterator it = adj[current_node].begin();
+                Neighborhood::const_iterator it = adj.find(current_node)->second.begin();
                 std::advance(it, 1);
                 Node next_node = *it;
                 if(next_node == last_node) {
-                  next_node = *(adj[current_node].begin()); 
+                  next_node = *(adj.find(current_node)->second.begin()); 
                 }
                 last_node = current_node;
                 current_node = next_node;
                 no.insert(current_node);
                 semi_disjoint_path_two.push_back(current_node);
                 if(get_single_degree(current_node) < 2) {
+                  #ifdef __DEBUG
                   warn("Trying to find a semidisjoint cycle, and found a node with degree 1: "+std::to_string(current_node)+" this will still work, but may need some unnecessary time.");
+                  #endif
                   not_done = false;
                 } else if(get_single_degree(current_node) > 2) {
                   not_done = false;
                 } else {
                   if(current_node == semi_disjoint_path_two.front()) {
                     // This is not possible.
+                    #ifdef __DEBUG
                     err("Logic error. Got to source node without returning before.");
+                    #endif
                     return std::make_pair(semi_disjoint_path_two, true);
                   }
                 }
@@ -161,38 +174,43 @@ namespace FvsGraph{
                 semi_disjoint_path_two.pop_back();
 				        semi_disjoint_path_two.pop_front();
                 semi_disjoint_path_one.splice(semi_disjoint_path_one.end(), semi_disjoint_path_two);
+                #ifdef __DEBUG
                 debug("Found a disjoint cycle of size "+std::to_string(semi_disjoint_path_one.size())+".");
+                #endif
                 return std::make_pair(semi_disjoint_path_one, true);
               }
             }
             return std::make_pair(std::list<Node>(), false);
           }
           
-          bool Graph::has_cycle() {            
+          bool Graph::has_cycle() const {            
               if(m >= n) {
+                #ifdef __DEBUG
                 note("Has_Cycle: Use heuristic: There is a cycle, because m [="+std::to_string(m)+"] >= n [="+std::to_string(n)+"]");
+                #endif
                 return true;
               }
               std::string tmp = "Has_Cycle: Don't use heuristic, because m [="+std::to_string(m)+"] < n [="+std::to_string(n)+"]: DFS ";
               
               std::unordered_set<Node> done = std::unordered_set<Node>();
               std::stack<std::pair<Node, Node> > S;
-              for(AdjacencyList::iterator it = adj.begin(); it != adj.end(); ++it) {
-                if(done.find(it->first) == done.end()) {
-                  S.push(std::make_pair(it->first, INVALID_NODE));
-                  done.insert(it->first); 
+              for(const auto &it : adj) {
+                if(done.find(it.first) == done.end()) {
+                  S.push(std::make_pair(it.first, INVALID_NODE));
+                  done.insert(it.first); 
                   while(!S.empty()) {
                     Node v = S.top().first;
                     Node f = S.top().second;
                     S.pop();
-                    for(Neighborhood::const_iterator neighbor = adj[v].begin(); neighbor != adj[v].end(); ++neighbor) {
-                      Node w = *neighbor;
-                      if(done.find(w) == done.end()) {
-                        S.push(std::make_pair(w, v));
-                        done.insert(w);
+                    for(const auto &neighbor : adj.find(v)->second) {
+                      if(done.find(neighbor) == done.end()) {
+                        S.push(std::make_pair(neighbor, v));
+                        done.insert(neighbor);
                       } else {
-                        if(w != f) {
+                        if(neighbor != f) {
+                          #ifdef __DEBUG
                           note(tmp+"found a cycle.");
+                          #endif
                           return true;
                         }
                       }
@@ -200,11 +218,13 @@ namespace FvsGraph{
                   }
                 }
               }
+              #ifdef __DEBUG
               note(tmp+" found no cycle.");
+              #endif
               return false;
           }
           
-          std::pair<std::list<Node>, bool> Graph::get_cycle() {
+          std::pair<std::list<Node>, bool> Graph::get_cycle() const {
               //if(m < n) return std::pair<std::list<Node>, bool>(std::list<Node>(), false);
               std::string tmp = "Get_Cycle: Don't use heuristic, because not yet implemente. DFS ";
               
@@ -221,7 +241,7 @@ namespace FvsGraph{
                   while(!S.empty()) {
                     Node v = S.top();
                     S.pop();
-                    for(const auto &neighbor : adj[v]) {
+                    for(const auto &neighbor : adj.find(v)->second) {
                       Node w = neighbor;
                       if(done.find(w) == done.end()) {
                         S.push(w);
@@ -236,7 +256,9 @@ namespace FvsGraph{
                           bool not_done = true;
                           while(not_done) {
                             if(pre.find(v) == pre.end()) {
+                              #ifdef __DEBUG
                               err("Found a cycle, but can't follow back to original node.");
+                              #endif
                               return std::pair<std::list<Node>, bool>(std::list<Node>(), true);
                             }
                             v = pre[v];
@@ -245,14 +267,18 @@ namespace FvsGraph{
                               return std::pair<std::list<Node>, bool>(std::list<Node>(), true);
                             }
                             if(v == w) {
+                               #ifdef __DEBUG
                                note("Found a cycle, and found its origin. Returning cycle.");
+                               #endif
                                x.push_back(w);
                                not_done = false;
                                return std::pair<std::list<Node>, bool>(x, true);
                             }
                             x.push_back(v);
                           }
+                          #ifdef __DEBUG
                           note(tmp+"found a cycle.");
+                          #endif
                           return std::pair<std::list<Node>, bool>(x, true);
                         }
                       }
@@ -260,68 +286,91 @@ namespace FvsGraph{
                   }
                 } // else { Node has already been found. }
               }
-            
+            #ifdef __DEBUG
               note(tmp+"found no cycle.");
+            #endif
               return std::make_pair<std::list<Node>, bool>(std::list<Node>(), false);
           }
           
-          std::pair<Edge, bool> Graph::get_bridge() {
-              return std::make_pair(std::make_pair(INVALID_NODE, INVALID_NODE), false);/*
-              std::string tmp = "Get Bridge: Don't use heuristic, because not yet implemente. DFS ";
-              std::unordered_set<Node> done = std::unordered_set<Node>();
-              std::stack<std::pair<Node, Node> > S;
-              for(AdjacencyList::iterator it = adj.begin(); it != adj.end(); ++it) {
-                if(done.find(it->first) == done.end()) {
-                  S.push(std::make_pair(it->first, INVALID_NODE));
-                  done.insert(it->first); 
-                  while(!S.empty()) {
-                    Node v = S.top().first;
-                    Node f = S.top().second;
-                    S.pop();
-                    for(Neighborhood::const_iterator neighbor = adj[v].begin(); neighbor != adj[v].end(); ++neighbor) {
-                      Node w = *neighbor;
-                      if(done.find(w) == done.end()) {
-                        S.push(std::make_pair(w, v));
-                        done.insert(w);
-                      } else {
-                        if(w != f) {
-                          S.push(std::make_pair(v,f));
-                          std::list<Node> x;
-                          while(!S.empty()) {
-                            x.push_back(S.top().first);
-                            S.pop();
-                          }
-                          note(tmp+"found a cycle.");
-                          return std::pair<std::list<Node>, bool>(x, true);
-                        }
-                      }
-                    }
-                  }
-                }
-              }
+          int Graph::articulate(const Node u, bool vis[], int dsc[], int low[], int par[], std::list<Node> &a_n, std::list<Edge> &a_e, int time) const {
+            vis[u] = true;
+            dsc[u] = time++;
+            int min = dsc[u];
+            int children = 0;
             
-              note(tmp+"found no cycle.");
-              return std::make_pair<std::list<Node>, bool>(std::list<Node>(), false);
-              */
+            
+            for(const auto &v : get_neighbors(u).first) {
+              if(!vis[v]) {
+                ++children;
+                par[v] = u;
+                int maybe_min = articulate(v, vis, dsc, low, par, a_n, a_e, time);
+                
+                if(maybe_min < min) min = maybe_min;
+                
+                
+                
+                
+              } else if(v != par[u]) {
+                if(dsc[v] < min) min = dsc[v];
+              }
+            }
+            
+            if(min == dsc[u] && par[u] != INVALID_NODE) {
+              a_e.push_back(std::make_pair(par[u], u));
+            }
+            
+            const bool first  = (par[u] == INVALID_NODE && children > 1);
+            const bool second = (par[u] != INVALID_NODE && dsc[par[u]] < min);
+
+            if (first || second) {
+              a_n.push_back(par[u]);
+            }
+            
+            return min;
+          }
+          
+          std::pair<std::list<Node>, std::list<Edge> > Graph::get_articulation_elements() const {
+            // TODO: n = max|V| over all time
+            bool *vis = new bool[n];
+            int *dsc = new int[n];
+            int *low = new int[n];
+            int *par = new int[n];
+            
+            std::list<Node> art_nodes;
+            std::list<Edge> art_edges;
+            
+            for(const auto &i : adj) {
+              par[i.first] = INVALID_NODE;
+              vis[i.first] = false;
+            }
+            for(const auto &i : adj) {
+              if(!vis[i.first]) {
+                articulate(i.first, vis, dsc, low,  par, art_nodes, art_edges, 0);
+              }
+            }
+            return std::make_pair(art_nodes, art_edges);
           }
   
-          // /The DFS algorithms
-          Node Graph::source(const Edge &e) { return e.first; }
-          Node Graph::src(const Edge &e) {return source(e);}
-          Node Graph::target(const Edge &e) { return e.second; }
-          Node Graph::trg(const Edge &e) { return target(e); }
           
-          Node Graph::lowest_deg_node(const std::set<Node> &candidates) {
+  
+          Node Graph::source(const Edge &e) const { return e.first; }
+          Node Graph::src(const Edge &e) const {return source(e);}
+          Node Graph::target(const Edge &e) const { return e.second; }
+          Node Graph::trg(const Edge &e) const { return target(e); }
+          
+          Node Graph::lowest_deg_node(const std::set<Node> &candidates) const {
             if(candidates.size() == 0) {
+              #ifdef __DEBUG
               warn("lowest_deg_node called with an empty set. Returning invalid node (-1).");
+              #endif
             }
             // Iterate over candidates
             Node minCan = *(candidates.begin());
-            size_t min = adj[minCan].size();
+            size_t min = adj.find(minCan)->second.size();
             
             for(const auto& it : candidates) {
-                if(adj[it].size() < min) {
-                    min = adj[it].size();
+                if(adj.find(it)->second.size() < min) {
+                    min = adj.find(it)->second.size();
                     minCan = it;
                 }
             }
@@ -330,28 +379,38 @@ namespace FvsGraph{
           
           bool Graph::add_node(const Node u) { // O(1)
             if(has_node(u)) {
+              #ifdef __DEBUG
               note("Added node which is already existant: "+std::to_string(u));
+              #endif
               return false;
             }
             adj[u] = Neighborhood();
             ++n;
+            #ifdef __DEBUG
             debug("Added note "+std::to_string(u));
+            #endif
             return true;
           }
           
-          std::pair<Neighborhood, bool> Graph::get_neighbors(const Node u) {
+          std::pair<Neighborhood, bool> Graph::get_neighbors(const Node u) const {
           /* O(1) */
               if(!has_node(u)) {
+                #ifdef __DEBUG
                 warn("Requested Neighborhood of a node, which doesn't exist. Node("+std::to_string(u)+")");
+                #endif
                 return std::pair<Neighborhood, bool>(Neighborhood(), false);
               }
+              #ifdef __DEBUG
               debug("Requested Neighborhood of node "+std::to_string(u)+". Node has degree "+std::to_string(get_single_degree(u))+".");
-              return std::pair<Neighborhood, bool>(adj[u], true);
+              #endif
+              return std::pair<Neighborhood, bool>(adj.find(u)->second, true);
           }
           
           bool Graph::remove_node(const Node u) {
             if(!has_node(u)) {
+              #ifdef __DEBUG
               warn("Removing node, which doesn't exist: Node("+std::to_string(u)+").");
+              #endif
               return false;
             }
             
@@ -365,16 +424,19 @@ namespace FvsGraph{
             adj[u].clear();
             adj.erase(u);
             --n;
-            return true;
+            return true; 
           }
           
-          int Graph::get_single_degree(const Node u) {
+          int Graph::get_single_degree(const Node u) const {
             if(!has_node(u)) {
+              #ifdef __DEBUG
               err("Get degree of a non-existant node "+std::to_string(u)+".");
+              #endif
               return -1;
             }
-            return adj[u].size();
+            return adj.find(u)->second.size();
           }
+  
           
           void Graph::add_edges(const std::list<Edge> &E) {
             std::unordered_set<Node> s;
@@ -401,7 +463,9 @@ namespace FvsGraph{
               O(1)
             */
               if(u==v) {
+                #ifdef __DEBUG
                 warn("Trying to add recursive edge, which is not allowed. Recursion on node "+std::to_string(u)+".");
+                #endif
                 return false;
               }
               if(!has_edge(u,v)) {
@@ -417,15 +481,19 @@ namespace FvsGraph{
 
                 return true;
               } else {
+                #ifdef __DEBUG
                 warn("Trying to add existant edge. Edge in question: ("+std::to_string(u)+"|"+std::to_string(v)+").");
+                #endif
                 return false;
               }
           }
           
-          void Graph::clear() {
+          void Graph::clear() { 
             adj.clear();
             n = m = 0;
+            #ifdef __DEBUG
             note("Clearing Graph.");
+            #endif
           }
             
           void Graph::remove_edges(const std::set<Edge> &E) {
@@ -448,11 +516,15 @@ namespace FvsGraph{
     
           bool Graph::remove_edge(const Node u, const Node v) {
             if(!has_node(u) || !has_node(v)) {
+              #ifdef __DEBUG
               warn("Trying to remove edge ("+std::to_string(u)+"|"+std::to_string(v)+"), but at least one of its nodes doesn't exist.");
+              #endif
               return false;
             }
             if(adj[u].find(v) == adj[u].end()) {
+              #ifdef __DEBUG
               warn("Trying to remove edge ("+std::to_string(u)+"|"+std::to_string(v)+"), but it doesn't exist.");
+              #endif
               return false;
             }
             

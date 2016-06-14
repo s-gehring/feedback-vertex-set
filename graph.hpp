@@ -68,7 +68,7 @@ class Graph {
           *
           * @returns A name as a string.
           */
-          std::string get_name();
+          std::string get_name() const;
     
           /**
           * @brief Constructor. Initializes with Debugger instance logs/graph.log
@@ -97,7 +97,7 @@ class Graph {
           * @param [in] v The node in question.
           * @returns True iff v exists in the graph.
           */
-          bool has_node(const Node v);
+          bool has_node(const Node v) const;
           
           /**
           * @brief Returns whether (u, v) or (v, u) exists in the graph.
@@ -109,7 +109,7 @@ class Graph {
           * @param [in] v The target node of the edge.
           * @returns True iff (u,v) exists in the graph.
           */
-          bool has_edge(const Node u, const Node v);
+          bool has_edge(const Node u, const Node v) const;
           /**
           * @brief Returns whether e exists in the graph.
           *
@@ -118,7 +118,7 @@ class Graph {
           * @param [in] e The edge in question.
           * @returns True iff e exists in the graph.
           */
-          bool has_edge(const Edge &e);
+          bool has_edge(const Edge &e) const;
   
           /**
           * @brief Returns the whole adjacency list of the graph.
@@ -128,18 +128,8 @@ class Graph {
           *
           * @returns An object of type AdjacencyList
           */
-          AdjacencyList get_adjacency_list();
+          AdjacencyList get_adjacency_list() const;
               
-          /**
-          * @brief Returns a bridge edge.
-          *
-          * Returns an edge which divides the graph
-          * into two connected components.
-          *
-          * @returns An edge which divides the graph.
-          */
-          std::pair<Edge, bool> get_bridge();
-  
           /**
           * @brief Returns a semidisjoint cycle if there exists one.
           *
@@ -155,7 +145,7 @@ class Graph {
           * @returns A pair, where the second entry is true iff there is a semidisjoint cycle in the first entry.
           * 
           */
-          std::pair<std::list<Node>, bool> find_semidisjoint_cycle(); 
+          std::pair<std::list<Node>, bool> find_semidisjoint_cycle() const; 
           
           /**
           * @brief Returns whether the graph has a cycle.
@@ -165,7 +155,7 @@ class Graph {
           *
           * @returns True iff there exists a cycle.
           */       
-          bool has_cycle();
+          bool has_cycle() const;
   
           /**
           * @brief Returns a cycle in the graph if there exists one.
@@ -175,7 +165,7 @@ class Graph {
           *
           * @returns A pair, where the second entry is true iff the first entry is a cycle.
           */       
-          std::pair<std::list<Node>, bool> get_cycle();
+          std::pair<std::list<Node>, bool> get_cycle() const;
           
           /**
           * @brief Returns the source node of a given edge.
@@ -183,7 +173,7 @@ class Graph {
           * @param [in] e The edge.
           * @returns A node
           */       
-          Node source(const Edge &e);
+          Node source(const Edge &e) const;
   
           /**
           * @brief Returns the source node of a given edge.
@@ -191,7 +181,7 @@ class Graph {
           * @param [in] e The edge.
           * @returns A node
           */       
-          Node src(const Edge &e);
+          Node src(const Edge &e) const;
   
           /**
           * @brief Returns the target node of a given edge.
@@ -199,7 +189,7 @@ class Graph {
           * @param [in] e The edge.
           * @returns A node
           */       
-          Node target(const Edge &e);
+          Node target(const Edge &e) const;
   
           /**
           * @brief Returns the target node of a given edge.
@@ -207,7 +197,7 @@ class Graph {
           * @param [in] e The edge.
           * @returns A node
           */       
-          Node trg(const Edge &e);
+          Node trg(const Edge &e) const;
           
           /**
           * @brief Returns the node with lowest degree out of a set.
@@ -218,7 +208,7 @@ class Graph {
           * @param [in] candidates A set of nodes from which the result is to choose.
           * @returns A node with lowest degree or INVALID_NODE if the set is empty.
           */       
-          Node lowest_deg_node(const std::set<Node> &candidates);
+          Node lowest_deg_node(const std::set<Node> &candidates) const;
           
           /**
           * @brief Add a node to the graph.
@@ -239,7 +229,7 @@ class Graph {
           * @param [in] u The node whose neighborhood to return.
           * @returns A pair whose second entry is true iff the first entry is a neighborhood of u.
           */    
-          std::pair<Neighborhood, bool> get_neighbors(const Node u);        
+          std::pair<Neighborhood, bool> get_neighbors(const Node u) const;        
   
           
           /**
@@ -261,7 +251,7 @@ class Graph {
           * @param [in] u The node whose degree to return.
           * @returns The degree of the node if it exists. -1 otherwise.
           */    
-          int get_single_degree(const Node u);
+          int get_single_degree(const Node u) const;
           
           /**
           * @brief Inserts a list of edges.
@@ -319,31 +309,49 @@ class Graph {
           */    
           bool remove_edge(const Node u, const Node v);
 
+          /**
+          * @brief Returns bridges and articulation points.
+          *
+          * Runs in DFS time O(|V|+|E|) and returns
+          * two lists. first is the list of all
+          * articulation vertices, second is the list
+          * of all bridges. Those two lists together form
+          * the pair of articulation elements, for which holds:
+          *
+          * An element of a graph G is an articulation element
+          * if and only if removal of this element
+          * increases the number of connected components in G.
+          */
+          std::pair<std::list<Node>, std::list<Edge> > get_articulation_elements() const;
+  
       private:
           AdjacencyList adj;
           #ifdef __DEBUG
           Debugger* d;
           #endif
         
-          void note(std::string s) {
+          int articulate(const Node u, bool vis[], int dsc[], int low[], int par[], std::list<Node> &a_n, std::list<Edge> &a_e, int time) const;
+          
+  
+          void note(std::string s) const {
             #ifdef __DEBUG
             d->log("[Graph "+get_name() + "]: "+s, Debugger::NOTE); 
             #endif
           }
           
-          void warn(std::string s) {
+          void warn(std::string s) const {
             #ifdef __DEBUG
             d->log("[Graph "+get_name() + "]: "+s, Debugger::WARNING); 
             #endif
           }
     
-          void err(std::string s) {
+          void err(std::string s) const {
             #ifdef __DEBUG
             d->log("[Graph "+get_name() + "]: "+s, Debugger::ERROR); 
             #endif
           }
     
-          void debug(std::string s) {
+          void debug(std::string s) const {
             #ifdef __DEBUG
             d->log("[Graph "+get_name() + "]: "+s, Debugger::DEBUG); 
             #endif
