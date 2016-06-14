@@ -367,7 +367,7 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 	for (const auto &it : g.get_adjacency_list()) {
 		weights[it.first] = 1; // weights all need to be the same s.t. nodes with high degree are preferred later
 	}
-	while (g.n > 0) {
+	while (g.get_n() > 0) {
 		// contains a semidisjoint cycle?
 		// Here, we do not the same as the algorithm in the paper: we only put the node with degree >2 into the fvs
 		pair<list<Node>, bool> sdcycle = find_semidisjoint_cycle(g);
@@ -381,7 +381,9 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 			    /**
 			    ** Don't change the set you're iterating over!
 			    ** You can invoke sdcycle.clear() after this loop
-			    ** terminates, but keep your filthy hands off
+			    ** terminates, but keep your
+          }
+   filthy hands off
 			    ** the list while you're using its iterators!
 			    */
 				g.remove_node(*it);
@@ -558,9 +560,9 @@ set<Node> fvs::set_union(const set<Node> S, const set<Node> T) {
 void fvs::print_graph(Graph& g) {
 	
 	cout << "Printing a graph." << endl;
-	cout << "Number of nodes: " << g.n << endl;
-	cout << "Number of edges: " << g.m << endl;
-	if(g.m > 1000 || g.n > 500) {
+	cout << "Number of nodes: " << g.get_n() << endl;
+	cout << "Number of edges: " << g.get_m() << endl;
+	if(g.get_m() > 1000 || g.get_n() > 500) {
 	  cout << "Graph too big, skipping complete printing."<<endl;
 	  return;
 	}

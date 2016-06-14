@@ -23,7 +23,20 @@
 namespace FvsGraph{
 
   
-
+          bool Graph::is_deg_three() const {
+            for(const auto &it :get_low_degree_nodes()) {
+              if(get_single_degree(it) < 3) return false; 
+            }
+            return true;
+          }
+  
+          int Graph::get_n() const {
+            return n;
+          }
+          int Graph::get_m() const {
+            return m; 
+          }
+          
 
           std::string Graph::get_name() const {
             char s[80];
@@ -31,6 +44,7 @@ namespace FvsGraph{
             return std::string(s);
           }
     
+  
           Graph::Graph() {
             #ifdef __DEBUG
             d = Debugger::get_instance("logs/graph.log", Debugger::ALL);

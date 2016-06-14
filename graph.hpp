@@ -44,15 +44,10 @@ class Graph {
       
       
       public:
-          
-          /**
-          * @brief The number of vertices. Shouldn't be changed.
-          */
-          int n;
-          /**
-          * @brief The number of edges. Shouldn't be changed.
-          */
-          int m;
+          bool is_deg_three() const;
+  
+          int get_n() const;
+          int get_m() const;
           
           /**
           * @brief Deletes all nodes with degree at most one.
@@ -341,7 +336,11 @@ class Graph {
           #ifdef __DEBUG
           Debugger* d;
           #endif
-        
+          int n;
+          int m;
+          int nodes_with_deg_three;
+  
+  
           int articulate(const Node u, bool vis[], int dsc[], int low[], int par[], std::unordered_set<Node> &a_n, std::unordered_set<Edge> &a_e, int time) const;
           
   
