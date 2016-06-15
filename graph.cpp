@@ -271,6 +271,47 @@ namespace FvsGraph{
                           // The cycle lies in v, pre[v], pre[pre[v]], ... pre[...pre[v]...]=w
                           
                           std::list<Node> x;
+                        
+                          std::unordered_set<Node> used;
+                          
+                          
+                          used.insert(w);
+                          used.insert(v);
+                          x.push_back(w);
+                          x.push_front(v);
+                          bool v_done = false;
+                          bool w_done = false;
+                          bool completely_done = false;
+                          while(!completely_done) {
+                            if(!v_done) {
+                              v = pre[v];
+                              if(v == INVALID_NODE || used.find(v) != used.end()) {
+                                v_done = true; 
+                              } else {
+                                x.push_front(v);
+                                used.insert(v);
+                              }
+                            }
+                            
+                            if(!w_done) {
+                              w = pre[w];
+                              if(w == INVALID_NODE || used.find(w) != used.end()) {
+                                w_done = true; 
+                              } else {
+                                x.push_back(w);
+                                used.insert(w);
+                              }
+                            }
+                            completely_done = v_done && w_done;
+                          }
+                          // if v is used, then cycle is too long at the back
+                          if(used.find(v) != used.end()) {
+                            while(v != x.back()) x.pop_back(); 
+                          } else
+                          if(used.find(w) != used.end()) {
+                            while(w != x.front()) x.pop_front(); 
+                          }
+                          return std::make_pair(x, true);/*
                           bool not_done = true;
                           while(not_done) {
                             if(pre.find(v) == pre.end()) {
@@ -279,25 +320,35 @@ namespace FvsGraph{
                               #endif
                               return std::pair<std::list<Node>, bool>(std::list<Node>(), true);
                             }
-                            v = pre[v];
+                            used.insert(v);
+                            x.push_back(v);
+                            
                             if(v == INVALID_NODE) {
-                              err("Found a cycle, but can't follow back to original node. Found invalid node."); 
-                              return std::pair<std::list<Node>, bool>(std::list<Node>(), true);
+                              x.push_back(w);
+                              while(not_done) {
+                                w = pre[w];
+                                if(w == x.back() || w == INVALID_NODE) {
+                                  not_done = false;
+                                } else {
+                                  x.push_front(w); 
+                                }
+                              }
+                              //err("Found a cycle, but can't follow back to original node. Found invalid node."); 
+                              return std::pair<std::list<Node>, bool>(x, true);
                             }
-                            if(v == w) {
+                            v = pre[v];
+                            if(v == w || v == x.front()) {
                                #ifdef __DEBUG
                                note("Found a cycle, and found its origin. Returning cycle.");
                                #endif
-                               x.push_back(w);
                                not_done = false;
                                return std::pair<std::list<Node>, bool>(x, true);
                             }
-                            x.push_back(v);
                           }
                           #ifdef __DEBUG
                           note(tmp+"found a cycle.");
                           #endif
-                          return std::pair<std::list<Node>, bool>(x, true);
+                          return std::pair<std::list<Node>, bool>(x, true);*/
                         }
                       }
                     }
