@@ -1,6 +1,5 @@
 
-
-#include "fvs_solver.h"
+#include "fvs_solver.hpp"
 
 using namespace fvs;
 using namespace FvsGraph;
@@ -14,12 +13,9 @@ int main(int argc, char** argv) {
     Graph g;
     read_graph(g, filepath);
     
-    
-  
     /*
     **  Test whether the graph has been read correctly.
     */ 
-    
     print_graph(g);
     
     /*
@@ -33,8 +29,7 @@ int main(int argc, char** argv) {
     **  an exponential factor).
     */
     pair<unordered_set<Node>, unordered_set<Edge> > master_of_arts = g.get_articulation_elements();
-    
-  
+
     /*
     **  Output all artiulcation elements.
     */
@@ -51,7 +46,7 @@ int main(int argc, char** argv) {
       }
     }
     cout << "}" << endl <<endl;
-    
+
     cout << "Bridges:"<<endl <<"{";
     first_out = true;
     max_output = MAX_OUTPUT_ARTICULATION;
@@ -69,14 +64,14 @@ int main(int argc, char** argv) {
     **  Do the two approximation, store 
     **  the forest decomposition in v1, v2.
     */
-    
+
     set<Node> v1, v2;
     v1 = two_approx_fvs(g);
     for(const auto &it : g.get_adjacency_list()) {
         // Fill v2
         if(v1.find(it.first)==v1.end()) v2.insert(it.first);
     }
-  
+    
     /*
     **  Print out the approximate solution. With some stats.
     */
@@ -87,7 +82,7 @@ int main(int argc, char** argv) {
     cout << endl;
     cout << "Total size: "<<v1.size()<<endl;
     cout << (0.5*v1.size()) << " <= MinFVS <= "<< v1.size() <<endl;
-    
+
     /*
     **  Binary search the minimal k in a range
     **  from 'size of approx solution * 0.5' to 'size of approx solution * 1.0'.
