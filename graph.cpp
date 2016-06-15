@@ -377,7 +377,7 @@ namespace FvsGraph{
           Node Graph::trg(const Edge &e) const { return target(e); }
           
           Node Graph::lowest_deg_node(const std::set<Node> &candidates) const {
-                Node minCan;
+                Node minCan = INVALID_NODE;
 		if(candidates.size() == 0) {
 			#ifdef __DEBUG
 			warn("lowest_deg_node called with an empty set. Returning invalid node (-1).");
