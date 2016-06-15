@@ -428,22 +428,25 @@ namespace FvsGraph{
           Node Graph::trg(const Edge &e) const { return target(e); }
           
           Node Graph::lowest_deg_node(const std::set<Node> &candidates) const {
-            if(candidates.size() == 0) {
-              #ifdef __DEBUG
-              warn("lowest_deg_node called with an empty set. Returning invalid node (-1).");
-              #endif
-            }
-            // Iterate over candidates
-            Node minCan = *(candidates.begin());
-            size_t min = adj.find(minCan)->second.size();
-            
-            for(const auto& it : candidates) {
-                if(adj.find(it)->second.size() < min) {
-                    min = adj.find(it)->second.size();
-                    minCan = it;
-                }
-            }
-            return minCan;
+                Node minCan = INVALID_NODE;
+		if(candidates.size() == 0) {
+			#ifdef __DEBUG
+			warn("lowest_deg_node called with an empty set. Returning invalid node (-1).");
+			#endif
+		}
+		else {
+			// Iterate over candidates
+			minCan = *(candidates.begin());
+			size_t min = adj.find(minCan)->second.size();
+
+			for (const auto& it : candidates) {
+				if (adj.find(it)->second.size() < min) {
+					min = adj.find(it)->second.size();
+					minCan = it;
+				}
+			}
+		}
+		return minCan;
           }
           
           bool Graph::add_node(const Node u) { // O(1)
