@@ -300,7 +300,6 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 
 bool fvs::is_fvs(const Graph& g, const set<Node>& fvs)
 {
-	// copy graph
 	Graph h(g);
 	for (set<Node>::iterator it = fvs.begin(); it != fvs.end(); ++it) {
 		h.remove_node(*it);
@@ -311,7 +310,7 @@ bool fvs::is_fvs(const Graph& g, const set<Node>& fvs)
 pair<set<Node>, bool> fvs::compression_fvs(const Graph& orig, const set<Node>& S) {
 	Graph g(orig);
 	int k = S.size() - 1;
-	int n = pow(2, S.size() - 1);
+	int n = pow(2, k);
 	set<Node> D; // the guessed intersection
 	// get nodes of the graph
 	set<Node> V;
@@ -349,15 +348,9 @@ pair<set<Node>, bool> fvs::compression_fvs(const Graph& orig, const set<Node>& S
 			for (set<Node>::iterator it = D.begin(); it != D.end(); ++it) {
 				g.remove_node(*it);
 			}
-			// Invalid Initialization of non-const reference of type set.
-			// This is why we have to save the two set_minus :/
-			// However, I just called these sets v1 and v2, this is
-			// an arbritrary choice I made and these names
-			// don't correspond to any meaning of any paper.
-			set<Node> v1 = set_minus(V, S);
-			set<Node> v2 = set_minus(S, D);
-			
-			result = forest_bipartition_fvs(g,g,v1,v2,k-D.size());
+			set<Node> v_without_s = set_minus(V, S);
+			set<Node> s_without_d = set_minus(S, D);
+			result = forest_bipartition_fvs(g,g,v_without_s,s_without_d,k-D.size());
 			if (result.second) {
 				return make_pair(set_union(result.first, D), true);
 			}
