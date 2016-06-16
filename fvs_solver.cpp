@@ -387,6 +387,127 @@ set<Node> fvs::set_union(const set<Node> S, const set<Node> T) {
 	return uni;
 }
 
+set<Node> fvs::compute_min_fvs(const Graph& orig) {
+	Graph g(orig);
+	// get nodes of the graph
+	set<Node> v;
+	for (const auto &it : g.get_adjacency_list()) {
+		v.insert(it.first);
+	}
+	// compute 2-approximation
+	set<Node> fvs_approx = two_approx_fvs(g);
+	// use any subset of half size
+	int k = 0.5*(fvs_approx.size()+fvs_approx.size()%2);
+	set<Node> v_prime;
+	set<Node>::iterator it = fvs_approx.begin();
+	for (int i = 0; i < k; i++) {
+		v_prime.insert(*it);
+		++it;
+	}
+	// initialize sets
+	set<Node> v_iter = set_union(v_prime, set_minus(v, fvs_approx)); // =v0
+	set<Node> help_nodes = set_minus(fvs_approx, v_prime);
+	vector<Node> iter_nodes;
+	for (set<Node>::iterator it = help_nodes.begin(); it != help_nodes.end(); ++it) {
+		iter_nodes.push_back(*it);
+	}
+	pair<set<Node>, bool> result = make_pair(v_prime, false);
+	set<Node> f_iter = v_prime; // f_0 = v_prime
+	// get the iterative compression going
+	for (int j = 0; j < fvs_approx.size() - k; j++) {
+		// construct iterative graph
+		Graph g(orig);
+		set<Node> to_delete = set_minus(v, v_iter);
+		for (set<Node>::iterator it1 = to_delete.begin(); it1 != to_delete.end(); ++it1) {
+			g.remove_node(*it1);
+		}
+		// run compression
+		result = compression_fvs(g, f_iter);
+		if(result.second) {
+			f_iter = result.first;
+		}
+		f_iter.insert(iter_nodes[j]);
+		v_iter.insert(iter_nodes[j]);
+	}
+	return f_iter;
+}
+
+set<Node> fvs::brute_force_fvs(const Graph& orig) {
+	Graph g(orig);
+	// get nodes of the graph
+	vector<Node> v;
+	for (const auto &it : g.get_adjacency_list()) {
+		v.push_back(it.first);
+	}
+	// compute 2-approximation
+	set<Node> fvs_approx = two_approx_fvs(g);
+	cout << "2-approximation of the FVS has size " << fvs_approx.size() << endl;
+	int upper_bound = fvs_approx.size();
+	int lower_bound = 0.5*(fvs_approx.size() + fvs_approx.size() % 2);
+	cout << "The size of the optimal solution must be between " << lower_bound << " and " << upper_bound << "." << endl;
+	// start it!
+	set<Node> solution = fvs_approx;
+	set<Node> guessed_fvs;
+	unsigned long long int num;
+	unsigned long long int t;
+	bool current;
+	unsigned long long int h;
+	while (lower_bound < upper_bound) {
+		bool found = false;
+		int k = 0.5*(lower_bound + upper_bound); // size of fvs to be considered
+		cout << "Considered size: " << k << endl;
+		// get first decimal number where k bits are set in binary representation
+		num = 0;
+		for (unsigned int j = 0; j < k; j++) {
+			num += pow(2, j);
+		}
+		unsigned long long int N = pow(2, v.size());
+		while (num < N && !found) {
+			// guess fvs using binary coding
+			h = num;
+			for (unsigned int l = 0; l < v.size(); l++) {
+				current = h % 2;
+				if (current) {
+					guessed_fvs.insert(v[l]);
+				}
+				h = (h - current) / 2;
+				if (h == 0) {
+					l = v.size();
+				}
+			}
+			// test if it is an fvs
+			if (is_fvs(g, guessed_fvs)) {
+				solution = guessed_fvs;
+				upper_bound = k;
+				found = true;
+				cout << "Found FVS of size " << k << ":" << endl;
+				set<Node>::iterator it = solution.begin();
+				cout << *it;
+				it++;
+				for (it; it != solution.end(); ++it) {
+					cout << ", " << *it;
+				}
+				cout << endl;
+			}
+			guessed_fvs.clear();
+			// compute next number with k bits set
+			// see: https://graphics.stanford.edu/~seander/bithacks.html#NextBitPermutation
+			t = (num | (num - 1)) + 1;
+			num = num == 0 ? 0 : t | ((((t & (~t + 1)) / (num & (~num + 1))) >> 1) - 1);
+		}
+		if(!found){
+			cout << "Did not find an FVS of size " << k << endl;
+			if (upper_bound - lower_bound == 2) {
+				lower_bound = upper_bound;
+			}
+			else {
+				lower_bound = k;
+			}
+		}
+	}
+	return solution;
+}
+
 void fvs::print_graph(Graph& g) {
 	
 	cout << "Printing a graph." << endl;
