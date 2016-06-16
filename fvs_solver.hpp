@@ -160,10 +160,7 @@ namespace fvs {
 	set<Node> compute_min_fvs(const Graph& orig);
 
 	/**
-	*@brief: Computes the minimum feedback vertex set for a given graph.
-	*
-	* The minimum feedback vertex set is found by using a 2 approximation and
-	* binary search combined with plain brute force.
+	*@brief: Computes the minimum feedback vertex set for a given graph using brute force.
 	*
 	* @param[in] orig The graph.
 	* @returns A minimum feedback vertex set.
