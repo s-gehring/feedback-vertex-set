@@ -414,7 +414,7 @@ set<Node> fvs::compute_min_fvs(const Graph& orig) {
 	pair<set<Node>, bool> result = make_pair(v_prime, false);
 	set<Node> f_iter = v_prime; // f_0 = v_prime
 	// get the iterative compression going
-	for (int j = 0; j < fvs_approx.size() - k; j++) {
+	for (size_t j = 0; j < fvs_approx.size() - k; j++) {
 		// construct iterative graph
 		Graph g(orig);
 		set<Node> to_delete = set_minus(v, v_iter);
@@ -454,11 +454,11 @@ set<Node> fvs::brute_force_fvs(const Graph& orig) {
 	unsigned long long int h;
 	while (lower_bound < upper_bound) {
 		bool found = false;
-		int k = 0.5*(lower_bound + upper_bound); // size of fvs to be considered
+		size_t k = 0.5*(lower_bound + upper_bound); // size of fvs to be considered
 		cout << "Considered size: " << k << endl;
 		// get first decimal number where k bits are set in binary representation
 		num = 0;
-		for (unsigned int j = 0; j < k; j++) {
+		for (size_t j = 0; j < k; j++) {
 			num += pow(2, j);
 		}
 		unsigned long long int N = pow(2, v.size());
@@ -484,8 +484,9 @@ set<Node> fvs::brute_force_fvs(const Graph& orig) {
 				set<Node>::iterator it = solution.begin();
 				cout << *it;
 				it++;
-				for (it; it != solution.end(); ++it) {
-					cout << ", " << *it;
+				while(it!= solution.end()) {
+          cout << ", " << *it;
+          ++it;
 				}
 				cout << endl;
 			}

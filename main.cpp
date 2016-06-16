@@ -75,8 +75,8 @@ void run_iter_comp(const char* filepath) {
 		cout << "It did find a minimal FVS of size " << min_fvs.size() << ". The set consists of: " << endl;
 		set<Node>::iterator it = min_fvs.begin();
 		cout << *it;
-		it++;
-		for (it; it != min_fvs.end(); ++it) {
+		while(++it != min_fvs.end()) {
+			
 			cout << ", " << *it;
 		}
 		cout << endl;
@@ -107,8 +107,7 @@ void run_brute_force(const char* filepath) {
 		cout << "It did find a minimal FVS of size " << min_fvs.size() << ". The set consists of: " << endl;
 		set<Node>::iterator it = min_fvs.begin();
 		cout << *it;
-		it++;
-		for (it; it != min_fvs.end(); ++it) {
+		while(++it != min_fvs.end()) {
 			cout << ", " << *it;
 		}
 		cout << endl;
@@ -125,8 +124,9 @@ int main(int argc, char** argv) {
     }
     Graph g;
     read_graph(g, filepath);
-	//print_graph(g);
-	//output_arti_elems_bridges(g);
-	run_brute_force(filepath);
+	  //print_graph(g);
+	  //output_arti_elems_bridges(g);
+	  //run_brute_force(filepath);
+		run_iter_comp(filepath);
     cout << "--------------- END OF PROGRAM ---------------" << endl;
 }
