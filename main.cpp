@@ -5,144 +5,128 @@ using namespace fvs;
 using namespace FvsGraph;
 #define MAX_OUTPUT_ARTICULATION 40
 
+/*
+*  Output all articulation vertices and bridges.
+*  Note, that I defined that
+*  "An element is an articulation element iff
+*  it is an articulation node or a bridge."
+*
+*  Basically something we can cut the graph at
+*  to simplify computation (hopefully by
+*  an exponential factor).
+*
+* @param [in] g The graph used.
+*/
+void output_arti_elems_bridges(const Graph& g) {
+	pair<unordered_set<Node>, unordered_set<Edge> > master_of_arts = g.get_articulation_elements();
+
+	/*
+	**  Output all artiulcation elements.
+	*/
+	cout << "Articulation Vertices:" << endl << "{";
+	bool first_out = true;
+	int max_output = MAX_OUTPUT_ARTICULATION;
+	for (const auto &it : master_of_arts.first) {
+		if (--max_output == 0) { cout << "...[" << master_of_arts.first.size() - MAX_OUTPUT_ARTICULATION << " more]"; break; }
+		if (first_out) {
+			first_out = false;
+			cout << it;
+		}
+		else {
+			cout << ", " << it;
+		}
+	}
+	cout << "}" << endl << endl;
+
+	cout << "Bridges:" << endl << "{";
+	first_out = true;
+	max_output = MAX_OUTPUT_ARTICULATION;
+	for (const auto &it : master_of_arts.second) {
+		if (--max_output == 0) { cout << "...[" << master_of_arts.second.size() - MAX_OUTPUT_ARTICULATION << " more]"; break; }
+		if (first_out) {
+			first_out = false;
+			cout << "(" << it.first << "," << it.second << ")";
+		}
+		else {
+			cout << ", (" << it.first << "," << it.second << ")";
+		}
+	}
+	cout << "}" << endl << endl;
+}
+
+/*
+* Runs iterative compression to find a minimum feedback vertex set in a given graph.
+*
+* @param [in] g The filepath of the file where the graph is in.
+*/
+void run_iter_comp(const char* filepath) {
+	Graph g;
+	read_graph(g, filepath);
+	// compute min fvs by using iterative compression
+	cout << "----------------------------------------------" << endl;
+	cout << "Starting iterative compression for file " << filepath << endl;
+	cout << "----------------------------------------------" << endl;
+	// "preprocessing"
+	cleanup(g);
+	// start! :)
+	set<Node> min_fvs = compute_min_fvs(g);
+	// sanity check and output of the results
+	if (is_fvs(g, min_fvs)) {
+		cout << "It did find a minimal FVS of size " << min_fvs.size() << ". The set consists of: " << endl;
+		set<Node>::iterator it = min_fvs.begin();
+		cout << *it;
+		it++;
+		for (it; it != min_fvs.end(); ++it) {
+			cout << ", " << *it;
+		}
+		cout << endl;
+	}
+	else {
+		cout << "Error: The set we have found is not an FVS!" << endl;
+	}
+}
+
+/*
+* Runs brute force to find a minimum feedback vertex set in a given graph.
+*
+* @param [in] g The filepath of the file where the graph is in.
+*/
+void run_brute_force(const char* filepath) {
+	Graph g;
+	read_graph(g, filepath);
+	// compute min fvs by using brute force
+	cout << "----------------------------------------------" << endl;
+	cout << "Starting brute force for file " << filepath << endl;
+	cout << "----------------------------------------------" << endl;
+	// "preprocessing"
+	cleanup(g);
+	// start! :)
+	set<Node> min_fvs = brute_force_fvs(g);
+	// sanity check and output of the results
+	if (is_fvs(g, min_fvs)) {
+		cout << "It did find a minimal FVS of size " << min_fvs.size() << ". The set consists of: " << endl;
+		set<Node>::iterator it = min_fvs.begin();
+		cout << *it;
+		it++;
+		for (it; it != min_fvs.end(); ++it) {
+			cout << ", " << *it;
+		}
+		cout << endl;
+	}
+	else {
+		cout << "Error: The set we have found is not an FVS!" << endl;
+	}
+}
+
 int main(int argc, char** argv) {
-    const char* filepath = "graphs/mini_graph.txt";
+    const char* filepath = "graphs/pace/095.graph";
     if(argc>1) {
         filepath = argv[1];
     }
     Graph g;
     read_graph(g, filepath);
-    
-    /*
-    **  Test whether the graph has been read correctly.
-    */ 
-    print_graph(g);
-    
-    /*
-    **  Output all articulation vertices and bridges.
-    **  Note, that I defined that
-    **  "An element is an articulation element iff
-    **  it is an articulation node or a bridge."
-    **
-    **  Basically something we can cut the graph at
-    **  to simplify computation (hopefully by
-    **  an exponential factor).
-    */
-    pair<unordered_set<Node>, unordered_set<Edge> > master_of_arts = g.get_articulation_elements();
-
-    /*
-    **  Output all artiulcation elements.
-    */
-    cout << "Articulation Vertices:"<<endl <<"{";
-    bool first_out = true;
-    int max_output = MAX_OUTPUT_ARTICULATION;
-    for(const auto &it : master_of_arts.first) {
-      if(--max_output == 0) { cout << "...["<<master_of_arts.first.size()-MAX_OUTPUT_ARTICULATION<<" more]"; break; }
-      if(first_out) {
-        first_out = false;
-        cout << it;
-      } else {
-        cout << ", " << it;
-      }
-    }
-    cout << "}" << endl <<endl;
-
-    cout << "Bridges:"<<endl <<"{";
-    first_out = true;
-    max_output = MAX_OUTPUT_ARTICULATION;
-    for(const auto &it : master_of_arts.second) {
-      if(--max_output == 0) { cout << "...["<<master_of_arts.second.size()-MAX_OUTPUT_ARTICULATION<<" more]"; break; }
-      if(first_out) {
-        first_out = false;
-        cout << "("<<it.first<< ","<<it.second<<")";
-      } else {
-        cout << ", ("<<it.first<< ","<<it.second<<")";
-      }
-    }
-    cout <<"}" <<endl <<endl;
-    /*
-    **  Do the two approximation, store 
-    **  the forest decomposition in v1, v2.
-    */
-
-    set<Node> v1, v2;
-    v1 = two_approx_fvs(g);
-    for(const auto &it : g.get_adjacency_list()) {
-        // Fill v2
-        if(v1.find(it.first)==v1.end()) v2.insert(it.first);
-    }
-    
-    /*
-    **  Print out the approximate solution. With some stats.
-    */
-    cout << "Found approx. solution: "<<endl;
-    for(const auto& i : v1) {
-        cout << i << ", ";
-    }
-    cout << endl;
-    cout << "Total size: "<<v1.size()<<endl;
-    cout << (0.5*v1.size()) << " <= MinFVS <= "<< v1.size() <<endl;
-
-    /*
-    **  Binary search the minimal k in a range
-    **  from 'size of approx solution * 0.5' to 'size of approx solution * 1.0'.
-    **  TODO: This is the wrong way to do this.
-    */ 
-    int k = v1.size();
-    int min = k/2;
-    int max = k;
-    std::pair<set<Node>, bool> feedback;
-    do {        
-        k = (min + max) / 2;
-        // TODO: Not copy!
-        Graph h(g);
-        set<Node> x (v1);
-        set<Node> y (v2);
-        
-        feedback = fvs::forest_bipartition_fvs(h, g, x, y, k);
-        cout << "Finished calculation for k = "<<k<<" [min:"<<min<<"|max:"<<max<<"]"<<endl;
-        
-        if(feedback.second) {
-            max = k;
-        } else {
-            if(min == k) {
-                // Rounding errors;
-                k = ++min;
-            } else {
-                min = k;
-            }
-            
-        }
-
-    } while(max != min);
-    // This is a bit weird. Binary search cancels if max == min. This is the size of the min FVS. However, since the loop just breaks,
-    // we're not guaranteed a result in currentSolution.
-    Graph h(g);
-    cout << "Found size of min FVS: "<<min<<", continue to compute min FVS."<<endl;
-    feedback = forest_bipartition_fvs(h,g,v1,v2,min);
-    
-    
-    cout << "Algorithm claims, that he " << (feedback.second ? "found" : "didn't find") << " a feedback vertex set." << endl;
-    cout << "However, the sanity function tells us that ";
-    if(is_fvs(g, feedback.first)) {
-        cout << "it did indeed find a FVS." << endl;
-    } else {
-        cout << "it didn't find a FVS, because there exists a cycle: ";   
-        for(const auto &it : feedback.first) {
-            h.remove_node(it);
-        }
-        list<Node> cycle = h.get_cycle().first;
-        cout << "{";
-        for(const auto &it : cycle) {
-            cout << to_string(it)<< "; ";
-        }
-        cout << "}"<<endl;
-    }
-        cout <<endl << "FVS in question: "<<endl;
-    for (const auto& i : feedback.first) {
-        cout << i << ", ";
-    }
-    cout << endl;
-    cout << "Total size: " << feedback.first.size() << endl;
+	//print_graph(g);
+	//output_arti_elems_bridges(g);
+	run_brute_force(filepath);
     cout << "--------------- END OF PROGRAM ---------------" << endl;
 }
