@@ -514,6 +514,9 @@ void fvs::print_nodes(set<Node>& s) {
 		}
 		cout << "}" << endl;
 	}
+	else {
+		cout << "{}" << endl;
+	}
 }
 
 void fvs::print_graph(Graph& g) {
