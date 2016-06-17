@@ -196,6 +196,13 @@ namespace fvs {
 	void print_graph(Graph& g);
 
 	/**
+	* Prints a set of nodes to stdout.
+	*
+	* @param [in] s Set of nodes to be printed.
+	*/
+	void print_nodes(set<Node>& s);
+
+	/**
 	* @brief Creates the induced subgraph g[u].
 	*/
 	void induced_subgraph(Graph& s, Graph& g, const set<Node>& u);
