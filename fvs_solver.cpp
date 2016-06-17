@@ -160,7 +160,7 @@ pair<set<Node>, bool> fvs::forest_bipartition_fvs(Graph& orig, Graph& g, set<Nod
 			f.erase(w);
       h.remove_node(w);
 
-			return retValue = forest_bipartition_fvs(orig, h, f, v2, k - 1);
+			return retValue = forest_bipartition_fvs(orig, h, f, v2, k);
 		} 
 		else if (w != INVALID_NODE) {
 			f.erase(w);
