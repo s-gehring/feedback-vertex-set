@@ -15,9 +15,11 @@ using namespace std;
 int get_random_value(int max);
 void print_matrix(Galois g, int size_row, int size_col, uint64_t** matrix);
 void print_vector(Galois g, int size, uint64_t* vector);
-uint64_t** add_matrix(Galois gal, uint64_t** mat1, uint64_t** mat2, int row, int col);
-uint64_t** scalar_matrix(Galois gal, uint64_t** mat, uint64_t scalar, int row, int col);
+void add_matrix(Galois gal, uint64_t** mat1, uint64_t** mat2, int row, int col);
+void scalar_matrix(Galois gal, uint64_t** mat, uint64_t scalar, int row, int col);
 uint64_t** wedge_product(Galois gal, uint64_t *b, uint64_t *c, int size);
+uint64_t** multiplication_matrix(uint64_t** A, int row_A, int col_A, uint64_t** B, int row_B, int col_B);
+bool swapLine(uint64_t** mat, int row, int col, int line1, int line2);
 /* Creates the compact Matrix Y and stores the random values x_i in vector random_values
  * so random_values has to be a "column of M-half-dim" vec (a pointer of it)
  * random values are integral between 1 and max_random_value
