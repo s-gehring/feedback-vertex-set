@@ -212,18 +212,18 @@ void fvs::cleanup(Graph& g)
 	Node neighbour;
 	Node help;
 	set<Node> processed;
-	for(auto &it : g.get_low_degree_nodes()) {
-		if(g.get_single_degree(it) == 0) {
-			g.remove_node(it);
+	for(auto &it : g.get_adjacency_list()) {
+		if(g.get_single_degree(it.first) == 0) {
+			g.remove_node(it.first);
 		}
-		else if (g.get_single_degree(it) == 1) {
+		else if (g.get_single_degree(it.first) == 1) {
 			// check the neighbour and his neighbours if they were already processed
-			neighbour = *(g.get_neighbors(it).first.begin());
-			g.remove_node(it);
+			neighbour = *(g.get_neighbors(it.first).first.begin());
+			g.remove_node(it.first);
 			while (g.get_single_degree(neighbour) < 2 && processed.find(neighbour) != processed.end()) {
 				if (g.get_single_degree(neighbour) == 0) {
 					g.remove_node(neighbour);
-					neighbour = it; // stop checking neighbours
+					neighbour = it.first; // stop checking neighbours
 				}
 				else if (g.get_single_degree(neighbour) == 1) {
 					help = neighbour;
@@ -232,7 +232,7 @@ void fvs::cleanup(Graph& g)
 				}
 			}
 		}
-		processed.insert(it);
+		processed.insert(it.first);
 	}
 }
 
