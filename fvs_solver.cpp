@@ -509,6 +509,16 @@ set<Node> fvs::brute_force_fvs(const Graph& orig) {
 	return solution;
 }
 
+void fvs::print_nodes(set<Node>& s) {
+	set<Node>::iterator it = s.begin();
+	cout << "{" << *it;
+	while (++it != s.end()) {
+
+		cout << ", " << *it;
+	}
+	cout << "}" << endl;
+}
+
 void fvs::print_graph(Graph& g) {
 	
 	cout << "Printing a graph." << endl;
