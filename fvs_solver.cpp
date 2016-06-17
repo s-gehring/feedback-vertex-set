@@ -310,7 +310,7 @@ bool fvs::is_fvs(const Graph& g, const set<Node>& fvs)
 pair<set<Node>, bool> fvs::compression_fvs(const Graph& orig, const set<Node>& S) {
 	Graph g(orig);
 	int k = S.size() - 1;
-	int n = pow(2, k);
+	int n = pow(2, k + 1);
 	set<Node> D; // the guessed intersection
 	// get nodes of the graph
 	set<Node> V;
@@ -328,17 +328,18 @@ pair<set<Node>, bool> fvs::compression_fvs(const Graph& orig, const set<Node>& S
 	for (int j = 0; j < n; j++) {
 		// guess intersection using binary coding
 		h = j;
-		for (int l = 0; l < k; l++) {
+		for (int l = 0; l < k + 1; l++) {
 			current = h % 2;
 			if (current) {
 				D.insert(T[l]);
 			}
 			h = (h - current) / 2;
 		}
-		set<Node> H = set_minus(S, D);
+		// compute G[S\D]
+		set<Node> s_without_d = set_minus(S, D);
 		Graph g(orig);
 		for (const auto &it : g.get_adjacency_list()) {
-			if (H.find(it.first) == H.end()) {
+			if (s_without_d.find(it.first) == s_without_d.end()) {
 				g.remove_node(it.first);
 			}
 		}
@@ -348,11 +349,12 @@ pair<set<Node>, bool> fvs::compression_fvs(const Graph& orig, const set<Node>& S
 			for (set<Node>::iterator it = D.begin(); it != D.end(); ++it) {
 				g.remove_node(*it);
 			}
+			// run forest bipartition fvs
 			set<Node> v_without_s = set_minus(V, S);
-			set<Node> s_without_d = set_minus(S, D);
 			result = forest_bipartition_fvs(g,g,v_without_s,s_without_d,k-D.size());
 			if (result.second) {
-				return make_pair(set_union(result.first, D), true);
+				set<Node> output = set_union(result.first, D);
+				return make_pair(output, true);
 			}
 		}
 		D.clear();
@@ -481,14 +483,7 @@ set<Node> fvs::brute_force_fvs(const Graph& orig) {
 				upper_bound = k;
 				found = true;
 				cout << "Found FVS of size " << k << ":" << endl;
-				set<Node>::iterator it = solution.begin();
-				cout << *it;
-				it++;
-				while(it!= solution.end()) {
-          cout << ", " << *it;
-          ++it;
-				}
-				cout << endl;
+				print_nodes(solution);
 			}
 			guessed_fvs.clear();
 			// compute next number with k bits set
@@ -511,12 +506,14 @@ set<Node> fvs::brute_force_fvs(const Graph& orig) {
 
 void fvs::print_nodes(set<Node>& s) {
 	set<Node>::iterator it = s.begin();
-	cout << "{" << *it;
-	while (++it != s.end()) {
+	if (s.size() > 0) {
+		cout << "{" << *it;
+		while (++it != s.end()) {
 
-		cout << ", " << *it;
+			cout << ", " << *it;
+		}
+		cout << "}" << endl;
 	}
-	cout << "}" << endl;
 }
 
 void fvs::print_graph(Graph& g) {
