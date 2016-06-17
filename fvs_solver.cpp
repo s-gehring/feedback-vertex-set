@@ -406,9 +406,9 @@ set<Node> fvs::compute_min_fvs(const Graph& orig) {
 		v_prime.insert(*it);
 		++it;
 	}
-	// initialize sets
+	// initialize sets/vectors
 	set<Node> v_iter = set_union(v_prime, set_minus(v, fvs_approx)); // =v0
-	set<Node> help_nodes = set_minus(fvs_approx, v_prime);
+	set<Node> help_nodes = set_minus(fvs_approx, v_prime); // used to create iter_nodes as vector
 	vector<Node> iter_nodes;
 	for (set<Node>::iterator it = help_nodes.begin(); it != help_nodes.end(); ++it) {
 		iter_nodes.push_back(*it);
@@ -417,6 +417,8 @@ set<Node> fvs::compute_min_fvs(const Graph& orig) {
 	set<Node> f_iter = v_prime; // f_0 = v_prime
 	// get the iterative compression going
 	for (size_t j = 0; j < fvs_approx.size() - k; j++) {
+		f_iter.insert(iter_nodes[j]);
+		v_iter.insert(iter_nodes[j]);
 		// construct iterative graph
 		Graph g(orig);
 		set<Node> to_delete = set_minus(v, v_iter);
@@ -428,8 +430,6 @@ set<Node> fvs::compute_min_fvs(const Graph& orig) {
 		if(result.second) {
 			f_iter = result.first;
 		}
-		f_iter.insert(iter_nodes[j]);
-		v_iter.insert(iter_nodes[j]);
 	}
 	return f_iter;
 }
