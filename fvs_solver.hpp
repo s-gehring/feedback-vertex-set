@@ -35,21 +35,20 @@ namespace fvs {
 	pair<list<Node>, bool> find_semidisjoint_cycle(Graph& g);
 
 	/**
-	* @brief Finds the lowest degree node in the graph.
+	* @brief Finds the lowest degree node in the graph induced subgraph of a set of nodes.
 	*
 	* This function iterates over all nodes to find the one with lowest degreen in U.
 	* Only neighbours also in u are counted.
 	*
 	* During the algorithm, it is assumed, that this method always returns a node with
-	* degree 1.
-	*
-	* PLEASE SOMEBODY COME UP WITH A NAME FOR U. A DESCRIPTIVE ONE!
+	* at most degree 1.
 	*
 	* @param [in] g The graph.
-	* @param [in] u A set of nodes.
-	* @returns The lowest degree node in u.
+	* @param [in] u The set of nodes the induced subgraph is created from.
+	* @returns The lowest degree node in u along with its degree.
 	*/
-	Node get_lowest_degree_node(Graph& g, const set<Node>& u);
+	Node get_lowest_degree_node(const Graph& g, const set<Node>& u);
+
 
 	/**
 	* @brief This function checks, if two of the neighbours of v belong to the same tree in g[u].
