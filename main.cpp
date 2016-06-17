@@ -73,13 +73,7 @@ void run_iter_comp(const char* filepath) {
 	// sanity check and output of the results
 	if (is_fvs(g, min_fvs)) {
 		cout << "It did find a minimal FVS of size " << min_fvs.size() << ". The set consists of: " << endl;
-		set<Node>::iterator it = min_fvs.begin();
-		cout << *it;
-		while(++it != min_fvs.end()) {
-			
-			cout << ", " << *it;
-		}
-		cout << endl;
+		print_nodes(min_fvs);
 	}
 	else {
 		cout << "Error: The set we have found is not an FVS!" << endl;
@@ -105,12 +99,7 @@ void run_brute_force(const char* filepath) {
 	// sanity check and output of the results
 	if (is_fvs(g, min_fvs)) {
 		cout << "It did find a minimal FVS of size " << min_fvs.size() << ". The set consists of: " << endl;
-		set<Node>::iterator it = min_fvs.begin();
-		cout << *it;
-		while(++it != min_fvs.end()) {
-			cout << ", " << *it;
-		}
-		cout << endl;
+		print_nodes(min_fvs);
 	}
 	else {
 		cout << "Error: The set we have found is not an FVS!" << endl;
