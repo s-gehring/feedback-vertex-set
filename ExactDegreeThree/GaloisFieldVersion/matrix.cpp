@@ -8,8 +8,8 @@
  * computes mat = scalar * mat
  */
 void scalar_matrix(Galois gal, uint64_t** mat, uint64_t scalar, int row, int col){
-	for(int i = 0; i < col ; i++){
-		for(int j = 0; j < row; j++){
+	for(int i = 0; i < row ; i++){
+		for(int j = 0; j < col; j++){
 			mat[i][j] = gal.multiply(mat[i][j], scalar);
 		}
 	}
@@ -20,8 +20,8 @@ void scalar_matrix(Galois gal, uint64_t** mat, uint64_t scalar, int row, int col
  * computes mat1 = mat1 + mat2
  */
 void add_matrix(Galois gal, uint64_t** mat1, uint64_t** mat2, int row, int col){
-	for(int i = 0; i < col ; i++){
-		for(int j = 0; j < row; j++){
+	for(int i = 0; i < row ; i++){
+		for(int j = 0; j < col; j++){
 			mat1[i][j] = gal.add(mat1[i][j], mat2[i][j]);
 		}
 	}
@@ -30,13 +30,17 @@ void add_matrix(Galois gal, uint64_t** mat1, uint64_t** mat2, int row, int col){
 void print_matrix(Galois g, int size_row, int size_col, uint64_t** matrix)
 {
   cout<<"Matrix is:" <<endl;
+
   for (int i = 0; i < size_row; i++){
+  	
   	for (int j = 0; j < size_col; j++){
+  	
   		cout << g.to_string(matrix[i][j]) << " " ;
   	}
   	cout << endl;
-    
+  	
   }
+  
   
 }
 
@@ -219,28 +223,31 @@ uint64_t** SMW_matrix(Galois gal, uint64_t** V, uint64_t** M, uint64_t** U, int 
 
 	//now add 1 to the diagonal
 	result[0][0] = gal.add( result[0][0], (uint64_t) 1);
-	result[1][1] = gal.add( result[0][0], (uint64_t) 1);
+	result[1][1] = gal.add( result[1][1], (uint64_t) 1);
 	return result;
 }
 
 /*
- * Berechnet M U (I + V M U) V M   (M = M^¹ und V = V_transponiert 2xn)
- * Benötigt um M⁻¹ upzudaten 
+ * Berechnet M U (I + V M U) V M   (M = Y^¹ und V = V_transponiert 2xn)
+ * Benötigt um Y⁻¹ upzudaten 
  * NEEDED FOR SMALL RANK UPDATE 4.1
  */
-uint64_t** SMW_inverse_update_matrix(Galois gal, uint64_t** V, uint64_t** M, uint64_t** U, int size ){
+uint64_t** SMW_inverse_update_matrix(Galois gal, uint64_t** V, uint64_t** Y_inverse, uint64_t** U, int size ){
 
-	uint64_t** MU = multiplication_matrix(gal, M, size, size, U, size, 2); //size x 2
-	uint64_t** SMW = SMW_matrix(gal, V, M, U, size);					   // 2 x 2
-	uint64_t** VM = multiplication_matrix(gal, V, 2, size, M, size, size); // 2 x size
+	uint64_t** MU = multiplication_matrix(gal, Y_inverse, size, size, U, size, 2); //size x 2
+	uint64_t** SMW = SMW_matrix(gal, V, Y_inverse, U, size);	 // 2 x 2
+	uint64_t** SMW_invert = invertMatrix(gal, SMW, 2);	//2x2		
 
-	uint64_t** MU_SMW = multiplication_matrix(gal, MU, size, 2, SMW, 2, 2); //size x 2
-	uint64_t** result = multiplication_matrix(gal, MU_SMW, size, 2, VM, 2, size); //size x size
+	uint64_t** VM = multiplication_matrix(gal, V, 2, size, Y_inverse, size, size); // 2 x size
 
-	free (MU);
+	uint64_t** MU_SMW_invert = multiplication_matrix(gal, MU, size, 2, SMW_invert, 2, 2); //size x 2
+	uint64_t** result = multiplication_matrix(gal, MU_SMW_invert, size, 2, VM, 2, size); //size x size
+
+	free(MU);
 	free(SMW);
 	free(VM);
-	free(MU_SMW);
+	free(MU_SMW_invert);
+	free(SMW_invert);
 
 	return result;
 }
@@ -280,4 +287,18 @@ uint64_t** wedge_product(Galois gal, uint64_t *b, uint64_t *c, int size){
 	free(cbt);
 	return bct;
 
+}
+
+uint64_t** copy_matrix(uint64_t** mat, int row, int col){
+	//construct a row x col matrix
+	uint64_t** copy= new uint64_t*[row];
+	for (int i=0; i<row; i++){
+    	copy[i]= new uint64_t[col];
+	}
+	for (int i = 0; i < row; i++){
+		for (int j = 0; j < col; j++){
+			copy[i][j] = mat[i][j];
+		}
+	}
+	return copy;
 }
