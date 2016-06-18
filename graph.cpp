@@ -202,7 +202,7 @@ namespace FvsGraph{
           }
           
           bool Graph::has_cycle() const {            
-              if(m >= n) {
+              if(m >= n && n > 0) {
                 #ifdef __DEBUG
                 note("Has_Cycle: Use heuristic: There is a cycle, because m [="+std::to_string(m)+"] >= n [="+std::to_string(n)+"]");
                 #endif
