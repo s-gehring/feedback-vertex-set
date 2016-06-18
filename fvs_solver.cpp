@@ -2,7 +2,7 @@
 #include <limits.h>
 #include <fstream>
 #include <sstream>
-
+#include <boost/cstdint.hpp>
 #include "fvs_solver.hpp"
 
 using namespace fvs;
@@ -325,8 +325,9 @@ bool fvs::is_fvs(const Graph& g, const set<Node>& fvs)
 
 pair<set<Node>, bool> fvs::compression_fvs(const Graph& orig, const set<Node>& S) {
 	Graph g(orig);
-	int k = S.size() - 1;
-	int n = pow(2, k + 1);
+	size_t k = S.size() - 1;
+	boost::uint_fast64_t n = pow(2, k + 1);
+	cout << n << endl;
 	set<Node> D; // the guessed intersection
 	// get nodes of the graph
 	set<Node> V;
@@ -341,10 +342,10 @@ pair<set<Node>, bool> fvs::compression_fvs(const Graph& orig, const set<Node>& S
 	}
 	pair<set<Node>, bool> result;
 	int h;
-	for (int j = 0; j < n; j++) {
+	for (size_t j = 0; j < n; j++) {
 		// guess intersection using binary coding
 		h = j;
-		for (int l = 0; l < k + 1; l++) {
+		for (size_t l = 0; l < k + 1; l++) {
 			current = h % 2;
 			if (current) {
 				D.insert(T[l]);
@@ -468,10 +469,10 @@ set<Node> fvs::brute_force_fvs(const Graph& orig) {
 	// start it!
 	set<Node> solution = fvs_approx;
 	set<Node> guessed_fvs;
-	unsigned long long int num;
-	unsigned long long int t;
+	boost::uint_fast64_t num;
+	boost::uint_fast64_t t;
 	bool current;
-	unsigned long long int h;
+	boost::uint_fast64_t h;
 	while (lower_bound < upper_bound) {
 		bool found = false;
 		size_t k = 0.5*(lower_bound + upper_bound); // size of fvs to be considered
@@ -481,11 +482,11 @@ set<Node> fvs::brute_force_fvs(const Graph& orig) {
 		for (size_t j = 0; j < k; j++) {
 			num += pow(2, j);
 		}
-		unsigned long long int N = pow(2, v.size());
+		boost::uint_fast64_t N = pow(2, v.size());
 		while (num < N && !found) {
 			// guess fvs using binary coding
 			h = num;
-			for (unsigned int l = 0; l < v.size(); l++) {
+			for (size_t l = 0; l < v.size(); l++) {
 				current = h % 2;
 				if (current) {
 					guessed_fvs.insert(v[l]);
