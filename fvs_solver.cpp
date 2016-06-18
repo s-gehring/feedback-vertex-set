@@ -284,13 +284,20 @@ set<Node> fvs::two_approx_fvs(Graph& orig)
 			}
 		}
 		// handle remaining vertices with weight 0
+		set<Node> to_delete;
 		for (const auto &it : g.get_adjacency_list()) {
-			if (weights[it.first] == 0) {
+			//cout << weights[it.first] << endl;
+			if (weights[it.first] < numeric_limits<double>::epsilon()) {
 				f.insert(it.first);
 				s.push(it.first);
-				g.remove_node(it.first);
+				to_delete.insert(it.first);
 			}
 		}
+		// delete nodes
+		for (const auto &it : to_delete) {
+			g.remove_node(it);
+		}
+		cleanup(g);
 		cleanup(g);
 	}
 	// shrink the approximation of the fvs set
