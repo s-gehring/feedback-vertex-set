@@ -47,7 +47,7 @@ namespace fvs {
 	* @param [in] u The set of nodes the induced subgraph is created from.
 	* @returns The lowest degree node in u along with its degree.
 	*/
-	Node get_lowest_degree_node(const Graph& g, const set<Node>& u);
+	Node get_lowest_degree_node(Graph& g, const set<Node>& u);
 
 
 	/**
