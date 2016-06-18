@@ -326,7 +326,7 @@ bool fvs::is_fvs(const Graph& g, const set<Node>& fvs)
 pair<set<Node>, bool> fvs::compression_fvs(const Graph& orig, const set<Node>& S) {
 	Graph g(orig);
 	size_t k = S.size() - 1;
-	boost::uint_fast64_t n = pow(2, k + 1);
+	boost::uint_fast64_t n = pow(2, k + 1); // for fvs of large size, this is too small -> need other approach
 	cout << n << endl;
 	set<Node> D; // the guessed intersection
 	// get nodes of the graph
