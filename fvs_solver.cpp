@@ -16,14 +16,10 @@ pair<list<Node>, bool> fvs::find_semidisjoint_cycle(Graph& g)
 	return g.find_semidisjoint_cycle();
 }
 
-Node fvs::get_lowest_degree_node(const Graph &g, const set<Node>& u) {
+Node fvs::get_lowest_degree_node(Graph &g, const set<Node>& u) {
 	// create induced subgraph
 	Graph h(g);
-	for (auto &it : g.get_adjacency_list()) {
-		if (u.find(it.first) == u.end()) {
-			h.remove_node(it.first);
-		}
-	}
+	induced_subgraph(h, g, u);
 	// find node with lowest degree
 	for (const auto &it : h.get_adjacency_list()) {
 		if (h.get_single_degree(it.first) < 2) {
