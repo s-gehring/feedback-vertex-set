@@ -64,8 +64,9 @@ uint64_t** SMW_matrix(Galois gal, uint64_t** V, uint64_t** M, uint64_t** U, int 
  * Benötigt um M⁻¹ upzudaten 
   *NEEDED FOR SMALL RANK UPDATE 4.1
  */
-uint64_t** SMW_inverse_update_matrix(Galois gal, uint64_t** V, uint64_t** M, uint64_t** U, int size );
+uint64_t** SMW_inverse_update_matrix(Galois gal, uint64_t** V, uint64_t** M, uint64_t** SMW, uint64_t** U, int size );
 
 uint64_t** wedge_product(Galois gal, uint64_t *b, uint64_t *c, int size);
 uint64_t** copy_matrix(uint64_t** mat, int row, int col);
+void my_free(uint64_t** mat, int row);
 #endif /* LIN_PARITY_H_ */

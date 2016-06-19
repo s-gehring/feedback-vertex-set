@@ -25,14 +25,14 @@ uint64_t** create_Y(Galois gal, uint64_t **M, int row, int col, uint64_t *random
 	for (int i=0; i<row; i++){
     	result_matrix[i]= new uint64_t[row];
 	}
-
+	
 	//initialise the result_matrix with zeros
 	for (int i=0; i<row; i++){
     	for(int j=0; j<row; j++){
         	result_matrix[i][j]= (uint64_t) 0;
     	}
 	}
-
+	
 	for(int i = 0 ; i < col ; i = i+2){
 		///compute Y = Y + random_value (b ^ c) where b is the i-th col and c the i+1-th col
 		while (random_values[i/2] == 0 ){ 
@@ -248,8 +248,6 @@ uint64_t** get_U(Galois gal, uint64_t** M, int size, uint64_t random, int i){
 	}
 	
 	
-	
-	
 	return V;
  }
 
@@ -263,7 +261,7 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col){
 
 	cout<<"------------------Algorithm start------------------"<< endl;
 	cout << "Startmatrix M :"<<endl;
-	if (row < 100) print_matrix(gal,row, col, M);
+	if (row < 11) print_matrix(gal,row, col, M);
 	else cout << "too big, will not write it down" <<endl;
 
 	cout << "Computing Y...";
@@ -299,6 +297,7 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col){
 		*/
 	}
 	cout << "Computing again Y...";
+	//my_free(Y, row); 
 	Y = create_Y( gal, M, row, col, random_values);
 	cout << "done." << endl;
 	//print_matrix(gal, row, row, Y);
@@ -313,10 +312,7 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col){
 	for(int i = 0; i < col; i = i+2){
 
 		//mat Y_prime = Y - random_values(i/2) *  (M.col(i) * M.col(i+1).t() - M.col(i+1)* M.col(i).t() );
-		uint64_t** Y_prime= new uint64_t*[row];
-		for (int i=0; i<row; i++){
-    		Y_prime[i]= new uint64_t[row];
-		}
+		
 
 		
 		uint64_t** V = get_V(gal, M, row, i);
@@ -328,7 +324,7 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col){
 		uint64_t** SMW = copy_matrix(SMW_det, 2,2);
 		uint64_t det_SMW = gauss.determinant(gal, 2, SMW_det);
 
-		free(SMW_det);
+		my_free(SMW_det,2);
 
 		cout<< "det von Y_prime durch trick ist " << gal.to_string(det_SMW) << endl;
 		
@@ -341,17 +337,27 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col){
 			add_matrix(gal, Y, hilf, row, row);
 
 			//update Y_inverse
-			uint64_t** update_matrix = SMW_inverse_update_matrix( gal,  V,  Y_inverse,  U, row );
+			uint64_t** update_matrix = SMW_inverse_update_matrix( gal,  V,  Y_inverse, SMW,  U, row );
 			add_matrix( gal, Y_inverse, update_matrix,  row, row);
+			my_free(U, row);
+			my_free(V, 2);
+			my_free(SMW, 2);
+			my_free(hilf, row);
 		
 		}
 		else{
+			my_free(U, row);
+			my_free(V, 2);
+			my_free(SMW, 2);
 			
 			parity_basis[counter] = i;
 			parity_basis[counter+1] = i+1;
 			counter = counter + 2;
 		}
 	}
+
+	delete [] random_values;
+
 	return parity_basis;
 }
 
@@ -507,8 +513,10 @@ int main(){
 	
 	Galois gal;
   	Gauss gauss;
-  	gal.set_w(8);
-  	gal.set_mode_naive();
+  	gal.set_w(16);
+  
+  	gal.set_mode_logtb();
+  
   	gal.seed();
 /*
   	int row = 4;
@@ -687,7 +695,8 @@ int main(){
 
   	//int help = mat_lin_dep(gal, Y, row);
   	//cout << "help ist" << help;
-  
+  	my_free(matrix, row);	
+  	delete [] result;
 	return 0;
 
 }

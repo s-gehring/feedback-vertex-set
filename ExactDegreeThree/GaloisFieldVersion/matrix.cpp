@@ -175,7 +175,7 @@ uint64_t** invertMatrix(Galois gal, uint64_t** mat, int size)
         for(int j = size; j < 2*size; ++j)
             inv[i][j-size] = gal.divide(A[i][j],f);
     }
- 	free(A);
+ 	my_free(A, size);
     return inv;
 }
 
@@ -213,13 +213,12 @@ uint64_t** multiplication_matrix(Galois gal, uint64_t** A, int row_A, int col_A,
  */
 uint64_t** SMW_matrix(Galois gal, uint64_t** V, uint64_t** M, uint64_t** U, int size){
 
-	
 
-	uint64_t** VM_hilf = multiplication_matrix(gal, V, 2, size, M, size, size);
+	uint64_t** VM_hilf = multiplication_matrix(gal, V, 2, size, M, size, size);    // 2 x size
 
-	uint64_t** result = multiplication_matrix(gal, VM_hilf, 2, size, U, size, 2);
+	uint64_t** result = multiplication_matrix(gal, VM_hilf, 2, size, U, size, 2);  //size x size
 
-	free(VM_hilf);
+	my_free(VM_hilf, 2);
 
 	//now add 1 to the diagonal
 	result[0][0] = gal.add( result[0][0], (uint64_t) 1);
@@ -232,10 +231,10 @@ uint64_t** SMW_matrix(Galois gal, uint64_t** V, uint64_t** M, uint64_t** U, int 
  * Benötigt um Y⁻¹ upzudaten 
  * NEEDED FOR SMALL RANK UPDATE 4.1
  */
-uint64_t** SMW_inverse_update_matrix(Galois gal, uint64_t** V, uint64_t** Y_inverse, uint64_t** U, int size ){
+uint64_t** SMW_inverse_update_matrix(Galois gal, uint64_t** V, uint64_t** Y_inverse, uint64_t** SMW, uint64_t** U, int size ){
 
 	uint64_t** MU = multiplication_matrix(gal, Y_inverse, size, size, U, size, 2); //size x 2
-	uint64_t** SMW = SMW_matrix(gal, V, Y_inverse, U, size);	 // 2 x 2
+
 	uint64_t** SMW_invert = invertMatrix(gal, SMW, 2);	//2x2		
 
 	uint64_t** VM = multiplication_matrix(gal, V, 2, size, Y_inverse, size, size); // 2 x size
@@ -243,17 +242,14 @@ uint64_t** SMW_inverse_update_matrix(Galois gal, uint64_t** V, uint64_t** Y_inve
 	uint64_t** MU_SMW_invert = multiplication_matrix(gal, MU, size, 2, SMW_invert, 2, 2); //size x 2
 	uint64_t** result = multiplication_matrix(gal, MU_SMW_invert, size, 2, VM, 2, size); //size x size
 
-	free(MU);
-	free(SMW);
-	free(VM);
-	free(MU_SMW_invert);
-	free(SMW_invert);
+	my_free(MU, size);
+
+	my_free(VM, 2);
+	my_free(MU_SMW_invert, size);
+	my_free(SMW_invert,2);
 
 	return result;
 }
-
-
-
 
 
 uint64_t** wedge_product(Galois gal, uint64_t *b, uint64_t *c, int size){
@@ -284,7 +280,7 @@ uint64_t** wedge_product(Galois gal, uint64_t *b, uint64_t *c, int size){
     	}
 	}
 	add_matrix(gal,bct, cbt, size, size);
-	free(cbt);
+	my_free(cbt, size);
 	return bct;
 
 }
@@ -301,4 +297,10 @@ uint64_t** copy_matrix(uint64_t** mat, int row, int col){
 		}
 	}
 	return copy;
+}
+
+void my_free(uint64_t** mat, int row){
+	for (int i=0; i<row; i++)
+    	delete [] mat[i];
+	delete [] mat;
 }
