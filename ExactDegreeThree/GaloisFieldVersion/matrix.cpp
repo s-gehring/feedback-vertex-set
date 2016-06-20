@@ -285,6 +285,9 @@ uint64_t** wedge_product(Galois gal, uint64_t *b, uint64_t *c, int size){
 
 }
 
+
+
+
 uint64_t** copy_matrix(uint64_t** mat, int row, int col){
 	//construct a row x col matrix
 	uint64_t** copy= new uint64_t*[row];

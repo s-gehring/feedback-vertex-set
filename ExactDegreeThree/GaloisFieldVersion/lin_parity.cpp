@@ -3,7 +3,7 @@
 #include "gauss.h"
 #include "lin_parity.h"
 #include "matrix.h"
-
+#include "matrix_xianghui.h"
 
 
 int get_random_value(int max){
@@ -16,8 +16,6 @@ int get_random_value(int max){
  * so random_values has to be a "column of M-half-dim" vec (a pointer of it)
  * random values are integral between 1 and max_random_value
  */ 
- 
-//uint64_t** create_Y(mat M, vec *random_values, int max_random_value){
 uint64_t** create_Y(Galois gal, uint64_t **M, int row, int col, uint64_t *random_values){
 	
 	//create a new row x row matrix (will be Y, the result)
@@ -61,6 +59,7 @@ uint64_t** create_Y(Galois gal, uint64_t **M, int row, int col, uint64_t *random
 /*
  * basically not needed, this is a computation with 2 intermediate steps (but this means there a two row x row matrices)
  * in the other computation (ref create_Y() ) there is a computation for every cell in one line
+ * For debugging very helpful
  */
 uint64_t** create_Y_naive(Galois gal, uint64_t **M, int row, int col, uint64_t *random_values){
 
@@ -121,6 +120,7 @@ uint64_t** create_Y_naive(Galois gal, uint64_t **M, int row, int col, uint64_t *
 
 	return result_matrix;
 }
+
 
 int* simple_parity(Galois gal, uint64_t** M, int row, int col){
 	Gauss gauss;
@@ -251,7 +251,7 @@ uint64_t** get_U(Galois gal, uint64_t** M, int size, uint64_t random, int i){
 	return V;
  }
 
-int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col){
+int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length){
 	Gauss gauss;
 	uint64_t* random_values = new uint64_t[col/2]; 		//stores the randomvalues x_i, created in create_Y (needed later on) 
 	for (int i = 0; i < col/2; i++){
@@ -269,10 +269,6 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col){
 	cout << "done." << endl;
 	//print_matrix(gal, row, row, Y);
 
-	cout << "Computing Inverse Y^-1 ...";
-	uint64_t** Y_inverse = invertMatrix(gal, Y,  row);
-	cout << "done" << endl;
-	
 
 	cout << "Computing determinant of Y ...";
 	uint64_t det = gauss.determinant(gal, row, Y);	
@@ -282,43 +278,62 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col){
 	
 	if (det == 0) {
 		//Hier ist Y zerstört durch det
-		cout << endl << endl << "THERE IS NO PARITY BASIS" << endl << "Searching for max rank submatrix of Y" << endl;
-		for(int k = 0; k < 1000000; k++){
-			cout << "ABORT" << endl;
-		}
-		/*
-		Col<uword> deleted_cols = find_max_submatrix(Y);   //all columns that can be deleted (and still remain full-rank)
-	
-		deleted_cols = all_except(deleted_cols, Y.n_cols); //all columns that can stay (and still remain full-rank)
-		
-		M = M.rows(deleted_cols);
+		cout << endl << endl << "THERE IS NO PARITY BASIS" << endl << "Searching for redundant rows of Y.." ;
 
-		M.print("Reduced M (and new instance for parity-basis-algo with less rows):");
-		*/
+		std::vector<int> del_row  = findRedundantRows(Y, row, row);
+		cout << "done " <<endl;
+		row -= del_row.size(); 
+
+		for(int kk = 0; kk < del_row.size(); kk++){
+			cout << "del_row[" << kk << "] = " << del_row[kk] << endl;
+		}
+
+		//delete the rows in M
+		uint64_t** M_prime = new uint64_t*[row];
+			for (int k=0; k<row; k++){
+    			M_prime[k]= new uint64_t[col];
+		}
+
+		int couter = 0;	
+		for (int i = 0; i < row; i++ ){
+			if ( i == del_row[couter]) couter++;
+			for(int j = 0; j < col; j++){
+				M_prime[i][j] = M[i-counter][j];
+			}
+		}
+
+		M = M_prime;
+
+		//print_matrix(gal, row, col, M);
+
 	}
+
+
 	cout << "Computing again Y...";
 	//my_free(Y, row); 
 	Y = create_Y( gal, M, row, col, random_values);
 	cout << "done." << endl;
 	//print_matrix(gal, row, row, Y);
 
+	cout << "Computing Inverse Y^-1 ...";
+	uint64_t** Y_inverse = invertMatrix(gal, Y,  row);
+	cout << "done" << endl;
 
+	
 
 	int* parity_basis = new int[row];		    //in here we will store the indices of the columns that built the parity basis
 	for (int i = 0; i < row; i++){
 		parity_basis[i] = 0;
 	}
+	
 
 	for(int i = 0; i < col; i = i+2){
 
 		//mat Y_prime = Y - random_values(i/2) *  (M.col(i) * M.col(i+1).t() - M.col(i+1)* M.col(i).t() );
 		
-
-		
+	
 		uint64_t** V = get_V(gal, M, row, i);
-		uint64_t** U = get_U(gal, M, row,random_values[i/2], i);
-
-		
+		uint64_t** U = get_U(gal, M, row,random_values[i/2], i);	
  		
  		uint64_t** SMW_det = SMW_matrix(gal,  V, Y_inverse, U, row);
 		uint64_t** SMW = copy_matrix(SMW_det, 2,2);
@@ -328,7 +343,6 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col){
 
 		cout<< "det von Y_prime durch trick ist " << gal.to_string(det_SMW) << endl;
 		
-
 
 		if (det_SMW != 0){ //if det(Y_prime) != 0
 
@@ -357,151 +371,9 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col){
 	}
 
 	delete [] random_values;
-
+	*length = row;
 	return parity_basis;
 }
-
-
-
-
-/*
- * returns a size-1 dimensional vector (0,1,...,i-1,i+1,..size)
- */
- /*
-Col<uword> every_column_except(int col, int size){//vector muss <uword> sein, um in funktion Y.cols(hilfsvec) eingesetzt werden zu können
-	Col<uword> vector(size-1);
-	int counter = 0;
-	for (int i = 0; i < size; i++ ){
-		if ( i != col){
-		  	vector(counter) = i;
-		  	counter++;
-		}
-	}
-	return vector;
-}
-
-
-mat delete_column(int col, mat matrix){
-	Col<uword> vector = every_column_except(col, matrix.n_cols);
-	return matrix.cols(vector);
-}
-
-
-/*
- * return the vector of indices, which, if we delete all the columns indices with the return indices, is still of full rank
- * therefor it goes through all columns, checks if we can delete this column without decreasing the rank
- */
- /*
-Col<uword> find_max_submatrix(mat Y){
-	int counter = 0; //counter for the amount of deleted columns
-	int rank_Y = arma::rank(Y);
-
-	Col<uword> deleted_cols(Y.n_cols - rank_Y);
-	int pos = 0;
-	int columns = Y.n_cols;
-	for(int i = 0; i < columns; i++){
-		
-		mat help = delete_column(i-counter, Y);
-	
-		if (arma::rank(help) == rank_Y){
-			//we can delete column i without loosing rank
-			//store this information
-			deleted_cols(pos) = i;  
-			pos++;
-			//update the Matrix
-			Y = help;
-			counter++;  //store the information, that we deleted a column (so the next col to check is (i-counter))
-		}
-
-		//otherwise if the rank differs, we do nothing and check the next column
-
-	}
-	return deleted_cols;
-
-}
-
-
-/*
- * input is a vector of indices 
- * outputs a vector of all indices ascending from 0 to size-1 without those in vec_not
- */
- /*
-Col<uword> all_except(Col<uword> vec_not, int size){
-	Col<uword> vec_result(size-vec_not.n_elem);
-	int pos = 0;			//to count up the vec_not vector (the forbidden indices in vec_not are ascending)
-	int counter = 0;		//to count up the vec_result vector
-
-	for (int i = 0; i < size ; i++){
-		
-		if ((vec_not.n_elem > pos) && (vec_not(pos) == i)){   //the first condition takes care of the problem, that after the last forbidden index, pos is still increased
-			//i is skipped, increase pos to the next forbidden index
-			pos++;
-		}
-		else{
-			//index i is not forbidden, write it to the result-vertex
-			vec_result(counter) = i;
-			counter++;
-		}
-	}
-	return vec_result;
-}
-/*
- * The main algorithm 4.1 with handeliing of no parity-basis (section 6.5)
- */
-
- /*
-std::vector<int> simple_parity(mat M, int max_random_value){
-	vec random_values(M.n_cols/2, fill::zeros); 		//stores the randomvalues x_i, created in create_Y (needed later on) 
-	int counter = 0;			   						//for positioning vector_parity 
-
-	cout<<"Algorithm start"<< endl;
-	mat Y = create_Y(M, &random_values, max_random_value);
-
-	M.print("Startmatrix M :");
-	Y.print("Computed Y :");
-
-	int rank_Y = arma::rank(Y);
-	
-	if (rank_Y != Y.n_cols) {
-		cout << endl << endl << "THERE IS NO PARITY BASIS" << endl << "Searching for max rank submatrix of Y" << endl;
-		
-		Col<uword> deleted_cols = find_max_submatrix(Y);   //all columns that can be deleted (and still remain full-rank)
-	
-		deleted_cols = all_except(deleted_cols, Y.n_cols); //all columns that can stay (and still remain full-rank)
-		
-		M = M.rows(deleted_cols);
-
-		M.print("Reduced M (and new instance for parity-basis-algo with less rows):");
-	}
-
-	Y = create_Y(M, &random_values, max_random_value);
-
-	//vec parity_basis(M.n_rows, fill::zeros);		    //in here we will store the indices of the columns that built the parity basis
-	std::vector<int>parity_basis(M.n_rows,0);
-
-	for(int i = 0; i < M.n_cols; i = i+2){
-
-		mat Y_prime = Y - random_values(i/2) *  (M.col(i) * M.col(i+1).t() - M.col(i+1)* M.col(i).t() );
-
-		if (arma::rank(Y_prime) == Y_prime.n_cols){ //if det(Y_prime) != 0
-			Y = Y_prime;
-		}
-		else{
-			//parity_basis(counter) = i;
-			//parity_basis(counter+1) = i+1;
-			parity_basis[counter]=i;
-			parity_basis[counter+1]=i+1;
-			counter = counter + 2;
-		}
-	}
-	return parity_basis;
-}
-*/
-
-
-
-
-
 
 
 
@@ -538,8 +410,8 @@ int main(){
 */
 
 	
-	int row = 400;
-	int col = 600;
+	int row = 41;
+	int col = 60;
 	
  
  	//construct a row x col matrix
@@ -553,65 +425,17 @@ int main(){
 	for (int i=0; i<row; i++){
     	for(int j=0; j<col; j++){
         	matrix[i][j]= gal.uniform_random_element();
+        	if (j == (col-1)){
+        		 matrix[i][j-3] = matrix[i][j];
+        		 matrix[i][j-2] = matrix[i][j];
+        		 matrix[i][j-1] = matrix[i][j];
+        		
+        	}
     	}
 	}
 	cout<< "Startmatrix = ";
 	print_matrix(gal, row, col, matrix);
 
-	/*
-	uint64_t* random_values = new uint64_t[col/2]; 		//stores the randomvalues x_i, created in create_Y (needed later on) 
-	for (int i = 0; i < col/2; i++){
-		random_values[i] = 0;
-	}
-
-	uint64_t** Y = create_Y( gal, matrix, row, col, random_values);
-	
-	//print_matrix(gal, row, row, Y);
-
-	uint64_t** Y_inverse = invertMatrix(gal, Y,  row);
-	
-	cout << "Y is" << endl;
-	print_matrix(gal, row, row, Y);
-	cout << "Y-inverse is" <<endl;
-	print_matrix(gal, row, row,Y_inverse);
-
-	uint64_t** test = multiplication_matrix(gal, Y, row, row, Y_inverse, row, row);
-	cout << "test mult = " << endl;
-	print_matrix(gal, row, row, test);
-
-
-	uint64_t** V = get_V(gal, matrix, row, 0);
-	uint64_t** U = get_U(gal, matrix, row,random_values[0/2], 0);
-
-	uint64_t** UV = multiplication_matrix(gal, U, row, 2, V, 2, row);
-	cout << "UV =" << endl;
-	print_matrix(gal, row, row, UV);
-	add_matrix(gal, Y, UV, row, row);
-
-	cout << "new Y = " << endl;
-	print_matrix(gal, row, row, Y);
-
-
-
-	uint64_t** VY_I = multiplication_matrix(gal, V, 2, row, Y_inverse, row, row);  //2 x row
-	uint64_t** VY_IU = multiplication_matrix(gal, VY_I, 2, row, U, row, 2);      //2 x 2
-	print_matrix(gal, 2, 2, VY_IU);
-	VY_IU[0][0] = gal.add(VY_IU[0][0] , (uint64_t) 1);
-	VY_IU[1][1] = gal.add(VY_IU[1][1] , (uint64_t) 1);
-	
-	print_matrix(gal, 2, 2, VY_IU);
-
-	*/
-	
-/*
-	uint64_t** inv = invertMatrix(gal, matrix,  row);
-	//uint64_t det = gauss.determinant(gal, row, matrix);
-	print_matrix(gal, row, row, inv);
-
-	uint64_t** matrix3 = multiplication_matrix(gal, matrix, row, row, inv , row, row);
-
-	print_matrix(gal, row, row, matrix3);
-*/
 
 /*
 
@@ -679,12 +503,12 @@ int main(){
 */	
 	
 
+	int length;
 
-
-	int* result = simple_parity_fast(gal, matrix, row, col);
+	int* result = simple_parity_fast(gal, matrix, row, col, &length);
 
 	cout << "ENDERGEBNIS " << endl;
-	print_vector_normal(row, result);
+	print_vector_normal(length, result);
 
 /*
 	uint64_t zahl1 = gal.uniform_random_element();
@@ -695,6 +519,8 @@ int main(){
 
   	//int help = mat_lin_dep(gal, Y, row);
   	//cout << "help ist" << help;
+
+
   	my_free(matrix, row);	
   	delete [] result;
 	return 0;
