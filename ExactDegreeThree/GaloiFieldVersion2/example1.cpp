@@ -246,10 +246,13 @@ int main(int argc, char** argv)
 	mat instance = matrixToStadardForm(result.first);
 	instance.print("transformed");
 	Galois ga;
+	ga.set_w(64);
+	ga.set_mode_naive();
+	ga.seed();
 	int length;
 	int* res = simple_parity_fast(ga, instance.toNMatrix(), instance.getHeight(), instance.getWidth(), &length);
 	//for(int i: test)
-	for (int i=0;i<length;i+=2)
+	for (int i=0;i<length;i++)
 	{
 		cout<<"Delete edge from "<<result.second[res[i]].first<< " to "<<result.second[res[i]].second <<endl;
 	}
