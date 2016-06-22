@@ -18,5 +18,8 @@ public:
 	void extractMatrix();
 	void maxSubmatrix();
 	void fullRankPosition();
+	void extractColumns();
+	void col();
+	void inverseSubmatrix();
 };
 

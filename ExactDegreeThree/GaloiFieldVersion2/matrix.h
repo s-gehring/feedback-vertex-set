@@ -16,6 +16,7 @@ public:
 	mat();
 	mat(uint64_t** pmatrix,int width, int height);
 	mat(std::initializer_list<std::initializer_list<uint64_t>> lst);
+	~mat();
 	void zeros();
 	mat operator+(const mat& rhs);
 	mat operator*(const mat& rhs);
@@ -43,7 +44,7 @@ public:
 	void print(const std::string & str) const;
 	std::vector<uint64_t> & col(const int colnumber);
 	std::vector<uint64_t> col(const int colnumber) const;
-	std::vector<uint64_t> getColumn(const int colNumber) const;
+	//std::vector<uint64_t> getColumn(const int colNumber) const;
 	void addColumn(const std::vector<uint64_t> column);
 	void shed_row(const int rowNumber);
 	//void deleteRow(const int row);
@@ -54,13 +55,15 @@ public:
 	mat i();
 	mat operator-(const mat & rhs);
 	std::tuple<mat, mat,std::vector<int>> upper_triangle_transform();
-	mat extractColumns(const mat & input, const std::vector<int> & index);
+	mat extractColumns(const std::vector<int> & index);
 	uint64_t det();
 	void swapColumns(int a, int b);
 	mat backSubstituation(std::tuple<mat, mat, std::vector<int>>& upperTriangle);
 	void extractMatrix(std::vector<int> rowCols);
 	std::vector<int> maxSubmatrix();
+	uint64_t** toNMatrix();
 //	std::vector<int> fullRankMatrixPosition();
+//	std::pair<std::vector<int>, mat> inverseSubmatrix();
 
 private:
 	void updateDimension();
@@ -71,9 +74,12 @@ private:
 	void columnTransform(mat & matrix, mat & inverse, int colNumber, int destColNumber, int rowNumber);
 	void columnOperation(mat& matrix, int colNumber, uint64_t factor);
 	void columnOperation(mat & matrix, int firstColNumber, int secondColNumber, uint64_t factor);
-	void addValue(uint64_t value);
-	void newRow();
-	int currentRow = 0;
+	void addValue(uint64_t value,int columnNumber);
+	uint64_t** nMat=nullptr;
+	void freeMat();
+	int nMatHeight = 0;
+	//void newRow();
+	//int currentRow = 0;
 };
 
 /*class column

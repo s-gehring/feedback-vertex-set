@@ -3,47 +3,57 @@
 
 #include <iostream>
 
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/ublas/matrix_proxy.hpp>
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/ublas/lu.hpp>
-#include <boost/numeric/ublas/vector.hpp>
 #include <cstdlib> 
 #include <ctime>
-#include "matrix.h"
+
+
+
+//using namespace arma;
 
 using namespace std;
 //using namespace boost::numeric::ublas;
 int get_random_value(int max);
-
 /* Creates the compact Matrix Y and stores the random values x_i in vector random_values
  * so random_values has to be a "column of M-half-dim" vec (a pointer of it)
  * random values are integral between 1 and max_random_value
  */ 
-mat create_Y(mat M, vec *random_values, int max_random_value);
+uint64_t** create_Y(Galois gal, uint64_t **M, int row, int col, uint64_t *random_values);
 
 /*
- * returns a size-1 dimensional vector (0,1,...,i-1,i+1,..size)
+ * basically not needed, this is a computation with 2 intermediate steps (but this means there a two row x row matrices)
+ * in the other computation (ref create_Y() ) there is a computation for every cell in one line
+ * For debugging very helpful
  */
-Col<uword> every_column_except(int col, int size);
+uint64_t** create_Y_naive(Galois gal, uint64_t **M, int row, int col, uint64_t *random_values);
 
-mat delete_column(int col, mat matrix);
-/*
- * return the vector of indices, which, if we delete all the columns indices with the return indices, is still of full rank
- * therefor it goes through all columns, checks if we can delete this column without decreasing the rank
- */
-Col<uword> find_max_submatrix(mat Y);
 
 /*
- * input is a vector of indices 
- * outputs a vector of all indices ascending from 0 to size-1 without those in vec_not
+ * This implementations does not use the Sherman Morrisin Woodbury fast rank update formula
  */
-Col<uword> all_except(Col<uword> vec_not, int size);
+int* simple_parity(Galois gal, uint64_t** M, int row, int col);
 
 /*
- * The main algorithm 4.1 with handeliing of no parity-basis (section 6.5)
+ * gibt U = x_i * ( b_i  c_i ) zurück, also x_i * ( i-th col   i+1-th col )
+ * U ist also size x 2 matrix
  */
-std::vector<int> simple_parity(mat M, int max_random_value);
+uint64_t** get_U(Galois gal, uint64_t** M, int size, uint64_t random, int i);
+
+/*
+ * gibt V = ( -c_i  b_i )^T zurück, also ( - i+1-th col   i-th col) ^T
+ * V ist also 2 x size matrix
+ */
+
+ uint64_t** get_V(Galois gal, uint64_t** M, int size, int i);
+
+
+
+/*
+ * This implemetation uses the small rank update formula and also return a maximum number of pairs, if there is no
+ * parity basis
+ * in length it returns the number of lin. independent vectors (so there are lenght/2 pairs)
+ */
+int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length);
+//std::vector<int> simple_parity(mat M, int max_random_value);
 
 
 

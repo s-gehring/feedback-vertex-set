@@ -23,6 +23,9 @@ void Tests::testAll()
 	extractMatrix();
 	maxSubmatrix();
 	fullRankPosition();
+	col();
+	extractColumns();
+	inverseSubmatrix();
 }
 
 void Tests::add()
@@ -110,6 +113,33 @@ void Tests::maxSubmatrix()
 	assert(m.maxSubmatrix() == std::vector<int>({ 3,1 }));
 	mat m2 = { { 1,1,1},{ 0,0,1},{ 0,0,1}};
 	assert(m2.maxSubmatrix() == std::vector<int>({ 1 }));
+}
+
+void Tests::extractColumns()
+{
+	mat m3 = { { 1,1,0 },{ 0,0,1 },{ 1,1,1 } };
+	mat r3 = { { 1,0 },{ 0,1 }, {1,1} };
+	assert(m3.extractColumns(std::vector<int>({ 0,2 })) == r3);
+	mat m = { { 1,0,1,0 },{ 1, 0,0,1 },{ 0,1,1,1 },{ 0,1,2,3 } };
+	mat r = { {1},{1},{0},{0} };
+	assert(m.extractColumns(std::vector<int>({ 0 })) == r);
+}
+
+void Tests::col()
+{
+	mat m3 = { { 1,1,0 },{ 0,0,1 },{ 1,1,1 } };
+	assert(m3.col(2) == std::vector<uint64_t>({0,1,1 }));
+}
+
+void Tests::inverseSubmatrix()
+{
+	/*mat m3 = { { 1,1,0 },{ 0,0,1 },{ 0,1,0 } };
+	assert(m3.inverseSubmatrix().first == std::vector<int>({ 0,2,1 }));
+	assert(m3.inverseSubmatrix().second == m3.i());
+	mat m = { {0, 1,1,0 },{0, 0,0,1 },{ 0,0,1,0 } };
+	assert(m.inverseSubmatrix().first == std::vector<int>({ 1,3, 2}));
+	m.inverseSubmatrix().second.print("");
+	assert(m.inverseSubmatrix().second == m3.i());*/
 }
 
 void Tests::fullRankPosition()

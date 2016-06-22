@@ -21,9 +21,9 @@ mat::mat(uint64_t** pmatrix, int height, int width)
 	{
 		for (int j = 0; j < width; j++)
 		{
-			addValue(pmatrix[i][j]);
+			addValue(pmatrix[i][j],j);
 		}
-		newRow();
+		//newRow();
 	}
 }
 
@@ -47,36 +47,43 @@ mat::mat()
 	updateDimension();
 }
 
+mat::~mat()
+{
+	freeMat();
+}
+
 mat::mat(std::initializer_list<std::initializer_list<uint64_t>> lst)
 	: n_rows(lst.size()), n_cols(n_rows ? lst.begin()->size() : 0)
 {
 	g.set_w(64);
 	g.set_mode_naive();
+	int i = 0;
 	for (const auto& row : lst) {
 		for (const auto& value : row) {
-			addValue(value);
+			addValue(value,i);
+			i++;
 		}
-		newRow();
+		i=0;
+		//newRow();
 	}
 }
 
-void mat::addValue(uint64_t value)
+void mat::addValue(uint64_t value, int columnNumber)
 {
-	if (matrix.size()<=currentRow)
+	if (matrix.size()<= columnNumber)
 	{
 		matrix.push_back(std::vector<uint64_t>(1, value));
 	}
 	else
 	{
-		matrix[currentRow].push_back(value);
+		matrix[columnNumber].push_back(value);
 	}
-	currentRow++;
 }
 
-void mat::newRow()
+/*void mat::newRow()
 {
 	currentRow = 0;
-}
+}*/
 
 void mat::zeros()
 {
@@ -160,7 +167,7 @@ mat join_rows(const mat & left, const mat & right)
 	mat result=left;
 	for (int i=0;i<right.getWidth();i++)
 	{
-		result.addColumn(right.getColumn(i));
+		result.addColumn(right.col(i));
 	}
 	return result;
 }
@@ -225,14 +232,14 @@ void mat::addColumn(const std::vector<uint64_t> column)
 	updateDimension();
 }
 
-std::vector<uint64_t> mat::getColumn(const int colNumber) const
+/*std::vector<uint64_t> mat::getColumn(const int colNumber) const
 {
 	if (colNumber >= matrix.size())
 	{
 		throw;
 	}
 	return matrix[colNumber];
-}
+}*/
 
 
 void mat::print(const std::string & str) const
@@ -491,12 +498,12 @@ std::tuple<mat,mat,std::vector<int>> mat::upper_triangle_transform()
 	return std::make_tuple(matrix,pInverse,result);
 }
 
-mat mat::extractColumns(const mat & input, const std::vector<int> & index)
+mat mat::extractColumns(const std::vector<int> & index)
 {
 	mat result;
 	for (int i : index)
 	{
-		result = join_rows(result, input.col(i));
+		result = join_rows(result, col(i));
 	}
 	return result;
 }
@@ -530,3 +537,51 @@ std::vector<int> findRedundantRows(uint64_t** pmatrix, int height, int width)
 	mat input(pmatrix,height, width);
 	return input.maxSubmatrix();
 }
+
+uint64_t** mat::toNMatrix()
+{
+	freeMat();
+	nMatHeight = getHeight();
+	nMat = new uint64_t* [getHeight()];
+	for (int i = 0; i < getHeight(); i++)
+	{
+		nMat[i]=new uint64_t[getWidth()];
+	}
+	for (int i=0;i<getHeight();i++)
+	{
+		for (int j = 0; j < getWidth(); j++)
+		{
+			nMat[i][j] = at(i,j);
+		}
+	}
+	return nMat;
+}
+
+void mat::freeMat()
+{
+	if (nMat != nullptr)
+	{
+		for (int i = 0; i < nMatHeight; i++)
+		{
+			delete[] nMat[i];
+		}
+		delete[] nMat;
+	}
+}
+
+/*std::pair<std::vector<int>,mat> mat::inverseSubmatrix()
+{
+	auto uTriangle = upper_triangle_transform();
+	std::vector<int> indicies;
+	mat triangle;
+	mat pInverse;
+	std::tie(triangle,pInverse,indicies)= uTriangle;
+	indicies.resize(triangle.getHeight());
+	std::vector<int> firstNumbers(triangle.getHeight());
+	for (int i=0;i<firstNumbers.size();i++)
+	{
+		firstNumbers[i]=i;
+	}
+	mat inverse = backSubstituation(make_tuple(triangle.extractColumns(firstNumbers), pInverse.extractColumns(firstNumbers),firstNumbers));
+	return make_pair(indicies,inverse);
+}*/
