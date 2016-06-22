@@ -1,15 +1,4 @@
-#include <iostream>
-//#include <boost/graph/adjacency_list.hpp>
-//#include <boost/graph/topological_sort.hpp>
-#include <vector>
-#include <algorithm>
-#include <tuple>
-#include <ctime>
-#include "Tests.h"
-#include "lin_parity.h"
-#include "matrix.h"
-#include "graph.hpp"
-#include "fvs_solver.hpp"
+#include "degree3.h"
 
 using namespace std;
 //using namespace fvs;
@@ -154,7 +143,7 @@ vector<int> findRest(const vector <int>& index, int dim)
   return result;
 }*/
 
-mat rearrangeMatrix(const mat & input, const vector<int> & arrangement)
+/*mat rearrangeMatrix(const mat & input, const vector<int> & arrangement)
 {
   mat result(input.n_rows,input.n_cols);
   for(int i=0;i<arrangement.size();i++)
@@ -162,7 +151,7 @@ mat rearrangeMatrix(const mat & input, const vector<int> & arrangement)
     result.col(arrangement[i])=input.col(i);
   }
   return result;
-}
+}*/
 
 
 mat transformFullRowRank(mat input)
@@ -222,8 +211,35 @@ mat matrixToStadardForm(const mat & input)
   arrangement.insert(arrangement.end(), restIndex.begin(), restIndex.end() );
   mat finalMatrix= join_rows(newRight.t(),eye<mat>(fullRank.n_cols-fullRank.n_rows, fullRank.n_cols-fullRank.n_rows));
   finalMatrix.print("finalMatrix");
-  return rearrangeMatrix(finalMatrix,arrangement);
+  return finalMatrix.rearrangeMatrix(arrangement);
 }
+
+set<Node> solveDegree3(Graph& g, set<Node>& s)
+{
+	auto result = graphToMatrix(g, s);
+	result.first.print("IncidenceMatrix");
+	mat instance = matrixToStadardForm(result.first);
+	instance.print("transformed");
+	Galois ga;
+	ga.set_w(64);
+	ga.set_mode_naive();
+	ga.seed();
+	int length;
+	int* res = simple_parity_fast(ga, instance.toNMatrix(), instance.getHeight(), instance.getWidth(), &length);
+	for (int i=0;i<length;i++)
+	{
+		cout<<"Delete edge from "<<result.second[res[i]].first<< " to "<<result.second[res[i]].second <<endl;
+	}
+
+	set<Node> feedBackSet;
+	for (int i=0;i<length;i+=2)
+	{
+		feedBackSet.insert(result.second[res[i]].first);
+	}
+	delete[] res;
+	return feedBackSet;
+}
+
 
 int main(int argc, char** argv)
 {
@@ -241,22 +257,7 @@ int main(int argc, char** argv)
 	}
 	Tests test;
 	test.testAll();
-	auto result = graphToMatrix(g, s);
-	result.first.print("IncidenceMatrix");
-	mat instance = matrixToStadardForm(result.first);
-	instance.print("transformed");
-	Galois ga;
-	ga.set_w(64);
-	ga.set_mode_naive();
-	ga.seed();
-	int length;
-	int* res = simple_parity_fast(ga, instance.toNMatrix(), instance.getHeight(), instance.getWidth(), &length);
-	//for(int i: test)
-	for (int i=0;i<length;i++)
-	{
-		cout<<"Delete edge from "<<result.second[res[i]].first<< " to "<<result.second[res[i]].second <<endl;
-	}
-	delete[] res;
+	solveDegree3(g,s);
    /*for(int i=0;i<test.size();i+=2)
    {
 	   cout<<"Delete note from "<<source(result.second[i],g) <<endl;

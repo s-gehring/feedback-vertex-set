@@ -585,3 +585,13 @@ void mat::freeMat()
 	mat inverse = backSubstituation(make_tuple(triangle.extractColumns(firstNumbers), pInverse.extractColumns(firstNumbers),firstNumbers));
 	return make_pair(indicies,inverse);
 }*/
+
+mat mat::rearrangeMatrix(const std::vector<int> & arrangement)
+{
+  mat result(getHeight(),getWidth());
+  for(int i=0;i<arrangement.size();i++)
+  {
+    result.col(arrangement[i])=col(i);
+  }
+  return result;
+}

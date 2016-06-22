@@ -62,6 +62,7 @@ public:
 	void extractMatrix(std::vector<int> rowCols);
 	std::vector<int> maxSubmatrix();
 	uint64_t** toNMatrix();
+	mat rearrangeMatrix(const std::vector<int> & arrangement);
 //	std::vector<int> fullRankMatrixPosition();
 //	std::pair<std::vector<int>, mat> inverseSubmatrix();
 
