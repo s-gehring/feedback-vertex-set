@@ -20,7 +20,7 @@ namespace fvs {
 	* @param [in] g The graph.
 	* @returns True, if there is a cycle in g.
 	*/
-	bool has_cycle(Graph& g);
+	bool has_cycle(const Graph& g);
 
 	/**
 	* @brief Checks, whether a given graph contains a semidisjoint cycle.
@@ -32,7 +32,7 @@ namespace fvs {
 	* @param [in] g The graph.
 	* @returns The set of nodes forming the semidisjoint cycle in g and an indicator for the existence.
 	*/
-	pair<list<Node>, bool> find_semidisjoint_cycle(Graph& g);
+	pair<list<Node>, bool> find_semidisjoint_cycle(const Graph& g);
 
 	/**
 	* @brief Finds the lowest degree node in the graph induced subgraph of a set of nodes.
@@ -47,7 +47,7 @@ namespace fvs {
 	* @param [in] u The set of nodes the induced subgraph is created from.
 	* @returns The lowest degree node in u along with its degree.
 	*/
-	Node get_lowest_degree_node(Graph& g, const set<Node>& u);
+	Node get_lowest_degree_node(const Graph& g, const set<Node>& u);
 
 
 	/**
@@ -76,7 +76,7 @@ namespace fvs {
 	* @returns A node of u with atleast two neighbours in v, if such a node exists or a null_vertex()
 	*		otherwise.
 	*/
-	Node two_neighbour_node(Graph& g, const set<Node> &u, const set<Node>& v);
+	Node two_neighbour_node(const Graph& g, const set<Node> &u, const set<Node>& v);
 
 	/**
 	* @brief: Deletes all vertices of degree at most 1 along with all incident edges from a given graph.
@@ -136,7 +136,7 @@ namespace fvs {
 	* @returns A pair of a set of nodes and a bool. The set of nodes contains a part of the feedback
 	*		vertex set. The bool will be false, if the algorithm decides that there is no fvs.
 	*/
-	pair<set<Node>, bool> forest_bipartition_fvs(Graph& orig, Graph& g, set<Node>& f, set<Node>& v2, int k);
+	pair<set<Node>, bool> forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node>& f, set<Node>& v2, int k);
 
 	/**
 	*@brief: Tries to decrease the size of a given fvs in a given graph by 1.
@@ -178,6 +178,7 @@ namespace fvs {
 	/**
 	* @brief Reads in a graph from a standard text format.
 	*
+  * OBSOLETE DESCRIPTION
 	* This function reads a graph from a .txt file with the following structure. The first
 	* line contains the number of nodes, the second on the number of edges in the graph. All
 	* other lines contain to positive integers denoting source and target of an edge.
@@ -187,19 +188,26 @@ namespace fvs {
 	* @param [out] g The graph will be written to this object. All data will be cleared before reading the new graph.
 	* @param [in] filepath The path to the file containing the graph.
 	*/
-	void read_graph(Graph& g, const char* filepath);
+	GraphData read_graph(const char* filepath);
 
-	/**
-	* @brief Print g to stdout.
-	*/
-	void print_graph(Graph& g);
-
+  
+  /*
+  * @brief Prints a special formatted graph.
+  *
+  * Prints a graph to stdout in such a way
+  * that it could be read by read_graph again.
+  *
+  * @param[in] g The graph to be output.
+  */
+  void print_graph_tidy(const Graph &g);
+  
+  
 	/**
 	* Prints a set of nodes to stdout.
 	*
 	* @param [in] s Set of nodes to be printed.
 	*/
-	void print_nodes(set<Node>& s);
+	void print_nodes(const set<Node>& s);
 
 	/**
 	* @brief Creates the induced subgraph g[u].

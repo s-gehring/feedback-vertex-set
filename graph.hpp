@@ -31,6 +31,7 @@
 namespace FvsGraph {
   typedef int Node;
   typedef std::pair<int,int> Edge;
+  typedef std::pair<std::map<std::string, Node>, std::map<Node, std::string> > Mapping;
   typedef std::unordered_set<Node> Neighborhood; 
   typedef std::unordered_map<Node, Neighborhood> AdjacencyList;  // A hashtable.
 
@@ -44,11 +45,24 @@ class Graph {
       
       
       public:
+          static bool compare_node_degrees(const std::pair<Node, Neighborhood> u, const std::pair<Node, Neighborhood> v);
+          std::pair<std::set<Node>, bool> get_dumb_approx(const unsigned int limit);
+          void print_nodeset(const std::set<Node> U) const;
+    std::set<Edge> minimal_spanning_forest() const;
+          bool assign_names(Mapping &m);
+          bool induced_subgraph(Graph &s, const std::set<Node>& u) const;
           bool is_deg_three() const;
   
           int get_n() const;
           int get_m() const;
           
+          void print() const;
+          void print_tidy() const;
+  
+          std::string get_node_name(const Node u) const;
+    
+          std::list<std::set<Edge> > get_connected_components() const;
+  
           /**
           * @brief Deletes all nodes with degree at most one.
           *
@@ -118,7 +132,7 @@ class Graph {
           bool has_edge(const Edge &e) const;
   
           /**
-          * @brief Returns the whole adjacency list of the graph.
+          * @brief Returns the wstd::string Graph::get_node_name(Node u)hole adjacency list of the graph.
           *
           * The adjacency list for iterating. The returned object
           * shouldn't be changed. Runs in O(1).
@@ -135,7 +149,7 @@ class Graph {
           * you'll only need to include the vertex with highest degree
           * in such a set. However, this function will return false
           * if no such cycle exists. Runtime of O(|V|) if no semi-disjoint
-          * cycle exists.
+          * cycle exists.std::string Graph::get_node_name(Node u)
           * The front entry in the returned list will be the node with
           * higher degree, if such a node exists.
           *
@@ -259,7 +273,7 @@ class Graph {
           * @param [in] E The list of edges to insert.
           * @returns Nothing
           */    
-          void add_edges(const std::list<Edge> &E);
+          void add_edges(const std::set<Edge> &E);
           
   
           
@@ -333,6 +347,7 @@ class Graph {
       private:
           AdjacencyList adj;
           std::unordered_set<Node> low_deg_nodes;
+          Mapping mapping;
           #ifdef __DEBUG
           Debugger* d;
           #endif
@@ -369,9 +384,16 @@ class Graph {
           }
   
 };
-
+class GraphData {
+  public:
+    Graph graph;
+    std::set<Node> necessary_nodes;
+    Mapping mapping;
+};
 
 }
+
+
 
 namespace std {
   template <> struct hash<FvsGraph::Edge> {

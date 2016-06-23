@@ -59,63 +59,106 @@ void output_arti_elems_bridges(const Graph& g) {
 *
 * @param [in] g The filepath of the file where the graph is in.
 */
-void run_iter_comp(const char* filepath) {
-	Graph g;
-	read_graph(g, filepath);
+set<Node> run_iter_comp(Graph g) {
 	// compute min fvs by using iterative compression
 	cout << "----------------------------------------------" << endl;
-	cout << "Starting iterative compression for file " << filepath << endl;
+	cout << "Starting iterative compression" <<endl;
 	cout << "----------------------------------------------" << endl;
+	
+	
 	// "preprocessing"
-	cleanup(g);
+	g.delete_low_degree_nodes();
 	// start! :)
 	set<Node> min_fvs = compute_min_fvs(g);
 	// sanity check and output of the results
 	if (is_fvs(g, min_fvs)) {
-		cout << "It did find a minimal FVS of size " << min_fvs.size() << ". The set consists of: " << endl;
-		print_nodes(min_fvs);
+		cout << "[Partial] It did find a minimal FVS of size " << min_fvs.size() << ". " << endl;
+		//print_nodes(min_fvs);
+    return min_fvs;
 	}
 	else {
 		cout << "Error: The set we have found is not an FVS!" << endl;
+    return set<Node>();
 	}
 }
 
-/*
-* Runs brute force to find a minimum feedback vertex set in a given graph.
-*
-* @param [in] g The filepath of the file where the graph is in.
-*/
-void run_brute_force(const char* filepath) {
-	Graph g;
-	read_graph(g, filepath);
-	// compute min fvs by using brute force
-	cout << "----------------------------------------------" << endl;
-	cout << "Starting brute force for file " << filepath << endl;
-	cout << "----------------------------------------------" << endl;
-	// "preprocessing"
-	cleanup(g);
-	// start! :)
-	set<Node> min_fvs = brute_force_fvs(g);
-	// sanity check and output of the results
-	if (is_fvs(g, min_fvs)) {
-		cout << "It did find a minimal FVS of size " << min_fvs.size() << ". The set consists of: " << endl;
-		print_nodes(min_fvs);
-	}
-	else {
-		cout << "Error: The set we have found is not an FVS!" << endl;
-	}
-}
 
 int main(int argc, char** argv) {
+    
     const char* filepath = "graphs/pace/095.graph";
     if(argc>1) {
         filepath = argv[1];
     }
-    Graph g;
-    read_graph(g, filepath);
-	  //print_graph(g);
-	  //output_arti_elems_bridges(g);
-	  //run_brute_force(filepath);
-		run_iter_comp(filepath);
+    // Read graph and store information in variables.
+    GraphData graph_data = read_graph(filepath);
+    
+    set<Node> necessary_nodes = graph_data.necessary_nodes;
+    Mapping node_names = graph_data.mapping;
+    Graph g = graph_data.graph;
+    g.assign_names(node_names);
+    Graph orig(g);
+    // Remove bridges.
+    unordered_set<Edge> bridges = g.get_articulation_elements().second;
+    cout << "Removing edges: ";
+    for(const auto &it : bridges) {
+        cout << "("<<g.get_node_name(it.first)<<","<<g.get_node_name(it.second)<<"),";
+      g.remove_edge(it.first, it.second); 
+      if(g.get_single_degree(it.first) == 0) {
+          g.remove_node(it.first);
+          //cout << "Deleting node "<<it.first<<", with original name "<<node_names.second[it.first]<<" because deg = 0"<<endl;   
+      }
+        if(g.get_single_degree(it.second) == 0) {
+          g.remove_node(it.second);
+          //cout << "Deleting node "<<it.second<<", with original name "<<node_names.second[it.second]<<" because deg = 0"<<endl;   
+      }
+      //if(g.get_single_degree(it.second) == 0) g.remove_node(it.first);
+    
+    }
+    cout <<endl<<endl;
+    cout << "Deleted " << bridges.size() << " bridges (useless edges)." <<endl;
+    
+    
+    // Split graph on connected components.  
+    std::list<std::set<Edge> > connected_components = g.get_connected_components();
+    std::list<Graph> connected_graphs;
+    int i = 0;
+    for(const auto &cc : connected_components) {
+        
+        Graph* h = new Graph();
+        /*cout << "Adding: "<<endl;
+        for(const auto &ccc : cc) {
+            ++i;
+            //cout << "("<<g.get_node_name(ccc.first) <<","<<g.get_node_name(ccc.second)<<"),";	
+        }
+        cout <<endl;*/
+        h->add_edges(cc);
+        h->assign_names(node_names);
+        if(h->get_n() > 0 && h->get_m() > 0)
+        connected_graphs.push_back(*h);
+    }
+  	cout << "Found/Created "<< connected_components.size() << " connected components with "<<i<<" edges in total." <<endl;;
+  
+    
+    list<set<Node> > partial_solutions;
+    set<Node> complete_solution;
+    for(auto &it : connected_graphs) {
+		   cout << "Trying to find partial solution for graph "<<it.get_name()<<" [n="<<it.get_n()<<"|m="<<it.get_m()<<"]"<<endl;
+			 
+       partial_solutions.push_back(run_iter_comp(it));
+       cout << "Found partial solution: ";
+		   
+        it.print_nodeset(partial_solutions.back());
+		
+        complete_solution.insert(partial_solutions.back().begin(), partial_solutions.back().end());
+    }
+		cout << "----------------------------------------------"<<endl;
+	
+		cout << "Computed a total of "<<partial_solutions.size()<<" partial solutions with ";
+		cout << complete_solution.size() << " nodes. Adding " << necessary_nodes.size() << " necessary ";
+	  cout << "nodes we get a solution size of " << (complete_solution.size()+necessary_nodes.size())<<"."<<endl;
+		cout << endl;
+	  complete_solution.insert(necessary_nodes.begin(), necessary_nodes.end());
+		cout << "Sanity check: " << (is_fvs(orig, complete_solution)?"PASS":"FAILED")<<endl;
+			
     cout << "--------------- END OF PROGRAM ---------------" << endl;
 }
