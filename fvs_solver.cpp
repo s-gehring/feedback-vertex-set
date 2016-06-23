@@ -23,7 +23,6 @@ using namespace fvs;
     }
   }
   
-  
   bool fvs::has_cycle(const Graph& g) { return g.has_cycle(); }
 
   pair<list<Node>, bool> fvs::find_semidisjoint_cycle(const Graph& g) { return g.find_semidisjoint_cycle(); }
@@ -200,9 +199,6 @@ using namespace fvs;
   return make_pair(fvs, false);
 }
 
-
-
-
   GraphData fvs::read_graph(const char* filepath) {
     GraphData result;
     int current_node_id = 0;
@@ -275,7 +271,6 @@ using namespace fvs;
       } else {
         result.graph.add_edge(s, t);
       }
-
     }
     file.close();
     
@@ -346,8 +341,6 @@ processed.insert(it.first);
     for (const auto &it : g.get_adjacency_list()) {
       weights[it.first] = 1;
     }
-
-
     while (g.get_n() > 0) {
       // contains a semidisjoint cycle?
       // Here, we do not the same as the algorithm in the paper: we only put the node with degree >2 into the fvs
@@ -406,7 +399,6 @@ processed.insert(it.first);
       // handle remaining vertices with weight 0
       set<Node> to_delete;
       for (const auto &it : g.get_adjacency_list()) {
-        //cout << weights[it.first] << endl;
         if (weights[it.first] < numeric_limits<double>::epsilon()) {
           f.insert(it.first);
           s.push(it.first);
@@ -427,7 +419,7 @@ processed.insert(it.first);
     **  Try to shrink the FVS we got.
     **  For this we try to remove each node from
     **  the FVS and see if the resulting set is
-    **  still a FVS.
+    **  still an FVS.
     */
     Node u;
     while (!s.empty()) {
@@ -457,7 +449,6 @@ processed.insert(it.first);
     Graph g(orig);
     size_t k = S.size() - 1;
     boost::uint_fast64_t n = pow(2, k + 1); // for fvs of large size, this is too small -> need other approach
-    //cout << n << endl;
     set<Node> D; // the guessed intersection
     // get nodes of the graph
     set<Node> V;
@@ -661,7 +652,3 @@ processed.insert(it.first);
     }
     return solution;
   }
-
-
-  
-
