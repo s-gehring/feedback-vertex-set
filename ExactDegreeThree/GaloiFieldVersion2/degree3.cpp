@@ -221,8 +221,8 @@ set<Node> solveDegree3(Graph& g, set<Node>& s)
 	mat instance = matrixToStadardForm(result.first);
 	instance.print("transformed");
 	Galois ga;
-	ga.set_w(64);
-	ga.set_mode_naive();
+	ga.set_w(16);
+	ga.set_mode_logtb();
 	ga.seed();
 	int length;
 	int* res = simple_parity_fast(ga, instance.toNMatrix(), instance.getHeight(), instance.getWidth(), &length);
@@ -245,7 +245,7 @@ int main(int argc, char** argv)
 {
 	std::srand(std::time(0));
 	Graph g;
-	fvs::read_graph(g, "mini_graph.txt");
+	fvs::read_graph(g, "027.graph");
 	fvs::print_graph(g);
 	//typedef graph_traits<Graph>::vertex_iterator node_iterator;
 	//pair<node_iterator, node_iterator> nIt = vertices(g);

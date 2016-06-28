@@ -302,6 +302,7 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 			}
 		}
 
+		//my_free(M, row);
 		M = M_prime;
 
 		//print_matrix(gal, row, col, M);
@@ -310,7 +311,7 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 
 
 	cout << "Computing again Y...";
-	//my_free(Y, row); 
+	my_free(Y, row); 
 	Y = create_Y( gal, M, row, col, random_values);
 	cout << "done." << endl;
 	//print_matrix(gal, row, row, Y);
@@ -353,6 +354,8 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 			//update Y_inverse
 			uint64_t** update_matrix = SMW_inverse_update_matrix( gal,  V,  Y_inverse, SMW,  U, row );
 			add_matrix( gal, Y_inverse, update_matrix,  row, row);
+
+			my_free(update_matrix, row);
 			my_free(U, row);
 			my_free(V, 2);
 			my_free(SMW, 2);
@@ -370,6 +373,7 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 		}
 	}
 
+	my_free(Y,row);
 	delete [] random_values;
 	*length = row;
 	return parity_basis;
@@ -387,7 +391,7 @@ int main(){
   	Gauss gauss;
   	gal.set_w(16);
   
-  	gal.set_mode_logtb();
+  	gal.set_mode_naive();
   
   	gal.seed();
 /*
@@ -521,8 +525,9 @@ int main(){
   	//cout << "help ist" << help;
 
 
-  	my_free(matrix, row);	
+  	my_free(matrix, length);	
   	delete [] result;
+
 	return 0;
 
 }
