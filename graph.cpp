@@ -159,10 +159,6 @@ namespace FvsGraph{
     
   
           Graph::Graph() {
-            #ifdef __DEBUG
-            d = Debugger::get_instance("logs/graph.log", Debugger::ALL);
-            d->log("Created graph with pointer " + get_name() + ".", Debugger::DEBUG);
-            #endif
             n = m = 0;;
             
           }
@@ -190,9 +186,6 @@ namespace FvsGraph{
               }
                
             } while(changes_occur);
-            #ifdef __DEBUG
-            debug("Deleted "+std::to_string(changes)+ " nodes with degree at most one.");
-            #endif
             return changes;
           }
             
@@ -202,9 +195,6 @@ namespace FvsGraph{
             std::set<Node> targets;
             std::string tmp = "Clearing node "+std::to_string(v)+ ": ";
             if(!has_node(v)) {
-              #ifdef __DEBUG
-              warn(tmp+ "Node doesn't exist."); 
-              #endif
             } else {
               for(const auto& it : adj[v]) {
                 targets.insert(it);
@@ -212,9 +202,6 @@ namespace FvsGraph{
               for(const auto& it : targets) {
                 remove_edge(v, it);
               }
-              #ifdef __DEBUG
-              note(tmp+"Cleared "+std::to_string(targets.size())+" edges.");
-              #endif
             }
           }
           
@@ -251,17 +238,11 @@ namespace FvsGraph{
                 semi_disjoint_path_one.push_front(current_node);
                 // TODO: Remove unnecessary check.
                 if(get_single_degree(current_node) < 2) {
-                  #ifdef __DEBUG
-                  warn("Trying to find a semidisjoint cycle, and found a node with degree 1: "+std::to_string(current_node)+" this will still work, but may need some unnecessary time.");
-                  #endif
                   not_done = false;
                 } else if(get_single_degree(current_node) > 2) {
                   not_done = false;
                 } else {
                   if(current_node == semi_disjoint_path_one.back()) {
-                    #ifdef __DEBUG
-                    warn("Found a full disjoint cycle. I don't really believe this.");
-                    #endif
 					          semi_disjoint_path_one.pop_back();
                     return std::make_pair(semi_disjoint_path_one, true);
                     }
@@ -284,18 +265,12 @@ namespace FvsGraph{
                 no.insert(current_node);
                 semi_disjoint_path_two.push_back(current_node);
                 if(get_single_degree(current_node) < 2) {
-                  #ifdef __DEBUG
-                  warn("Trying to find a semidisjoint cycle, and found a node with degree 1: "+std::to_string(current_node)+" this will still work, but may need some unnecessary time.");
-                  #endif
                   not_done = false;
                 } else if(get_single_degree(current_node) > 2) {
                   not_done = false;
                 } else {
                   if(current_node == semi_disjoint_path_two.front()) {
                     // This is not possible.
-                    #ifdef __DEBUG
-                    err("Logic error. Got to source node without returning before.");
-                    #endif
                     return std::make_pair(semi_disjoint_path_two, true);
                   }
                 }
@@ -305,9 +280,6 @@ namespace FvsGraph{
                 semi_disjoint_path_two.pop_back();
 				        semi_disjoint_path_two.pop_front();
                 semi_disjoint_path_one.splice(semi_disjoint_path_one.end(), semi_disjoint_path_two);
-                #ifdef __DEBUG
-                debug("Found a disjoint cycle of size "+std::to_string(semi_disjoint_path_one.size())+".");
-                #endif
                 return std::make_pair(semi_disjoint_path_one, true);
               }
             }
@@ -316,9 +288,6 @@ namespace FvsGraph{
           
           bool Graph::has_cycle() const {            
               if(m >= n && n > 0) {
-                #ifdef __DEBUG
-                note("Has_Cycle: Use heuristic: There is a cycle, because m [="+std::to_string(m)+"] >= n [="+std::to_string(n)+"]");
-                #endif
                 return true;
               }
               std::string tmp = "Has_Cycle: Don't use heuristic, because m [="+std::to_string(m)+"] < n [="+std::to_string(n)+"]: DFS ";
@@ -339,9 +308,6 @@ namespace FvsGraph{
                         done.insert(neighbor);
                       } else {
                         if(neighbor != f) {
-                          #ifdef __DEBUG
-                          note(tmp+"found a cycle.");
-                          #endif
                           return true;
                         }
                       }
@@ -349,9 +315,6 @@ namespace FvsGraph{
                   }
                 }
               }
-              #ifdef __DEBUG
-              note(tmp+" found no cycle.");degre
-              #endif
               return false;
           }
   
@@ -478,53 +441,14 @@ namespace FvsGraph{
                           if(used.find(w) != used.end()) {
                             while(w != x.front()) x.pop_front(); 
                           }
-                          return std::make_pair(x, true);/*
-                          bool not_done = true;
-                          while(not_done) {
-                            if(pre.find(v) == pre.end()) {
-                              #ifdef __DEBUG
-                              err("Found a cycle, but can't follow back to original node.");
-                              #endif
-                              return std::pair<std::list<Node>, bool>(std::list<Node>(), true);
-                            }
-                            used.insert(v);
-                            x.push_back(v);
-                            
-                            if(v == INVALID_NODE) {
-                              x.push_back(w);
-                              while(not_done) {
-                                w = pre[w];
-                                if(w == x.back() || w == INVALID_NODE) {
-                                  not_done = false;
-                                } else {
-                                  x.push_front(w); 
-                                }
-                              }
-                              //err("Found a cycle, but can't follow back to original node. Found invalid node."); 
-                              return std::pair<std::list<Node>, bool>(x, true);
-                            }
-                            v = pre[v];
-                            if(v == w || v == x.front()) {
-                               #ifdef __DEBUG
-                               note("Found a cycle, and found its origin. Returning cycle.");
-                               #endif
-                               not_done = false;
-                               return std::pair<std::list<Node>, bool>(x, true);
-                            }
-                          }
-                          #ifdef __DEBUG
-                          note(tmp+"found a cycle.");
-                          #endif
-                          return std::pair<std::list<Node>, bool>(x, true);*/
+                          return std::make_pair(x, true);
                         }
                       }
                     }
                   }
                 } // else { Node has already been found. }
               }
-            #ifdef __DEBUG
-              note(tmp+"found no cycle.");
-            #endif
+            
               return std::make_pair<std::list<Node>, bool>(std::list<Node>(), false);
           }
           
@@ -597,9 +521,7 @@ namespace FvsGraph{
           Node Graph::lowest_deg_node(const std::set<Node> &candidates) const {
                 Node minCan = INVALID_NODE;
 		if(candidates.size() == 0) {
-			#ifdef __DEBUG
-			warn("lowest_deg_node called with an empty set. Returning invalid node (-1).");
-			#endif
+			
 		}
 		else {
 			// Iterate over candidates
@@ -618,31 +540,23 @@ namespace FvsGraph{
           
           bool Graph::add_node(const Node u) { // O(1)
             if(has_node(u)) {
-              #ifdef __DEBUG
-              note("Added node which is already existant: "+std::to_string(u));
-              #endif
+              
               return false;
             }
             adj[u] = Neighborhood();
             ++n;
             low_deg_nodes.insert(u);
-            #ifdef __DEBUG
-            debug("Added note "+std::to_string(u));
-            #endif
+            
             return true;
           }
           
           std::pair<Neighborhood, bool> Graph::get_neighbors(const Node u) const {
           /* O(1) */
               if(!has_node(u)) {
-                #ifdef __DEBUG
-                warn("Requested Neighborhood of a node, which doesn't exist. Node("+std::to_string(u)+")");
-                #endif
+                
                 return std::pair<Neighborhood, bool>(Neighborhood(), false);
               }
-              #ifdef __DEBUG
-              debug("Requested Neighborhood of node "+std::to_string(u)+". Node has degree "+std::to_string(get_single_degree(u))+".");
-              #endif
+              
               return std::pair<Neighborhood, bool>(adj.find(u)->second, true);
           }
           
@@ -667,9 +581,7 @@ namespace FvsGraph{
           
           int Graph::get_single_degree(const Node u) const {
             if(!has_node(u)) {
-              #ifdef __DEBUG
-              err("Get degree of a non-existant node "+std::to_string(u)+".");
-              #endif
+              
               return -1;
             }
             return adj.find(u)->second.size();
@@ -704,9 +616,7 @@ namespace FvsGraph{
               O(1)
             */
               if(u==v) {
-                #ifdef __DEBUG
-                warn("Trying to add recursive edge, which is not allowed. Recursion on node "+std::to_string(u)+".");
-                #endif
+                
                 return false;
               }
               if(!has_edge(u,v)) {
@@ -727,9 +637,7 @@ namespace FvsGraph{
 
                 return true;
               } else {
-                #ifdef __DEBUG
-                warn("Trying to add existant edge. Edge in question: ("+std::to_string(u)+"|"+std::to_string(v)+").");
-                #endif
+                
                 return false;
               }
           }
@@ -738,9 +646,7 @@ namespace FvsGraph{
             adj.clear();
             n = m = 0;
             low_deg_nodes.clear();
-            #ifdef __DEBUG
-            note("Clearing Graph.");
-            #endif
+            
           }
             
           void Graph::remove_edges(const std::set<Edge> &E) {
@@ -768,15 +674,11 @@ namespace FvsGraph{
     
           bool Graph::remove_edge(const Node u, const Node v) {
             if(!has_node(u) || !has_node(v)) {
-              #ifdef __DEBUG
-              warn("Trying to remove edge ("+std::to_string(u)+"|"+std::to_string(v)+"), but at least one of its nodes doesn't exist.");
-              #endif
+              
               return false;
             }
             if(adj[u].find(v) == adj[u].end()) {
-              #ifdef __DEBUG
-              warn("Trying to remove edge ("+std::to_string(u)+"|"+std::to_string(v)+"), but it doesn't exist.");
-              #endif
+              
               return false;
             }
             

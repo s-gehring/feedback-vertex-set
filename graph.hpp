@@ -22,9 +22,6 @@
 
 #define INVALID_NODE -1
 
-#ifdef __DEBUG
-#include "debugger.hpp"
-#endif
 
 
 
@@ -82,9 +79,7 @@ class Graph {
           std::string get_name() const;
     
           /**
-          * @brief Constructor. Initializes with Debugger instance logs/graph.log
-          *
-          * Creates a graph and starts a debugger.
+          * @brief Constructor.
           *
           */
           Graph();
@@ -348,9 +343,6 @@ class Graph {
           AdjacencyList adj;
           std::unordered_set<Node> low_deg_nodes;
           Mapping mapping;
-          #ifdef __DEBUG
-          Debugger* d;
-          #endif
           int n;
           int m;
           int nodes_with_deg_three;
@@ -359,29 +351,6 @@ class Graph {
           int articulate(const Node u, bool vis[], int dsc[], int low[], int par[], std::unordered_set<Node> &a_n, std::unordered_set<Edge> &a_e, int time) const;
           
   
-          void note(std::string s) const {
-            #ifdef __DEBUG
-            d->log("[Graph "+get_name() + "]: "+s, Debugger::NOTE); 
-            #endif
-          }
-          
-          void warn(std::string s) const {
-            #ifdef __DEBUG
-            d->log("[Graph "+get_name() + "]: "+s, Debugger::WARNING); 
-            #endif
-          }
-    
-          void err(std::string s) const {
-            #ifdef __DEBUG
-            d->log("[Graph "+get_name() + "]: "+s, Debugger::ERROR); 
-            #endif
-          }
-    
-          void debug(std::string s) const {
-            #ifdef __DEBUG
-            d->log("[Graph "+get_name() + "]: "+s, Debugger::DEBUG); 
-            #endif
-          }
   
 };
 class GraphData {

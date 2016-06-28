@@ -2,6 +2,7 @@
 #include <limits.h>
 #include <fstream>
 #include <sstream>
+#include <iostream>
 #include <boost/cstdint.hpp>
 #include <boost/variant/variant.hpp>
 #include "fvs_solver.hpp"
@@ -9,6 +10,7 @@
 using namespace fvs;
 
   void fvs::print_nodes(const set<Node>& s) {
+      return;
     set<Node>::iterator it = s.begin();
     if (s.size() > 0) {
       cout << "{" << *it;
@@ -198,23 +200,24 @@ using namespace fvs;
   
   return make_pair(fvs, false);
 }
-
-  GraphData fvs::read_graph(const char* filepath) {
+  GraphData fvs::read_graph() {
     GraphData result;
     int current_node_id = 0;
 
     /*
     **  Open a file at the given filepath to read from.
     */
-    ifstream file(filepath, ios::in);
-    if (!file.is_open()) {
+    /*
+    if (!cin.is_open()) {
       throw std::runtime_error("Cannot open file.");
     }
+    */
     /*
     **  Now, line for line, read the file...
     */
     string line;
-    while (getline(file, line)) {
+    while (!getline(cin, line).eof()) {
+      if(cin.peek() == '#') continue; // Comments
       istringstream iss(line);
       /*
       **  Put the two read strings into src and dst. 
@@ -225,6 +228,7 @@ using namespace fvs;
       char src[50], dst[50]; 
       int x = sscanf(line.c_str(), "%s %s", src, dst);
       if(x != 2) {
+        //std::cout << "src: ["<<src<<"], dst: ["<<dst<<"], line: ["<<line<<"]"<<endl;
         throw std::runtime_error("Can't parse file. Wrong format?");
       }
       /*
@@ -272,7 +276,6 @@ using namespace fvs;
         result.graph.add_edge(s, t);
       }
     }
-    file.close();
     
     /*
     **  If there are nodes, which became necessary after a number of
@@ -535,16 +538,16 @@ processed.insert(it.first);
     }
     // compute 2-approximation
     set<Node> fvs_approx = two_approx_fvs(g);
-    cout << "2 approximation of size " << fvs_approx.size() << " is: " << endl;
-    orig.print_nodeset(fvs_approx);
+    debug cout << "2 approximation of size " << fvs_approx.size() << " is: " << endl;
+    debug orig.print_nodeset(fvs_approx);
       
     pair<set<Node>, bool> fvs_dumb_approx = g.get_dumb_approx(fvs_approx.size());
       
     if(fvs_dumb_approx.second && (fvs_dumb_approx.first.size() < fvs_approx.size())) {
-        cout <<"Greedy approximation is better, take it instead!"<<endl;
+        debug cout <<"Greedy approximation is better, take it instead!"<<endl;
         fvs_approx = fvs_dumb_approx.first;
     } else {
-        cout << "(Greedy approximation is worse with size >= "<<fvs_approx.size()<<")"<<endl;   
+        debug cout << "(Greedy approximation is worse with size >= "<<fvs_approx.size()<<")"<<endl;   
     }
       
     // use any subset of half size
@@ -592,10 +595,10 @@ processed.insert(it.first);
     }
     // compute 2-approximation
     set<Node> fvs_approx = two_approx_fvs(g);
-    cout << "2-approximation of the FVS has size " << fvs_approx.size() << endl;
+    debug cout << "2-approximation of the FVS has size " << fvs_approx.size() << endl;
     int upper_bound = fvs_approx.size();
     int lower_bound = 0.5*(fvs_approx.size() + fvs_approx.size() % 2);
-    cout << "The size of the optimal solution must be between " << lower_bound << " and " << upper_bound << "." << endl;
+    debug cout << "The size of the optimal solution must be between " << lower_bound << " and " << upper_bound << "." << endl;
     // start it!
     set<Node> solution = fvs_approx;
     set<Node> guessed_fvs;
@@ -641,7 +644,7 @@ processed.insert(it.first);
         num = num == 0 ? 0 : t | ((((t & (~t + 1)) / (num & (~num + 1))) >> 1) - 1);
       }
       if(!found){
-        cout << "Did not find an FVS of size " << k << endl;
+        debug cout << "Did not find an FVS of size " << k << endl;
         if (upper_bound - lower_bound == 2) {
           lower_bound = upper_bound;
         }

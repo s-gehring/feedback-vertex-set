@@ -3,6 +3,7 @@
 
 using namespace fvs;
 using namespace FvsGraph;
+#define debug if(0)
 #define MAX_OUTPUT_ARTICULATION 40
 
 /*
@@ -61,9 +62,9 @@ void output_arti_elems_bridges(const Graph& g) {
 */
 set<Node> run_iter_comp(Graph g) {
 	// compute min fvs by using iterative compression
-	cout << "----------------------------------------------" << endl;
-	cout << "Starting iterative compression" <<endl;
-	cout << "----------------------------------------------" << endl;
+	debug cout << "----------------------------------------------" << endl;
+	debug cout << "Starting iterative compression" <<endl;
+	debug cout << "----------------------------------------------" << endl;
 	
 	
 	// "preprocessing"
@@ -72,12 +73,12 @@ set<Node> run_iter_comp(Graph g) {
 	set<Node> min_fvs = compute_min_fvs(g);
 	// sanity check and output of the results
 	if (is_fvs(g, min_fvs)) {
-		cout << "[Partial] It did find a minimal FVS of size " << min_fvs.size() << ". " << endl;
+		debug cout << "[Partial] It did find a minimal FVS of size " << min_fvs.size() << ". " << endl;
 		//print_nodes(min_fvs);
     return min_fvs;
 	}
 	else {
-		cout << "Error: The set we have found is not an FVS!" << endl;
+		debug cout << "Error: The set we have found is not an FVS!" << endl;
     return set<Node>();
 	}
 }
@@ -85,12 +86,8 @@ set<Node> run_iter_comp(Graph g) {
 
 int main(int argc, char** argv) {
     
-    const char* filepath = "graphs/pace/095.graph";
-    if(argc>1) {
-        filepath = argv[1];
-    }
     // Read graph and store information in variables.
-    GraphData graph_data = read_graph(filepath);
+    GraphData graph_data = read_graph();
     
     set<Node> necessary_nodes = graph_data.necessary_nodes;
     Mapping node_names = graph_data.mapping;
@@ -99,9 +96,9 @@ int main(int argc, char** argv) {
     Graph orig(g);
     // Remove bridges.
     unordered_set<Edge> bridges = g.get_articulation_elements().second;
-    cout << "Removing edges: ";
+   debug  cout << "Removing edges: ";
     for(const auto &it : bridges) {
-        cout << "("<<g.get_node_name(it.first)<<","<<g.get_node_name(it.second)<<"),";
+        debug cout << "("<<g.get_node_name(it.first)<<","<<g.get_node_name(it.second)<<"),";
       g.remove_edge(it.first, it.second); 
       if(g.get_single_degree(it.first) == 0) {
           g.remove_node(it.first);
@@ -114,8 +111,8 @@ int main(int argc, char** argv) {
       //if(g.get_single_degree(it.second) == 0) g.remove_node(it.first);
     
     }
-    cout <<endl<<endl;
-    cout << "Deleted " << bridges.size() << " bridges (useless edges)." <<endl;
+    debug cout <<endl<<endl;
+    debug cout << "Deleted " << bridges.size() << " bridges (useless edges)." <<endl;
     
     
     // Split graph on connected components.  
@@ -136,29 +133,33 @@ int main(int argc, char** argv) {
         if(h->get_n() > 0 && h->get_m() > 0)
         connected_graphs.push_back(*h);
     }
-  	cout << "Found/Created "<< connected_components.size() << " connected components with "<<i<<" edges in total." <<endl;;
+  	debug cout << "Found/Created "<< connected_components.size() << " connected components with "<<i<<" edges in total." <<endl;;
   
     
     list<set<Node> > partial_solutions;
     set<Node> complete_solution;
     for(auto &it : connected_graphs) {
-		   cout << "Trying to find partial solution for graph "<<it.get_name()<<" [n="<<it.get_n()<<"|m="<<it.get_m()<<"]"<<endl;
+		   debug cout << "Trying to find partial solution for graph "<<it.get_name()<<" [n="<<it.get_n()<<"|m="<<it.get_m()<<"]"<<endl;
 			 
        partial_solutions.push_back(run_iter_comp(it));
-       cout << "Found partial solution: ";
+       debug cout << "Found partial solution: ";
 		   
-        it.print_nodeset(partial_solutions.back());
+        debug it.print_nodeset(partial_solutions.back());
 		
         complete_solution.insert(partial_solutions.back().begin(), partial_solutions.back().end());
     }
-		cout << "----------------------------------------------"<<endl;
+		debug cout << "----------------------------------------------"<<endl;
 	
-		cout << "Computed a total of "<<partial_solutions.size()<<" partial solutions with ";
-		cout << complete_solution.size() << " nodes. Adding " << necessary_nodes.size() << " necessary ";
-	  cout << "nodes we get a solution size of " << (complete_solution.size()+necessary_nodes.size())<<"."<<endl;
-		cout << endl;
+		debug cout << "Computed a total of "<<partial_solutions.size()<<" partial solutions with ";
+		debug cout << complete_solution.size() << " nodes. Adding " << necessary_nodes.size() << " necessary ";
+	  debug cout << "nodes we get a solution size of " << (complete_solution.size()+necessary_nodes.size())<<"."<<endl;
+		debug cout << endl;
 	  complete_solution.insert(necessary_nodes.begin(), necessary_nodes.end());
-		cout << "Sanity check: " << (is_fvs(orig, complete_solution)?"PASS":"FAILED")<<endl;
+        
+        for(const auto &it : complete_solution) {
+            cout << node_names.second[it] << endl;   
+        }
+	    debug cout << "Sanity check: " << (is_fvs(orig, complete_solution)?"PASS":"FAILED")<<endl;
 			
-    cout << "--------------- END OF PROGRAM ---------------" << endl;
+       debug cout << "--------------- END OF PROGRAM ---------------" << endl;
 }

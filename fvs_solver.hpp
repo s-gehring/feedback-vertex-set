@@ -6,6 +6,7 @@
 #include <set>
 #include <vector>
 #include <stack>
+#define debug if(0)
 #include "graph.hpp"
 
 using namespace std;
@@ -188,7 +189,7 @@ namespace fvs {
 	* @param [out] g The graph will be written to this object. All data will be cleared before reading the new graph.
 	* @param [in] filepath The path to the file containing the graph.
 	*/
-	GraphData read_graph(const char* filepath);
+	GraphData read_graph();
 
   
   /*
