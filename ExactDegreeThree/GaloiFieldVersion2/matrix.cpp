@@ -245,15 +245,22 @@ void mat::addColumn(const std::vector<uint64_t> column)
 void mat::print(const std::string & str) const
 {
 	std::cout << str<<std::endl;
-	std::stringstream output;
-	for (int j = 0; j<getHeight(); j++)
+	if (getWidth()>30 || getHeight()>30)
 	{
-		output.str(std::string());
-		for (int i = 0; i < getWidth(); i++)
+		std::cout<<"Matrix too big, Width: "<<getWidth()<<" Height: "<<getHeight() <<std::endl;
+	}
+	else
+	{
+		std::stringstream output;
+		for (int j = 0; j<getHeight(); j++)
 		{
-			output<<matrix[i][j] <<" ";
+			output.str(std::string());
+			for (int i = 0; i < getWidth(); i++)
+			{
+				output<<matrix[i][j] <<" ";
+			}
+			std::cout<<output.str() << std::endl;
 		}
-		std::cout<<output.str() << std::endl;
 	}
 }
 
