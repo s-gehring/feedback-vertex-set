@@ -385,22 +385,26 @@ std::vector<int> mat::maxSubmatrix()
 	return result;
 }
 
-void mat::extractMatrix(std::vector<int> rowCols)
+void mat::extractMatrix(std::vector<int> rowCols, const std::vector<int> & arrangement)
 {
 	std::sort(rowCols.begin(), rowCols.end(), std::greater<int>());
 	for (auto i : rowCols)
 	{
 		matrix.erase(matrix.begin()+i);
 	}
+	std::sort(rowCols.begin(), rowCols.end(), [&arrangement](int & left, int & right) {
+		return arrangement[left] > arrangement[right];
+	});
 	for (auto i: rowCols)
 	{
 		for (auto & j : matrix)
 		{
-			j.erase(j.begin()+i);
+			j.erase(j.begin()+ arrangement[i]);
 		}
 	}
 	matrix.shrink_to_fit();
 	matrix[0].shrink_to_fit();
+	updateDimension();
 }
 
 /*template <typename T>
@@ -443,6 +447,60 @@ void mat::columnOperation(mat & matrix, int firstColNumber, int secondColNumber,
 	}
 }
 
+void mat::rowTransform(mat & matrix, mat & inverse, int rowNumber, int destRowNumber, int colNumber)
+{
+	if (matrix(rowNumber, colNumber) != 1)
+	{
+		uint64_t inv = g.inverse(matrix(rowNumber, colNumber));
+		rowOperation(matrix, rowNumber, inv);
+		rowOperation(inverse, rowNumber, inv);
+	}
+	uint64_t fac = matrix(destRowNumber, colNumber);
+	rowOperation(matrix, rowNumber, destRowNumber, fac);
+	rowOperation(inverse, rowNumber, destRowNumber, fac);
+}
+
+void mat::rowTransform(mat & matrix, int rowNumber, int destRowNumber, int colNumber)
+{
+	if (matrix(rowNumber, colNumber) != 1)
+	{
+		uint64_t inv = g.inverse(matrix(rowNumber, colNumber));
+		rowOperation(matrix, rowNumber, inv);
+	}
+	uint64_t fac = matrix(destRowNumber, colNumber);
+	rowOperation(matrix, rowNumber, destRowNumber, fac);
+}
+
+void mat::rowOperation(mat& matrix, int rowNumber, uint64_t factor)
+{
+	for (int i = 0; i < matrix.getWidth(); i++)
+	{
+		if (factor == 0)
+		{
+			matrix(rowNumber, i) = 0;
+		}
+		else if (factor!=1)
+		{
+			matrix(rowNumber, i) = g.multiply(matrix(rowNumber, i), factor);
+		}
+	}
+}
+
+void mat::rowOperation(mat & matrix, int firstRowNumber, int secondRowNumber, uint64_t factor)
+{
+	for (int i = 0; i < matrix.getWidth(); i++)
+	{
+		if (factor == 1)
+		{
+			matrix(secondRowNumber, i) = g.add(matrix(firstRowNumber, i), matrix(secondRowNumber, i));
+		}
+		else if (factor != 0)
+		{
+			matrix(secondRowNumber, i) = g.add(g.multiply(matrix(firstRowNumber, i), factor), matrix(secondRowNumber, i));
+		}
+	}
+}
+
 uint64_t mat::det()
 {
 	auto transform = upper_triangle_transform();
@@ -477,7 +535,8 @@ mat mat::backSubstituation(std::tuple < mat, mat,std::vector<int> > & upperTrian
 std::tuple<mat,mat,std::vector<int>> mat::upper_triangle_transform()
 {
 	mat matrix = (*this);
-	mat pInverse = eye<mat>(getHeight(), getWidth());
+	//mat pInverse = eye<mat>(getHeight(), getWidth());
+	mat pInverse = eye<mat>(getWidth(), getWidth());
 	std::vector<int> result;
 	for (int i = 0; i < getWidth(); i++)
 	{
@@ -503,6 +562,42 @@ std::tuple<mat,mat,std::vector<int>> mat::upper_triangle_transform()
 		}
 	}
 	return std::make_tuple(matrix,pInverse,result);
+}
+
+std::pair<mat,std::vector<int>> mat::toStandarForm()
+{
+	mat matrix = (*this);
+	std::vector<int> result;
+	for (int i = 0; i < getWidth(); i++)
+	{
+		result.push_back(i);
+	}
+	for (int n = 0; n < std::min(matrix.getHeight(), matrix.getWidth()); n++)
+	{
+		int nonzero = findNonZero(matrix, n, n);
+
+		if (nonzero != -1) //or column is 0
+		{
+			if (nonzero != n)
+			{
+				matrix.swapColumns(nonzero, n);
+				std::swap(result[nonzero], result[n]);
+			}
+
+			for (int i = n + 1; i < matrix.getHeight(); i++)
+			{
+				rowTransform(matrix, n, i, n);
+			}
+		}
+	}
+	for (int i = matrix.getHeight() - 1; i >= 0; i--)
+	{
+		for (int j = 0; j<i; j++)
+		{
+			rowTransform(matrix, i, j, i);
+		}
+	}
+	return std::make_pair(matrix, result);
 }
 
 mat mat::extractColumns(const std::vector<int> & index)
@@ -583,13 +678,19 @@ void mat::freeMat()
 	mat triangle;
 	mat pInverse;
 	std::tie(triangle,pInverse,indicies)= uTriangle;
-	indicies.resize(triangle.getHeight());
 	std::vector<int> firstNumbers(triangle.getHeight());
 	for (int i=0;i<firstNumbers.size();i++)
 	{
 		firstNumbers[i]=i;
 	}
-	mat inverse = backSubstituation(make_tuple(triangle.extractColumns(firstNumbers), pInverse.extractColumns(firstNumbers),firstNumbers));
+	std::vector<int> remainingNumbers;
+	for (int i=triangle.getHeight();i<triangle.getWidth();i++)
+	{
+		remainingNumbers.push_back(i);
+	}
+	pInverse.extractMatrix(remainingNumbers,indicies);
+	indicies.resize(triangle.getHeight());
+	mat inverse = backSubstituation(make_tuple(triangle.extractColumns(firstNumbers),pInverse ,firstNumbers));
 	return make_pair(indicies,inverse);
 }*/
 

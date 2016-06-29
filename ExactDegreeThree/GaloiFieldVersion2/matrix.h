@@ -59,12 +59,18 @@ public:
 	uint64_t det();
 	void swapColumns(int a, int b);
 	mat backSubstituation(std::tuple<mat, mat, std::vector<int>>& upperTriangle);
-	void extractMatrix(std::vector<int> rowCols);
+	void extractMatrix(std::vector<int> rowCols,const std::vector<int> & arrangement);
 	std::vector<int> maxSubmatrix();
 	uint64_t** toNMatrix();
 	mat rearrangeMatrix(const std::vector<int> & arrangement);
 //	std::vector<int> fullRankMatrixPosition();
 //	std::pair<std::vector<int>, mat> inverseSubmatrix();
+	std::pair<mat, std::vector<int>> toStandarForm();
+	void rowTransform(mat & matrix, mat & inverse, int rowNumber, int destRowNumber, int colNumber);
+	void rowOperation(mat& matrix, int rowNumber, uint64_t factor);
+	void rowOperation(mat & matrix, int firstRowNumber, int secondRowNumber, uint64_t factor);
+	void rowTransform(mat & matrix, int rowNumber, int destRowNumber, int colNumber);
+
 
 private:
 	void updateDimension();

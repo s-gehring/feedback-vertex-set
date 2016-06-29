@@ -17,9 +17,10 @@ public:
 	void rankMat();
 	void extractMatrix();
 	void maxSubmatrix();
-	void fullRankPosition();
+	void toStandardForm();
 	void extractColumns();
 	void col();
 	void inverseSubmatrix();
+	std::vector<int> findRest(const std::vector <int>& index, int dim);
 };
 

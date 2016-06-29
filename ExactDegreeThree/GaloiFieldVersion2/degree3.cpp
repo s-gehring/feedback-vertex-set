@@ -176,7 +176,7 @@ mat transformFullRowRank(mat input)
   return input;
 }
 
-mat matrixToStadardForm(const mat & input)
+mat colinearToLinear(const mat & input)
 {
   mat fullRank= transformFullRowRank(input);
   fullRank.print("transformed row rank");
@@ -192,23 +192,32 @@ mat matrixToStadardForm(const mat & input)
   mat res=U.t()*L.t()*P;
   res.print("check");
   vector<int> invSubMatrix= findOnes(P,L.n_cols);*/
-  //vector<int> invSubMatrix;
-  //mat inverse;
-  //auto inverseSub= fullRank.inverseSubmatrix();
-  //std::tie(invSubMatrix, inverse) = inverseSub;
-  vector<int> invSubMatrix =std::get<2>(fullRank.upper_triangle_transform());
-  invSubMatrix.resize(fullRank.getHeight());
-  vector<int> restIndex= findRest(invSubMatrix,fullRank.n_cols);
-  mat submatrix=fullRank.extractColumns(invSubMatrix);
-  submatrix.print("sub");
-  mat inverse=submatrix.i();
-  inverse.print("inverse");
-  mat rest= fullRank.extractColumns(restIndex);
-  rest.print("rest");
-  mat newRight=inverse*rest;
-  newRight.print("newRight");
-  vector<int> arrangement=invSubMatrix;
-  arrangement.insert(arrangement.end(), restIndex.begin(), restIndex.end() );
+  /*vector<int> invSubMatrix;
+  mat inverse;
+  auto inverseSub= fullRank.inverseSubmatrix();
+  std::tie(invSubMatrix, inverse) = inverseSub;*/
+  /*vector<int> invSubMatrix =std::get<2>(fullRank.upper_triangle_transform());
+  invSubMatrix.resize(fullRank.getHeight());*/
+  auto standardForm = fullRank.toStandarForm();
+  vector<int> arrangement = standardForm.second;
+  vector<int> restIndex;// = findRest(invSubMatrix, fullRank.n_cols);
+  for (int i = fullRank.getHeight();i<fullRank.getWidth();i++)
+  {
+	  restIndex.push_back(i);
+  }
+  //mat submatrix=fullRank.extractColumns(invSubMatrix);
+  //submatrix.print("sub");
+  standardForm.first.print("1");
+  mat newRight = standardForm.first.extractColumns(restIndex);
+  newRight.print("nR");
+  //mat inverse=submatrix.i();
+//  inverse.print("inverse");
+//  mat rest= fullRank.extractColumns(restIndex);
+//  rest.print("rest");
+//  mat newRight=inverse*rest;
+//  newRight.print("newRight");
+  //vector<int> arrangement=invSubMatrix;
+  //arrangement.insert(arrangement.end(), restIndex.begin(), restIndex.end() );
   mat finalMatrix= join_rows(newRight.t(),eye<mat>(fullRank.n_cols-fullRank.n_rows, fullRank.n_cols-fullRank.n_rows));
   finalMatrix.print("finalMatrix");
   return finalMatrix.rearrangeMatrix(arrangement);
@@ -218,11 +227,11 @@ set<Node> solveDegree3(Graph& g, set<Node>& s)
 {
 	auto result = graphToMatrix(g, s);
 	result.first.print("IncidenceMatrix");
-	mat instance = matrixToStadardForm(result.first);
+	mat instance = colinearToLinear(result.first);
 	instance.print("transformed");
 	Galois ga;
-	ga.set_w(16);
-	ga.set_mode_logtb();
+	ga.set_w(64);
+	ga.set_mode_naive();
 	ga.seed();
 	int length;
 	int* res = simple_parity_fast(ga, instance.toNMatrix(), instance.getHeight(), instance.getWidth(), &length);
@@ -243,9 +252,10 @@ set<Node> solveDegree3(Graph& g, set<Node>& s)
 
 int main(int argc, char** argv)
 {
-	std::srand(std::time(0));
+	//std::srand(std::time(0));
 	Graph g;
-	fvs::read_graph(g, "027.graph");
+//	fvs::read_graph(g, "mini_graph.txt");
+	fvs::read_graph(g, argv[1]);
 	fvs::print_graph(g);
 	//typedef graph_traits<Graph>::vertex_iterator node_iterator;
 	//pair<node_iterator, node_iterator> nIt = vertices(g);
