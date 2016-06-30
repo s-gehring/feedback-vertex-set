@@ -191,11 +191,6 @@ namespace fvs {
 	* @param [in] s Set of nodes to be printed.
 	*/
 	void print_nodes(const set<Node>& s);
-
-	/**
-	* @brief Creates the induced subgraph g[u].
-	*/
-	void induced_subgraph(Graph& s, Graph& g, const set<Node>& u);
 	
 	enum direction_tag { forward, inverse };
 }
