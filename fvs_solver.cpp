@@ -8,7 +8,6 @@
 using namespace fvs;
 
   void fvs::print_nodes(const set<Node>& s) {
-      return;
     set<Node>::iterator it = s.begin();
     if (s.size() > 0) {
       cout << "{" << *it;
