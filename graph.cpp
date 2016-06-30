@@ -1,24 +1,7 @@
 #ifndef _GRAPH_CPP
 #define _GRAPH_CPP
 
-#include <vector>
-#include <time.h>
-
-#include <stack>
-#include <list>
-#include <unordered_map>
-#include <unordered_set>
-#include <set>
-#include <iostream>
-#include <map>
-#include <string>
-#include <random>
-#include <math.h>
-
 #include "graph.hpp"
-
-
-
 
 namespace FvsGraph{
             
