@@ -80,16 +80,6 @@ namespace fvs {
 	Node two_neighbour_node(const Graph& g, const set<Node> &u, const set<Node>& v);
 
 	/**
-	* @brief: Deletes all vertices of degree at most 1 along with all incident edges from a given graph.
-	*
-	* As long as a given graph has vertices of degree at most 1, all incident edges and all vertices
-	* are deleted. We need this as a subroutine for the 2-approx-algo.
-	*
-	* @param [in] g The graph.
-	*/
-	void cleanup(Graph& g);
-
-	/**
 	*@brief: Computes a 2 - approximation of an fvs for a given graph.
 	*
 	* This function computes a 2 - approximation of a feedback vertex set following
@@ -158,14 +148,6 @@ namespace fvs {
 	* @returns A minimum feedback vertex set.
 	*/
 	set<Node> compute_min_fvs(const Graph& orig);
-
-	/**
-	*@brief: Computes the minimum feedback vertex set for a given graph using brute force.
-	*
-	* @param[in] orig The graph.
-	* @returns A minimum feedback vertex set.
-	*/
-	set<Node> brute_force_fvs(const Graph& orig);
 
 	/**
 	*@brief: Computes the difference set of two given sets.
