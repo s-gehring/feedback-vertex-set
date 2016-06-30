@@ -20,7 +20,6 @@ using namespace FvsGraph;
 */
 void output_arti_elems_bridges(const Graph& g) {
 	pair<unordered_set<Node>, unordered_set<Edge> > master_of_arts = g.get_articulation_elements();
-
 	/*
 	**  Output all artiulcation elements.
 	*/
@@ -38,7 +37,6 @@ void output_arti_elems_bridges(const Graph& g) {
 		}
 	}
 	cout << "}" << endl << endl;
-
 	cout << "Bridges:" << endl << "{";
 	first_out = true;
 	max_output = MAX_OUTPUT_ARTICULATION;
@@ -65,8 +63,6 @@ set<Node> run_iter_comp(Graph g) {
 	debug cout << "----------------------------------------------" << endl;
 	debug cout << "Starting iterative compression" <<endl;
 	debug cout << "----------------------------------------------" << endl;
-	
-	
 	// "preprocessing"
 	g.delete_low_degree_nodes();
 	// start! :)
@@ -83,12 +79,9 @@ set<Node> run_iter_comp(Graph g) {
 	}
 }
 
-
 int main(int argc, char** argv) {
-    
     // Read graph and store information in variables.
     GraphData graph_data = read_graph();
-    
     set<Node> necessary_nodes = graph_data.necessary_nodes;
     Mapping node_names = graph_data.mapping;
     Graph g = graph_data.graph;
@@ -96,7 +89,7 @@ int main(int argc, char** argv) {
     Graph orig(g);
     // Remove bridges.
     unordered_set<Edge> bridges = g.get_articulation_elements().second;
-   debug  cout << "Removing edges: ";
+    debug  cout << "Removing edges: ";
     for(const auto &it : bridges) {
         debug cout << "("<<g.get_node_name(it.first)<<","<<g.get_node_name(it.second)<<"),";
       g.remove_edge(it.first, it.second); 
@@ -109,18 +102,14 @@ int main(int argc, char** argv) {
           //cout << "Deleting node "<<it.second<<", with original name "<<node_names.second[it.second]<<" because deg = 0"<<endl;   
       }
       //if(g.get_single_degree(it.second) == 0) g.remove_node(it.first);
-    
     }
     debug cout <<endl<<endl;
     debug cout << "Deleted " << bridges.size() << " bridges (useless edges)." <<endl;
-    
-    
     // Split graph on connected components.  
     std::list<std::set<Edge> > connected_components = g.get_connected_components();
     std::list<Graph> connected_graphs;
     int i = 0;
     for(const auto &cc : connected_components) {
-        
         Graph* h = new Graph();
         /*cout << "Adding: "<<endl;
         for(const auto &ccc : cc) {
@@ -134,32 +123,22 @@ int main(int argc, char** argv) {
         connected_graphs.push_back(*h);
     }
   	debug cout << "Found/Created "<< connected_components.size() << " connected components with "<<i<<" edges in total." <<endl;;
-  
-    
     list<set<Node> > partial_solutions;
     set<Node> complete_solution;
     for(auto &it : connected_graphs) {
-		   debug cout << "Trying to find partial solution for graph "<<it.get_name()<<" [n="<<it.get_n()<<"|m="<<it.get_m()<<"]"<<endl;
-			 
-       partial_solutions.push_back(run_iter_comp(it));
-       debug cout << "Found partial solution: ";
-		   
+	debug cout << "Trying to find partial solution for graph "<<it.get_name()<<" [n="<<it.get_n()<<"|m="<<it.get_m()<<"]"<<endl;	 
+        partial_solutions.push_back(run_iter_comp(it));
+        debug cout << "Found partial solution: ";
         debug it.print_nodeset(partial_solutions.back());
-		
         complete_solution.insert(partial_solutions.back().begin(), partial_solutions.back().end());
     }
-		debug cout << "----------------------------------------------"<<endl;
-	
-		debug cout << "Computed a total of "<<partial_solutions.size()<<" partial solutions with ";
-		debug cout << complete_solution.size() << " nodes. Adding " << necessary_nodes.size() << " necessary ";
-	  debug cout << "nodes we get a solution size of " << (complete_solution.size()+necessary_nodes.size())<<"."<<endl;
-		debug cout << endl;
-	  complete_solution.insert(necessary_nodes.begin(), necessary_nodes.end());
-        
-        for(const auto &it : complete_solution) {
-            cout << node_names.second[it] << endl;   
-        }
-	    debug cout << "Sanity check: " << (is_fvs(orig, complete_solution)?"PASS":"FAILED")<<endl;
-			
-       debug cout << "--------------- END OF PROGRAM ---------------" << endl;
+    debug cout << "----------------------------------------------"<<endl;
+    debug cout << "Computed a total of "<<partial_solutions.size()<<" partial solutions with ";
+    debug cout << complete_solution.size() << " nodes. Adding " << necessary_nodes.size() << " necessary ";
+    debug cout << "nodes we get a solution size of " << (complete_solution.size()+necessary_nodes.size())<<"."<<endl;
+    debug cout << endl;
+    complete_solution.insert(necessary_nodes.begin(), necessary_nodes.end());      
+    print_nodes(complete_solution);
+    debug cout << "Sanity check: " << (is_fvs(orig, complete_solution)?"PASS":"FAILED")<<endl;		
+    debug cout << "--------------- END OF PROGRAM ---------------" << endl;
 }
