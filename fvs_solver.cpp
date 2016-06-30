@@ -499,16 +499,6 @@ using namespace fvs;
     set<Node> fvs_approx = two_approx_fvs(g);
     debug cout << "2 approximation of size " << fvs_approx.size() << " is: " << endl;
     debug orig.print_nodeset(fvs_approx);
-      
-    pair<set<Node>, bool> fvs_dumb_approx = g.get_dumb_approx(fvs_approx.size());
-      
-    if(fvs_dumb_approx.second && (fvs_dumb_approx.first.size() < fvs_approx.size())) {
-        debug cout <<"Greedy approximation is better, take it instead!"<<endl;
-        fvs_approx = fvs_dumb_approx.first;
-    } else {
-        debug cout << "(Greedy approximation is worse with size >= "<<fvs_approx.size()<<")"<<endl;   
-    }
-      
     // use any subset of half size
     int k = 0.5*(fvs_approx.size()+fvs_approx.size()%2);
     set<Node> v_prime;
