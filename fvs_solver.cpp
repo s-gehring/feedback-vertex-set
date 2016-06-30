@@ -3,8 +3,6 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <boost/cstdint.hpp>
-#include <boost/variant/variant.hpp>
 #include "fvs_solver.hpp"
 
 using namespace fvs;
@@ -213,7 +211,7 @@ using namespace fvs;
     }
     */
     /*
-    **  Now, line for line, read the file...
+    **  Now, line by line, read the file...
     */
     string line;
     while (!getline(cin, line).eof()) {
@@ -294,41 +292,6 @@ using namespace fvs;
     */
     return result;
   }
-
-  /*
-  **  I deleted this function, since it's already implemented in Graph.delete_low_degree_nodes().
-  */
-  
-  /*
-void cleanup(Graph& g)
-{
-Node neighbour;
-Node help;
-set<Node> processed;
-for(auto &it : g.get_adjacency_list()) {
-if(g.get_single_degree(it.first) == 0) {
-g.remove_node(it.first);
-}
-else if (g.get_single_degree(it.first) == 1) {
-// check the neighbour and his neighbours if they were already processed
-neighbour = *(g.get_neighbors(it.first).first.begin());
-g.remove_node(it.first);
-while (g.get_single_degree(neighbour) < 2 && processed.find(neighbour) != processed.end()) {
-if (g.get_single_degree(neighbour) == 0) {
-g.remove_node(neighbour);
-neighbour = it.first; // stop checking neighbours
-}
-else if (g.get_single_degree(neighbour) == 1) {
-help = neighbour;
-neighbour = *(g.get_neighbors(help).first.begin()); // for repeating the process
-g.remove_node(help);
-}
-}
-}
-processed.insert(it.first);
-}
-}
-*/
 
   set<Node> fvs::two_approx_fvs(Graph& orig) {
     Graph g(orig);              // our working copy
@@ -438,7 +401,7 @@ processed.insert(it.first);
 
   bool fvs::is_fvs(const Graph& g, const set<Node>& fvs) {
     /*
-    **  Create a copy, delete all nodes from fvs
+    **  Create a copy, delete all nodes from the fvs
     **  and check wether there's a cycle.
     */
     Graph h(g);
@@ -449,13 +412,13 @@ processed.insert(it.first);
   }
 
   pair<set<Node>, bool> fvs::compression_fvs(const Graph& orig, const set<Node>& S) {
-    Graph g(orig);
+    Graph g_help(orig);
     size_t k = S.size() - 1;
-    boost::uint_fast64_t n = pow(2, k + 1); // for fvs of large size, this is too small -> need other approach
+    uint64_t n = pow(2, k + 1); // for an fvs of large size, this is too small -> need other approach
     set<Node> D; // the guessed intersection
     // get nodes of the graph
     set<Node> V;
-    for (const auto &it : g.get_adjacency_list()) {
+    for (const auto &it : g_help.get_adjacency_list()) {
       V.insert(it.first);
     }
     bool current;
@@ -478,13 +441,9 @@ processed.insert(it.first);
       }
       // compute G[S\D]
       set<Node> s_without_d = set_minus(S, D);
-      Graph g(orig);
-      for (const auto &it : g.get_adjacency_list()) {
-        if (s_without_d.find(it.first) == s_without_d.end()) {
-          g.remove_node(it.first);
-        }
-      }
-      if (!has_cycle(g)) {
+      Graph g1;
+      orig.induced_subgraph(g1, s_without_d);
+      if (!has_cycle(g1)) {
         // compute G without D
         Graph g(orig);
         for (set<Node>::iterator it = D.begin(); it != D.end(); ++it) {
@@ -572,86 +531,13 @@ processed.insert(it.first);
       f_iter.insert(iter_nodes[j]);
       v_iter.insert(iter_nodes[j]);
       // construct iterative graph
-      Graph g(orig);
-      set<Node> to_delete = set_minus(v, v_iter);
-      for (set<Node>::iterator it1 = to_delete.begin(); it1 != to_delete.end(); ++it1) {
-        g.remove_node(*it1);
-      }
+      Graph h;
+      orig.induced_subgraph(h, v_iter);
       // run compression
-      result = compression_fvs(g, f_iter);
+      result = compression_fvs(h, f_iter);
       if(result.second) {
         f_iter = result.first;
       }
     }
     return f_iter;
-  }
-
-  set<Node> fvs::brute_force_fvs(const Graph& orig) {
-    Graph g(orig);
-    // get nodes of the graph
-    vector<Node> v;
-    for (const auto &it : g.get_adjacency_list()) {
-      v.push_back(it.first);
-    }
-    // compute 2-approximation
-    set<Node> fvs_approx = two_approx_fvs(g);
-    debug cout << "2-approximation of the FVS has size " << fvs_approx.size() << endl;
-    int upper_bound = fvs_approx.size();
-    int lower_bound = 0.5*(fvs_approx.size() + fvs_approx.size() % 2);
-    debug cout << "The size of the optimal solution must be between " << lower_bound << " and " << upper_bound << "." << endl;
-    // start it!
-    set<Node> solution = fvs_approx;
-    set<Node> guessed_fvs;
-    boost::uint_fast64_t num;
-    boost::uint_fast64_t t;
-    bool current;
-    boost::uint_fast64_t h;
-    while (lower_bound < upper_bound) {
-      bool found = false;
-      size_t k = 0.5*(lower_bound + upper_bound); // size of fvs to be considered
-      cout << "Considered size: " << k << endl;
-      // get first decimal number where k bits are set in binary representation
-      num = 0;
-      for (size_t j = 0; j < k; j++) {
-        num += pow(2, j);
-      }
-      boost::uint_fast64_t N = pow(2, v.size());
-      while (num < N && !found) {
-        // guess fvs using binary coding
-        h = num;
-        for (size_t l = 0; l < v.size(); l++) {
-          current = h % 2;
-          if (current) {
-            guessed_fvs.insert(v[l]);
-          }
-          h = (h - current) / 2;
-          if (h == 0) {
-            l = v.size();
-          }
-        }
-        // test if it is an fvs
-        if (is_fvs(g, guessed_fvs)) {
-          solution = guessed_fvs;
-          upper_bound = k;
-          found = true;
-          cout << "Found FVS of size " << k << ":" << endl;
-          print_nodes(solution);
-        }
-        guessed_fvs.clear();
-        // compute next number with k bits set
-        // see: https://graphics.stanford.edu/~seander/bithacks.html#NextBitPermutation
-        t = (num | (num - 1)) + 1;
-        num = num == 0 ? 0 : t | ((((t & (~t + 1)) / (num & (~num + 1))) >> 1) - 1);
-      }
-      if(!found){
-        debug cout << "Did not find an FVS of size " << k << endl;
-        if (upper_bound - lower_bound == 2) {
-          lower_bound = upper_bound;
-        }
-        else {
-          lower_bound = k;
-        }
-      }
-    }
-    return solution;
   }
