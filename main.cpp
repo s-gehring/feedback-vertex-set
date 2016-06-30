@@ -137,8 +137,10 @@ int main(int argc, char** argv) {
     debug cout << complete_solution.size() << " nodes. Adding " << necessary_nodes.size() << " necessary ";
     debug cout << "nodes we get a solution size of " << (complete_solution.size()+necessary_nodes.size())<<"."<<endl;
     debug cout << endl;
-    complete_solution.insert(necessary_nodes.begin(), necessary_nodes.end());      
-    print_nodes(complete_solution);
+    complete_solution.insert(necessary_nodes.begin(), necessary_nodes.end());
+    for(const auto &it : complete_solution) {
+-       cout << node_names.second[it] << endl;   
+-   }
     debug cout << "Sanity check: " << (is_fvs(orig, complete_solution)?"PASS":"FAILED")<<endl;		
     debug cout << "--------------- END OF PROGRAM ---------------" << endl;
 }
