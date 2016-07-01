@@ -139,8 +139,8 @@ int main(int argc, char** argv) {
     debug cout << endl;
     complete_solution.insert(necessary_nodes.begin(), necessary_nodes.end());
     for(const auto &it : complete_solution) {
--       cout << node_names.second[it] << endl;   
--   }
+        cout << node_names.second[it] << endl;   
+    }
     debug cout << "Sanity check: " << (is_fvs(orig, complete_solution)?"PASS":"FAILED")<<endl;		
     debug cout << "--------------- END OF PROGRAM ---------------" << endl;
 }
