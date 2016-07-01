@@ -114,7 +114,7 @@ namespace FvsGraph{
             return result;
           }
   
-          bool Graph::assign_names(const Mapping &m) {
+          bool Graph::assign_names(Mapping &m) {
             this->mapping = m;   
               return true;
           }

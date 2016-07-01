@@ -46,7 +46,7 @@ class Graph {
           std::pair<std::set<Node>, bool> get_dumb_approx(const unsigned int limit);
           void print_nodeset(const std::set<Node> U) const;
     std::set<Edge> minimal_spanning_forest() const;
-          bool assign_names(const Mapping &m);
+          const bool assign_names(Mapping &m);
           bool induced_subgraph(Graph &s, const std::set<Node>& u) const;
           bool is_deg_three() const;
   

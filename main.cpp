@@ -79,54 +79,74 @@ set<Node> run_iter_comp(Graph g) {
 	}
 }
 
-int main(int argc, char** argv) {
-    // Read graph and store information in variables.
-    GraphData graph_data = read_graph();
-    set<Node> necessary_nodes = graph_data.necessary_nodes;
-    Mapping node_names = graph_data.mapping;
-    Graph g = graph_data.graph;
-    g.assign_names(node_names);
-    Graph orig(g);
-    // Remove bridges.
-    unordered_set<Edge> bridges = g.get_articulation_elements().second;
+void remove_bridges(Graph &g, const unordered_set<Edge> &bridges) {
     debug  cout << "Removing edges: ";
     for(const auto &it : bridges) {
-        debug cout << "("<<g.get_node_name(it.first)<<","<<g.get_node_name(it.second)<<"),";
+      debug cout << "(" << g.get_node_name(it.first) << "," << g.get_node_name(it.second)<< "),";
       g.remove_edge(it.first, it.second); 
       if(g.get_single_degree(it.first) == 0) {
           g.remove_node(it.first);
-          //cout << "Deleting node "<<it.first<<", with original name "<<node_names.second[it.first]<<" because deg = 0"<<endl;   
       }
-        if(g.get_single_degree(it.second) == 0) {
+      if(g.get_single_degree(it.second) == 0) {
           g.remove_node(it.second);
-          //cout << "Deleting node "<<it.second<<", with original name "<<node_names.second[it.second]<<" because deg = 0"<<endl;   
       }
-      //if(g.get_single_degree(it.second) == 0) g.remove_node(it.first);
     }
     debug cout <<endl<<endl;
     debug cout << "Deleted " << bridges.size() << " bridges (useless edges)." <<endl;
-    // Split graph on connected components.  
-    std::list<std::set<Edge> > connected_components = g.get_connected_components();
-    std::list<Graph> connected_graphs;
+}
+
+void get_connected_graphs(const Graph &g, const list<set<Edge> > &connected_components, list<Graph> &connected_graphs) {
     int i = 0;
     for(const auto &cc : connected_components) {
         Graph* h = new Graph();
         /*cout << "Adding: "<<endl;
+
         for(const auto &ccc : cc) {
             ++i;
             //cout << "("<<g.get_node_name(ccc.first) <<","<<g.get_node_name(ccc.second)<<"),";	
         }
         cout <<endl;*/
         h->add_edges(cc);
-        h->assign_names(node_names);
+        h->assign_names(g.get_mapping());
         if(h->get_n() > 0 && h->get_m() > 0)
         connected_graphs.push_back(*h);
     }
-  	debug cout << "Found/Created "<< connected_components.size() << " connected components with "<<i<<" edges in total." <<endl;;
+    
+    
+  	debug cout << "Found/Created "<< connected_components.size() << " connected components with "<<i<<" edges in total." <<endl;
+}
+
+int main(int argc, char** argv) {
+    // Read graph and store information in variables.
+    
+    GraphData graph_data = read_graph();
+    
+    set<Node> necessary_nodes = graph_data.necessary_nodes;
+    Mapping node_names = graph_data.mapping;
+    Graph g = graph_data.graph;
+    
+    g.assign_names(node_names);
+    
+    // Create original copy.
+    Graph orig(g);
+    
+    
+    remove_bridges(g, g.get_articulation_elements().second);
+    
+    
+    
+    // Split graph on connected components.  
+    std::list<Graph> connected_graphs;
+    get_connected_graphs(g, g.get_connected_components(), connected_graphs);
+
+
+
+
+
     list<set<Node> > partial_solutions;
     set<Node> complete_solution;
     for(auto &it : connected_graphs) {
-	debug cout << "Trying to find partial solution for graph "<<it.get_name()<<" [n="<<it.get_n()<<"|m="<<it.get_m()<<"]"<<endl;	 
+	    debug cout << "Trying to find partial solution for graph "<<it.get_name()<<" [n="<<it.get_n()<<"|m="<<it.get_m()<<"]"<<endl;	 
         partial_solutions.push_back(run_iter_comp(it));
         debug cout << "Found partial solution: ";
         debug it.print_nodeset(partial_solutions.back());
