@@ -31,6 +31,11 @@ mat generateIncidenceVector(const Graph& g, const Edge & e, vector<vector<int>>&
   return result;
 }
 
+int getComponentNumber(Graph & g, Node & n)
+{
+	return 0;
+}
+
 pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u)
 {
   //typedef graph_traits<Graph>::vertices_size_type id;
@@ -182,7 +187,8 @@ mat colinearToLinear(const mat & input)
   fullRank.print("transformed row rank");
   if (fullRank.is_square())
   {
-    return eye<mat>(fullRank.n_rows,fullRank.n_cols);
+    //return eye<mat>(fullRank.n_rows,fullRank.n_cols);
+	  return eye<mat>(0, 0);
   }
   /*mat L, U, P;
   lu(L,U,P,fullRank.t());
@@ -249,10 +255,15 @@ void findNodes(Graph & g, set<Node> & s, set<Node> & result)
 
 set<Node> solveDegree3(Graph& g, set<Node>& s)
 {
+	set<Node> feedBackSet;
 	auto result = graphToMatrix(g, s);
 	result.first.print("IncidenceMatrix");
 	mat instance = colinearToLinear(result.first);
 	instance.print("transformed");
+	if (instance==eye<mat>(0,0))
+	{
+		return feedBackSet;
+	}
 	Galois ga;
 	ga.set_w(16);
 	//ga.set_mode_naive();
@@ -265,7 +276,6 @@ set<Node> solveDegree3(Graph& g, set<Node>& s)
 		cout << "Delete edge from " << result.second[res[i]].first << " to " << result.second[res[i]].second << endl;
 		g.remove_edge(result.second[res[i]].first, result.second[res[i]].second);
 	}
-	set<Node> feedBackSet;
 	for (int i=0;i<length;i+=2)
 	{
 		feedBackSet.insert(result.second[res[i]].first);
@@ -283,12 +293,12 @@ set<Node> solveDegree3(Graph& g, set<Node>& s)
 int main(int argc, char** argv)
 {
 	//std::srand(std::time(0));
+//	Graph g;
+//	fvs::read_graph(g, "mini_graph.txt");
 	GraphData graph_data = fvs::read_graph();
 	Graph g=graph_data.graph;
-	//Graph g;
-	//fvs::read_graph(g, "mini_graph.txt");
 //	fvs::read_graph(g, argv[1]);
-	//fvs::print_graph(g);
+//	fvs::print_graph(g);
 	//typedef graph_traits<Graph>::vertex_iterator node_iterator;
 	//pair<node_iterator, node_iterator> nIt = vertices(g);
 	set<Node> s;
