@@ -3,7 +3,9 @@
 
 using namespace fvs;
 using namespace FvsGraph;
-#define debug if(0)
+#ifndef debug
+    #define debug if(true)
+#endif
 #define MAX_OUTPUT_ARTICULATION 40
 
 /*
@@ -95,6 +97,37 @@ void remove_bridges(Graph &g, const unordered_set<Edge> &bridges) {
     debug cout << "Deleted " << bridges.size() << " bridges (useless edges)." <<endl;
 }
 
+void contract_edges(Graph &g) {
+    Node u = INVALID_NODE;
+    Node v = INVALID_NODE;
+    int contracted_edges = 0;
+    debug cout << "Contracting edges: ";
+    for(auto &it : g.get_low_degree_nodes()) {
+        if(g.get_single_degree(it) == 2) {
+            // Shitty hack, because iterators are weird:
+            bool first = true;
+            for(const auto &it2 : g.get_neighbors(it).first) {
+                if(first) {
+                    first = false;
+                    u = it2;
+                } else {
+                    v = it2;
+                }
+            }
+            
+            if(!g.has_edge(u, v)) {
+                debug cout << "("<<g.get_node_name(u)<<"<->"<<g.get_node_name(it)<<"<->"<<g.get_node_name(v)<<") => ("<<g.get_node_name(u)<<"<->"<<g.get_node_name(v)<<"),";
+                ++contracted_edges;
+                g.add_edge(u, v);
+                g.remove_node(it);
+            }
+             
+        }
+    }
+    debug cout <<endl<<endl;
+    debug cout << "Contracted " << contracted_edges << " edges." <<endl;
+}
+
 void get_connected_graphs(const Graph &g, const list<set<Edge> > &connected_components, list<Graph> &connected_graphs) {
     int i = 0;
     for(const auto &cc : connected_components) {
@@ -133,6 +166,7 @@ int main(int argc, char** argv) {
     
     remove_bridges(g, g.get_articulation_elements().second);
     
+    contract_edges(g);
     
     
     // Split graph on connected components.  
@@ -152,6 +186,7 @@ int main(int argc, char** argv) {
         debug it.print_nodeset(partial_solutions.back());
         complete_solution.insert(partial_solutions.back().begin(), partial_solutions.back().end());
     }
+    
     debug cout << "----------------------------------------------"<<endl;
     debug cout << "Computed a total of "<<partial_solutions.size()<<" partial solutions with ";
     debug cout << complete_solution.size() << " nodes. Adding " << necessary_nodes.size() << " necessary ";

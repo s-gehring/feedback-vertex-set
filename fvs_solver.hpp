@@ -6,7 +6,9 @@
 #include <set>
 #include <vector>
 #include <stack>
-#define debug if(0)
+#ifndef debug
+    #define debug if(1)
+#endif
 #include "graph.hpp"
 
 using namespace std;
