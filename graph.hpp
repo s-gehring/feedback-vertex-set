@@ -199,7 +199,7 @@ class Graph {
           bool has_edge(const Edge &e) const;
   
           /**
-          * @brief Returns the wstd::string Graph::get_node_name(Node u)hole adjacency list of the graph.
+          * @brief Returns the whole adjacency list of the graph.
           *
           * The adjacency list for iterating. The returned object
           * shouldn't be changed. Runs in O(1).
