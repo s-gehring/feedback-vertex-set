@@ -52,41 +52,6 @@ namespace FvsGraph{
             std::cout <<"}"<<std::endl;
           }
     
-          std::pair<std::set<Node>, bool> Graph::get_dumb_approx(const unsigned int limit) {
-              std::set<Node> fvs;
-              std::list<std::pair<Node, Neighborhood> > all_nodes;
-              
-              
-              Graph h(*this);
-              std::pair<std::list<Node>, bool> x;
-              while((x=h.find_semidisjoint_cycle()).second) {
-                  fvs.insert(x.first.front());
-                  
-                  x.first.pop_front();
-                  
-                  while(!x.first.empty()) {
-                      h.remove_node(x.first.front());
-                      x.first.pop_front();
-                  }
-              }
-              if(limit <= fvs.size()) return std::make_pair(std::set<Node>(), false);
-              for(const auto &it : h.adj) {
-                all_nodes.push_back(it);   
-                
-              }
-              
-              all_nodes.sort(compare_node_degrees);
-              
-              while(h.has_cycle()) {
-                  fvs.insert(all_nodes.front().first);
-                  if(limit <= fvs.size()) return std::make_pair(std::set<Node>(), false);
-                  h.remove_node(all_nodes.front().first);
-                  all_nodes.pop_front();
-              }
-              
-              return std::make_pair(fvs, true);
-          }
-    
           std::list<std::set<Edge> > Graph::get_connected_components() const {
             std::unordered_set<Node> done = std::unordered_set<Node>();
             std::stack<std::pair<Node, Node> > S;

@@ -42,22 +42,94 @@ class Graph {
       
       
       public:
+          /**
+          * @brief Compares tuples of nodes and their neighborhood by their neighborhood size.
+          */
           static bool compare_node_degrees(const std::pair<Node, Neighborhood> u, const std::pair<Node, Neighborhood> v);
-          std::pair<std::set<Node>, bool> get_dumb_approx(const unsigned int limit);
+          
+          /**
+          * @brief Prints a set of nodes with their original name in a pretty way.
+          */
           void print_nodeset(const std::set<Node> U) const;
-    std::set<Edge> minimal_spanning_forest() const;
+  
+          /**
+          * @brief Computes a minimal spanning forest for the current graph.
+          *
+          * Computes a minimal spanning forest via DFS in linear time.
+          * For all edges (u, v) in the resulting set it is guaranteed that
+          * u <= v. Keep in mind, that lone vertices (with degree 0) will
+          * be ignored in this computation.
+          *
+          * @returns an edge set, corresponding to the MSF.
+          */
+          std::set<Edge> minimal_spanning_forest() const;
+  
+          /**
+          * @brief Assign a mapping of names to the nodes of this graph.
+          *
+          * @returns true
+          */
           bool assign_names(const Mapping &m);
+  
+          /**
+          * @brief Computes the induced subgraph in respect to a nodeset.
+          *
+          * Computes a subgraph in respect to a given nodeset u and
+          * saves it in s.
+          *
+          * @returns true
+          */
           bool induced_subgraph(Graph &s, const std::set<Node>& u) const;
+  
+          /**
+          * @brief Returns true iff there exists no node of degree != 3.
+          */
           bool is_deg_three() const;
   
           int get_n() const;
           int get_m() const;
           
+          /*
+          * @brief Prints the graph in human readable way.
+          *
+          * Prints the adjacency list of the graph in a (more or less)
+          * human readable form. This function uses the given name mapping
+          * to translate nodes into string before outputting.
+          * However, if such a mapping is not found (or empty for a given
+          * node), it will output such "unnamed" nodes in square brackets.
+          */
           void print() const;
+  
+          /*
+          * @brief Prints the graph in gephi readable way.
+          *
+          * Print the adjacenfcy lsit of the graph in a way such that it is
+          * easily inserted into a gephi project. However for importing into
+          * gephi, keep in mind, that a file needs a "source" and a "target"
+          * header, even although we're talking about undirected edges.
+          */
           void print_tidy() const;
   
+          /*
+          * @brief Given a node, returns the assigned name given by an assigned mapping.
+          * 
+          * If there is an assigned mapping of nodes for this graph, 
+          * this function will translate a node (which is basically an 
+          * integer) into a string.
+          *
+          * @returns A string, representing the given node.
+          */
           std::string get_node_name(const Node u) const;
     
+          /*
+          * @brief Computes all connected components of a graph.
+          *
+          * Returns a list of edgesets, each representing a 
+          * connected component on its own. Keep in mind that lone
+          * vertices (with degree zero) are not included in this result.
+          *
+          * @returns A list of edge sets, each corresponding to a connected component.
+          */
           std::list<std::set<Edge> > get_connected_components() const;
   
           /**
