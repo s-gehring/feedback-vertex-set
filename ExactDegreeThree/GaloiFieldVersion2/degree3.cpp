@@ -256,7 +256,7 @@ int main(int argc, char** argv)
 	Graph g;
 //	fvs::read_graph(g, "mini_graph.txt");
 	fvs::read_graph(g, argv[1]);
-	fvs::print_graph(g);
+	//fvs::print_graph(g);
 	//typedef graph_traits<Graph>::vertex_iterator node_iterator;
 	//pair<node_iterator, node_iterator> nIt = vertices(g);
 	set<Node> s;
