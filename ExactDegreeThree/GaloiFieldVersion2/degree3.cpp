@@ -103,7 +103,7 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u)
   return make_pair(matrix,assignment);
 }
 
-vector<int> findRest(const vector <int>& index, int dim)
+/*vector<int> findRest(const vector <int>& index, int dim)
 {
     vector<int> result;
     for(int i=0;i<dim;i++)
@@ -114,7 +114,7 @@ vector<int> findRest(const vector <int>& index, int dim)
       }
     }
     return result;
-}
+}*/
 
 /*mat extractColumns(const mat & input, const vector<int> & index)
 {
@@ -223,6 +223,30 @@ mat colinearToLinear(const mat & input)
   return finalMatrix.rearrangeMatrix(arrangement);
 }
 
+void findNodes(Graph & g, set<Node> & s, set<Node> & result)
+{
+	auto mst=g.minimal_spanning_forest();
+	for (const auto& firstNode : s) {
+		Neighborhood nextToFirstNode = g.get_neighbors(firstNode).first;
+		for (const auto& secondNode : nextToFirstNode) {
+			Edge e;
+			e.first = firstNode;
+			e.second = secondNode;
+			if (e.first< e.second && mst.find(e) == mst.end())
+			{
+				if (s.find(firstNode) != s.end())
+				{
+					result.insert(firstNode);
+				}
+				else
+				{
+					result.insert(secondNode);
+				}
+			}
+		}
+	}
+}
+
 set<Node> solveDegree3(Graph& g, set<Node>& s)
 {
 	auto result = graphToMatrix(g, s);
@@ -230,20 +254,26 @@ set<Node> solveDegree3(Graph& g, set<Node>& s)
 	mat instance = colinearToLinear(result.first);
 	instance.print("transformed");
 	Galois ga;
-	ga.set_w(64);
-	ga.set_mode_naive();
+	ga.set_w(16);
+	//ga.set_mode_naive();
+	ga.set_mode_logtb();
 	ga.seed();
 	int length;
 	int* res = simple_parity_fast(ga, instance.toNMatrix(), instance.getHeight(), instance.getWidth(), &length);
-	for (int i=0;i<length;i++)
+	for (int i = 0; i < length; i++)
 	{
-		cout<<"Delete edge from "<<result.second[res[i]].first<< " to "<<result.second[res[i]].second <<endl;
+		cout << "Delete edge from " << result.second[res[i]].first << " to " << result.second[res[i]].second << endl;
+		g.remove_edge(result.second[res[i]].first, result.second[res[i]].second);
 	}
-
 	set<Node> feedBackSet;
 	for (int i=0;i<length;i+=2)
 	{
 		feedBackSet.insert(result.second[res[i]].first);
+	}
+	findNodes(g, s, feedBackSet);
+	for (Node n : feedBackSet)
+	{
+		cout << "Delete node: " << n << endl;
 	}
 	delete[] res;
 	return feedBackSet;
@@ -253,11 +283,11 @@ set<Node> solveDegree3(Graph& g, set<Node>& s)
 int main(int argc, char** argv)
 {
 	//std::srand(std::time(0));
-	//Graph g;
-//	fvs::read_graph(g, "mini_graph.txt");
-	//fvs::read_graph(g, argv[1]);
 	GraphData graph_data = fvs::read_graph();
 	Graph g=graph_data.graph;
+	//Graph g;
+	//fvs::read_graph(g, "mini_graph.txt");
+//	fvs::read_graph(g, argv[1]);
 	//fvs::print_graph(g);
 	//typedef graph_traits<Graph>::vertex_iterator node_iterator;
 	//pair<node_iterator, node_iterator> nIt = vertices(g);
