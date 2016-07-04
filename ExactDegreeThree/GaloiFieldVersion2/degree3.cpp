@@ -253,9 +253,11 @@ set<Node> solveDegree3(Graph& g, set<Node>& s)
 int main(int argc, char** argv)
 {
 	//std::srand(std::time(0));
-	Graph g;
+	//Graph g;
 //	fvs::read_graph(g, "mini_graph.txt");
-	fvs::read_graph(g, argv[1]);
+	//fvs::read_graph(g, argv[1]);
+	GraphData graph_data = fvs::read_graph();
+	Graph g=graph_data.graph;
 	//fvs::print_graph(g);
 	//typedef graph_traits<Graph>::vertex_iterator node_iterator;
 	//pair<node_iterator, node_iterator> nIt = vertices(g);
