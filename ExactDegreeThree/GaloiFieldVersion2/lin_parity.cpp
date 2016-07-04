@@ -372,6 +372,8 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 
 	delete [] random_values;
 	*length = row;
+
+	print_vector_normal(row, parity_basis);
 	return parity_basis;
 }
 
