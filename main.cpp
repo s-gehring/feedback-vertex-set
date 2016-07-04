@@ -82,9 +82,9 @@ set<Node> run_iter_comp(Graph g) {
 }
 
 void remove_bridges(Graph &g, const unordered_set<Edge> &bridges) {
-    debug  cout << "Removing edges: ";
+    //debug  cout << "Removing edges: ";
     for(const auto &it : bridges) {
-      debug cout << "(" << g.get_node_name(it.first) << "," << g.get_node_name(it.second)<< "),";
+      //debug cout << "(" << g.get_node_name(it.first) << "," << g.get_node_name(it.second)<< "),";
       g.remove_edge(it.first, it.second); 
       if(g.get_single_degree(it.first) == 0) {
           g.remove_node(it.first);
@@ -93,7 +93,7 @@ void remove_bridges(Graph &g, const unordered_set<Edge> &bridges) {
           g.remove_node(it.second);
       }
     }
-    debug cout <<endl<<endl;
+    //debug cout <<endl<<endl;
     debug cout << "Deleted " << bridges.size() << " bridges (useless edges)." <<endl;
 }
 
@@ -101,7 +101,7 @@ void contract_edges(Graph &g) {
     Node u = INVALID_NODE;
     Node v = INVALID_NODE;
     int contracted_edges = 0;
-    debug cout << "Contracting edges: ";
+    //debug cout << "Contracting edges: ";
     for(auto &it : g.get_low_degree_nodes()) {
         if(g.get_single_degree(it) == 2) {
             // Shitty hack, because iterators are weird:
@@ -116,7 +116,7 @@ void contract_edges(Graph &g) {
             }
             
             if(!g.has_edge(u, v)) {
-                debug cout << "("<<g.get_node_name(u)<<"<->"<<g.get_node_name(it)<<"<->"<<g.get_node_name(v)<<") => ("<<g.get_node_name(u)<<"<->"<<g.get_node_name(v)<<"),";
+                //debug cout << "("<<g.get_node_name(u)<<"<->"<<g.get_node_name(it)<<"<->"<<g.get_node_name(v)<<") => ("<<g.get_node_name(u)<<"<->"<<g.get_node_name(v)<<"),";
                 ++contracted_edges;
                 g.add_edge(u, v);
                 g.remove_node(it);
@@ -124,7 +124,7 @@ void contract_edges(Graph &g) {
              
         }
     }
-    debug cout <<endl<<endl;
+    //debug cout <<endl<<endl;
     debug cout << "Contracted " << contracted_edges << " edges." <<endl;
 }
 
@@ -141,6 +141,12 @@ void get_connected_graphs(const Graph &g, const list<set<Edge> > &connected_comp
         cout <<endl;*/
         h->add_edges(cc);
         h->assign_names(g.get_mapping());
+        
+        i+= cc.size(); 
+        // Confused that this number seems unreasonably high?
+        // Keep in mind, that we ignore double edges, which are counted multiple times here.
+        // Other than that, paths are ignored, because trivial.
+        
         if(h->get_n() > 0 && h->get_m() > 0)
         connected_graphs.push_back(*h);
     }
@@ -181,11 +187,15 @@ int main(int argc, char** argv) {
     set<Node> complete_solution;
     for(auto &it : connected_graphs) {
 	    debug cout << "Trying to find partial solution for graph "<<it.get_name()<<" [n="<<it.get_n()<<"|m="<<it.get_m()<<"]"<<endl;	 
+        
         partial_solutions.push_back(run_iter_comp(it));
         debug cout << "Found partial solution: ";
         debug it.print_nodeset(partial_solutions.back());
         complete_solution.insert(partial_solutions.back().begin(), partial_solutions.back().end());
     }
+    
+    
+    
     
     debug cout << "----------------------------------------------"<<endl;
     debug cout << "Computed a total of "<<partial_solutions.size()<<" partial solutions with ";

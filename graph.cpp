@@ -5,20 +5,31 @@
 
 namespace FvsGraph{
             
-          std::set<Edge> Graph::minimal_spanning_forest() const {
-            std::unordered_set<Node> covered;
+           std::set<Edge> Graph::minimal_spanning_forest() const {
+            std::unordered_set<Node> done;
+            std::stack<Node> s;
             std::set<Edge> mst;
-            throw; // Not yet implemented;
             for(const auto &it : adj) {
-                if(covered.find(it.first) != covered.end()) continue;
-                covered.insert(it.first);
-                Node u = it.first;
-                Node v = *(adj.find(it.first)->second.begin());
-                if(u > v) {
-                    mst.insert(std::make_pair(v, u));
-                } else {
-                    mst.insert(std::make_pair(u, v));
+                if(done.find(it.first) == done.end()) {
+                    s.push(it.first);
+                    while(!s.empty()) {
+                        Node u = s.top();
+                        s.pop();
+                        for(const auto &v : get_neighbors(u).first) {
+                            if(done.find(v) == done.end()) {
+                                if(u > v) {
+                                    mst.insert(std::make_pair(v, u));
+                                } else {
+                                    mst.insert(std::make_pair(u, v));
+                                }
+                                s.push(v);
+                                done.insert(v);
+                            }
+                        }
+                    }
+                    
                 }
+                
             }
               return mst;
           }
@@ -353,7 +364,7 @@ namespace FvsGraph{
             for (const auto &it : get_adjacency_list()) {
               for (const auto &eit : it.second) {
                 if(eit > it.first)
-                  std::cout << it.first << " " << eit << std::endl;
+                  std::cout << get_node_name(it.first) << " " << get_node_name(eit) << std::endl;
               }
             }
           }
