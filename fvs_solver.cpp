@@ -4,8 +4,10 @@
 #include <sstream>
 #include <iostream>
 #include "fvs_solver.hpp"
+#include "bin_count.hpp"
 
 using namespace fvs;
+using namespace BinCount;
 
   void fvs::print_nodes(const set<Node>& s) {
     set<Node>::iterator it = s.begin();
@@ -413,30 +415,25 @@ using namespace fvs;
   pair<set<Node>, bool> fvs::compression_fvs(const Graph& orig, const set<Node>& S) {
     Graph g_help(orig);
     size_t k = S.size() - 1;
-    uint64_t n = pow(2, k + 1); // for an fvs of large size, this is too small -> need other approach
+    Bin_count counter(k + 1);
     set<Node> D; // the guessed intersection
     // get nodes of the graph
     set<Node> V;
     for (const auto &it : g_help.get_adjacency_list()) {
       V.insert(it.first);
     }
-    bool current;
     // convert set S to a vector
     vector<Node> T;
     for (set<Node>::iterator it = S.begin(); it != S.end(); ++it) {
       T.push_back(*it);
     }
     pair<set<Node>, bool> result;
-    int h;
-    for (size_t j = 0; j < n; j++) {
-      // guess intersection using binary coding
-      h = j;
+    while(!counter.is_full()) {
+      // guess intersection using the binary counter
       for (size_t l = 0; l < k + 1; l++) {
-        current = h % 2;
-        if (current) {
+        if (counter.at(l)) {
           D.insert(T[l]);
-        }
-        h = (h - current) / 2;
+	      }
       }
       // compute G[S\D]
       set<Node> s_without_d = set_minus(S, D);
@@ -457,6 +454,7 @@ using namespace fvs;
         }
       }
       D.clear();
+	  counter.increase();
     }
     return make_pair(S, false);
   }
