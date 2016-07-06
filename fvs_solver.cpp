@@ -75,6 +75,34 @@ using namespace BinCount;
     **  Either use DFS or induced_subgraph() or both.
     */
     for (const auto& i : neighbors_in_u) {
+      stack<Node> s;
+      unordered_set<Node> used;
+      unordered_map<Node, Node> pred;
+      s.push(i);
+      while(!s.empty()) {
+
+        Node m = s.top();
+        
+        if(used.find(m) != used.end()) continue;
+        used.insert(m);
+        pred[m] = INVALID_NODE;
+        s.pop();
+        for(const auto &it: g.get_neighbors(m).first) {
+            if(u.find(it) == u.end()) continue;
+            if(used.find(it) == used.end()) {
+                used.insert(it);
+                pred[it] = m;
+            } else {
+                if(pred[it] != m) {
+                    return true;
+                }
+            }
+        }
+        
+      }
+     } 
+      
+      /*
       pair<Neighborhood, bool> eIt = g.get_neighbors(i); 
       if(!eIt.second) {
           throw std::runtime_error("Error: There is a vertex which is in u, but not in g.");
@@ -85,7 +113,7 @@ using namespace BinCount;
           return true;
         }
       }
-    }
+    }*/
     return false;
   }
 
@@ -155,8 +183,7 @@ using namespace BinCount;
         //for (const auto& i : fvs) { cout << i << ", "; } cout << endl;
         return make_pair(fvs, true);
       }
-    }
-    else {
+    } else {
       Graph h(g);
       f.erase(w);
       h.remove_node(w);
