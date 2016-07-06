@@ -118,6 +118,8 @@ using namespace BinCount;
   }
 
   Node fvs::two_neighbour_node(const Graph& g, const set<Node> &u, const set<Node> &v) {
+    Node result = INVALID_NODE;
+    int cur_neighbors = 1;
     /*
     **  Check every node in U.
     */
@@ -132,11 +134,15 @@ using namespace BinCount;
           **  ...which are in V.
           */
           if(v.find(j) != v.end()) {
-              if(++neighbors > 1) return candidate;
+              if(++neighbors > cur_neighbors) {
+                  result = candidate;
+                  cur_neighbors = neighbors;
+              }
+              
           }
       }
     }
-    return INVALID_NODE;
+    return result;
   }
 
 
