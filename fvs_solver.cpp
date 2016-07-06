@@ -145,13 +145,13 @@ using namespace BinCount;
   pair<set<Node>, bool> fvs::forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node>& v1, set<Node>& v2, int k) {
     set<Node> fvs;
     pair<set<Node>, bool> retValue;
-	/*
+    /*
     * no budget but g still has cycles -> return false
     */
     if (k < 0 || (k == 0 && has_cycle(g))) {
       return make_pair(fvs, false);
     }
-	/*
+    /*
     * g is a forest -> return empty set
     */
     if (!has_cycle(g)) {
@@ -159,7 +159,7 @@ using namespace BinCount;
     }
     /*
     * Pick a vertex w of v1 which has least two neighbors in v2
-	* here, we want to pick the vertex with the highest degree!
+    * here, we want to pick the vertex with the highest degree!
     */
     Node w = two_neighbour_node(g, v1, v2);
     if (w != INVALID_NODE) {
@@ -222,9 +222,9 @@ using namespace BinCount;
       * pick any vertex w that has degree <= 1 in g[v1]
       */
       w = get_lowest_degree_node(g, v1);
-	  /* 
+      /* 
       * if degree of w <= 1 in the original graph
-	  * delete w from the current graph and do not select it
+      * delete w from the current graph and do not select it
       */
       if (INVALID_NODE != w && orig.get_single_degree(w) < 2) {
         Graph h(g);
