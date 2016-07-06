@@ -24,6 +24,7 @@ class Galois
     uint64_t ilog(uint64_t);
     uint64_t uniform_random_element();
     void seed();
+	void seed(int se);
 
     void set_mode_naive();
     void set_mode_table();

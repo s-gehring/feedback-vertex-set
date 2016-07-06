@@ -25,14 +25,14 @@ int getComponentNumber(const Node & n)
 	}
 }*/
 
-mat generateIncidenceVector(const Graph& g, const Edge & e, vector<vector<int>>& edgesUsed, int & lastUsedRow, int row_number, const vector<int> & pairNumber, vector<vector<int>>& lastVertexIndex, vector<int> & nodeToRow)
+/*vector<uint64_t> generateIncidenceVector(const Graph& g, const Edge & e, vector<vector<int>>& edgesUsed, int & lastUsedRow, int row_number, const vector<int> & pairNumber, vector<vector<int>>& lastVertexIndex, vector<int> & nodeToRow)
 {
-	mat result(row_number, 1);
-	result.zeros();
+	vector<uint64_t> result(row_number,0);*/
+//	result.zeros();
 	/*int mi=min(source(e,g),target(e,g));
 	int ma=max(source(e,g),target(e,g));*/
-	int mi = min(nodeToRow[e.first], nodeToRow[e.second]);
-	int ma = max(nodeToRow[e.first], nodeToRow[e.second]);
+/*	int mi = min(nodeToRow[e.first], nodeToRow[e.second]);
+	int ma = max(nodeToRow[e.first], nodeToRow[e.second]);*/
 	/*int miN;
 	int maN;
 	if (nodeToRow[e.first] < nodeToRow[e.second])
@@ -49,25 +49,52 @@ mat generateIncidenceVector(const Graph& g, const Edge & e, vector<vector<int>>&
 		maN = e.first;
 		miN = e.second;
 	}*/
-	edgesUsed[mi][ma]++;
-	result(lastVertexIndex[mi][ma], 0) = 1;
+	/*edgesUsed[mi][ma]++;
+	result[lastVertexIndex[mi][ma]] = 1;
 
 	//cout<<mi<<" "<<ma<<" "<<lastVertexIndex[mi][ma]<<endl;
 	if (edgesUsed[mi][ma] == pairNumber[mi] + pairNumber[ma])
 	{
 		//result(ma,0)=-1;
-		result(ma, 0) = 1;
+		result[ma] = 1;
 		//cout<<"case 1 "<<ma<<endl;
 	}
 	else
 	{
 		//result(lastUsedRow,0)=-1;
 		assert(lastUsedRow < row_number);
-		result(lastUsedRow, 0) = 1;
+		result[lastUsedRow] = 1;
 		lastVertexIndex[mi][ma] = lastUsedRow;
 		lastUsedRow++;
 	}
 	return result;
+}*/
+
+
+void generateIncidenceVector(const Graph& g, const Edge & e, vector<vector<int>>& edgesUsed, int & lastUsedRow, mat & matrix, int columnNumber ,const vector<int> & pairNumber, vector<vector<int>>& lastVertexIndex, vector<int> & nodeToRow)
+{
+	int mi = min(nodeToRow[e.first], nodeToRow[e.second]);
+	int ma = max(nodeToRow[e.first], nodeToRow[e.second]);
+	edgesUsed[mi][ma]++;
+	if (lastVertexIndex[mi][ma] != -1)
+	{
+		matrix(lastVertexIndex[mi][ma], columnNumber) = 1;
+	}
+	else
+	{
+		matrix(mi, columnNumber) = 1;
+	}
+	if (edgesUsed[mi][ma] == pairNumber[mi] + pairNumber[ma])
+	{
+		matrix(ma,columnNumber) = 1;
+	}
+	else
+	{
+		matrix(lastUsedRow,columnNumber) = 1;
+		lastVertexIndex[mi][ma] = lastUsedRow;
+		lastUsedRow++;
+	}
+//	matrix.print("");
 }
 
 pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u)
@@ -107,7 +134,7 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u)
 		  nodeToRow[it.first] = componentToRow[getComponentNumber(it.first)];
 	  }
   }
-
+  cout <<"Number of Nodes: "<<lastUsedRow << endl;
   vector<int> pairNumber(g.get_n(),0);
   size_t edgeNumber = 0;
   for (const auto& firstNode : u) {
@@ -128,7 +155,7 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u)
         //edgePairs.insert(make_pair(nodeIndex[i],nodeIndex[target(*it, g)]));
         //neighbours.push_back(nodeIndex[target(*it, g)]);
       }
-      pairNumber[nodeToRow[firstNode]]=neighbours.size()-1;
+      pairNumber[nodeToRow[firstNode]]+=neighbours.size()-1;
       for (int i=0;i<neighbours.size();i++)
       {
         for(int j=0;j<i;j++)
@@ -137,7 +164,7 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u)
         }
       }
   }
-  mat matrix;
+  cout<<"Number of edges: "<<edgeNumber <<endl << "Number of pairs: " << edgePairs.size() << endl;
   vector<Edge> assignment;
   //int row_number = g.get_n() + 2 * edgePairs.size() - g.get_m();
   vector<vector<int>> edgesUsed;
@@ -145,7 +172,8 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u)
   for (int i=0;i<g.get_n();i++)
   {
     vector<int> v(g.get_n(),0);
-    vector<int> w(g.get_n(),nodeToRow[i]);
+//    vector<int> w(g.get_n(),nodeToRow[i]);
+	vector<int> w(g.get_n(), -1);
     edgesUsed.push_back(v);
     lastVertexIndex.push_back(w);
   }
@@ -155,12 +183,19 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u)
     lastVertexIndex[i]=i;
   }*/
   int row_number = lastUsedRow + 2 * edgePairs.size() - edgeNumber;
+  cout << "Number of rows: " << row_number << endl<< "Number of columns: "<<2*edgePairs.size()<<endl <<"Number of entries: "<< row_number* 2 * edgePairs.size() <<endl;
+  mat matrix(row_number,edgePairs.size()*2);
+  int columnNumber=0;
   for(auto & p: edgePairs)
   {
-    mat first=generateIncidenceVector(g,p.first,edgesUsed,lastUsedRow,row_number,pairNumber,lastVertexIndex, nodeToRow);
-    mat second=generateIncidenceVector(g,p.second,edgesUsed,lastUsedRow,row_number,pairNumber,lastVertexIndex, nodeToRow);
-    matrix=join_rows(matrix,first);
-    matrix=join_rows(matrix,second);
+	generateIncidenceVector(g, p.first, edgesUsed, lastUsedRow,matrix ,columnNumber, pairNumber, lastVertexIndex, nodeToRow);
+	columnNumber++;
+	generateIncidenceVector(g, p.second, edgesUsed, lastUsedRow,matrix, columnNumber, pairNumber, lastVertexIndex, nodeToRow);
+	columnNumber++;
+    /*auto first=generateIncidenceVector(g,p.first,edgesUsed,lastUsedRow,row_number,pairNumber,lastVertexIndex, nodeToRow);
+    auto second=generateIncidenceVector(g,p.second,edgesUsed,lastUsedRow,row_number,pairNumber,lastVertexIndex, nodeToRow);
+    join_rows_fast(matrix,first);
+    join_rows_fast(matrix,second);*/
     assignment.push_back(p.first);
     assignment.push_back(p.second);
   }
@@ -242,8 +277,10 @@ mat transformFullRowRank(mat input)
 
 mat colinearToLinear(const mat & input)
 {
-  mat fullRank= transformFullRowRank(input);
-  fullRank.print("transformed row rank");
+  //mat fullRank= transformFullRowRank(input);
+  //fullRank.print("transformed row rank");
+  mat fullRank = input;
+  fullRank.shed_row(0);
   if (fullRank.is_square())
   {
     //return eye<mat>(fullRank.n_rows,fullRank.n_cols);
@@ -272,9 +309,8 @@ mat colinearToLinear(const mat & input)
   }
   //mat submatrix=fullRank.extractColumns(invSubMatrix);
   //submatrix.print("sub");
-  standardForm.first.print("1");
   mat newRight = standardForm.first.extractColumns(restIndex);
-  newRight.print("nR");
+  //newRight.print("nR");
   //mat inverse=submatrix.i();
 //  inverse.print("inverse");
 //  mat rest= fullRank.extractColumns(restIndex);
@@ -284,7 +320,7 @@ mat colinearToLinear(const mat & input)
   //vector<int> arrangement=invSubMatrix;
   //arrangement.insert(arrangement.end(), restIndex.begin(), restIndex.end() );
   mat finalMatrix= join_rows(newRight.t(),eye<mat>(fullRank.n_cols-fullRank.n_rows, fullRank.n_cols-fullRank.n_rows));
-  finalMatrix.print("finalMatrix");
+  //finalMatrix.print("finalMatrix");
   return finalMatrix.rearrangeMatrix(arrangement);
 }
 
@@ -312,7 +348,7 @@ void findNodes(Graph & g, set<Node> & s, set<Node> & result)
 	}
 }
 
-set<Node> solveDegree3(Graph& g, set<Node>& s)
+set<Node> solveDegree3(Graph& g, set<Node>& s, int seed)
 {
 	set<Node> feedBackSet;
 	auto result = graphToMatrix(g, s);
@@ -327,7 +363,7 @@ set<Node> solveDegree3(Graph& g, set<Node>& s)
 	ga.set_w(16);
 	//ga.set_mode_naive();
 	ga.set_mode_logtb();
-	ga.seed();
+	ga.seed(seed);
 	int length;
 	int* res = simple_parity_fast(ga, instance.toNMatrix(), instance.getHeight(), instance.getWidth(), &length);
 	for (int i = 0; i < length; i++)
@@ -352,10 +388,11 @@ set<Node> solveDegree3(Graph& g, set<Node>& s)
 int main(int argc, char** argv)
 {
 	//std::srand(std::time(0));
-	//Graph g;
-	//fvs::read_graph(g, "mini_graph.txt");
 	GraphData graph_data = fvs::read_graph();
-	Graph g=graph_data.graph;
+	Graph g= graph_data.graph;
+//	Graph g;
+//	fvs::read_graph(g, "004.graph");
+//	fvs::read_graph(g, "mini_graph.txt");
 //	fvs::read_graph(g, argv[1]);
 //	fvs::print_graph(g);
 	//typedef graph_traits<Graph>::vertex_iterator node_iterator;
@@ -366,11 +403,11 @@ int main(int argc, char** argv)
 	{
 		s.insert(it.first);
 	}
-	s.erase(0);
-	s.erase(1);
+	//s.erase(0);
+	//s.erase(1);
 	Tests test;
 	test.testAll();
-	solveDegree3(g,s);
+	solveDegree3(g,s,0);
    /*for(int i=0;i<test.size();i+=2)
    {
 	   cout<<"Delete note from "<<source(result.second[i],g) <<endl;

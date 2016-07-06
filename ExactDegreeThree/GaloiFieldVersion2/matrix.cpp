@@ -183,6 +183,15 @@ mat join_rows(const mat & left, const std::vector<uint64_t> & right)
 	return result;
 }
 
+void join_rows_fast(mat & left, const std::vector<uint64_t> & right)
+{
+	if (left.getHeight() != 0 && right.size() != 0 && left.getHeight() != right.size())
+	{
+		throw;
+	}
+	left.addColumn(right);
+}
+
 void mat::updateDimension()
 {
 	n_rows = getHeight();
@@ -226,7 +235,7 @@ void mat::shed_row(const int rowNumber)
 }
 
 
-void mat::addColumn(const std::vector<uint64_t> column)
+void mat::addColumn(const std::vector<uint64_t> & column)
 {
 	matrix.push_back(column);
 	updateDimension();

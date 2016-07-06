@@ -172,6 +172,11 @@ void Galois::seed()
   gen.seed(rd());   
 }
 
+void Galois::seed(int se)
+{
+	gen.seed(se);
+}
+
 uint64_t Galois::uniform_random_element()
 { 
   int bits = w;

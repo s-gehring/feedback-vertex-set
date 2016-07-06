@@ -11,10 +11,10 @@
 class mat
 {
 public:
-	mat(Galois& ga, int width, int height);
-	mat(int width, int height);
+	mat(Galois& ga, int height, int width);
+	mat(int height, int width);
 	mat();
-	mat(uint64_t** pmatrix,int width, int height);
+	mat(uint64_t** pmatrix,int height, int width);
 	mat(std::initializer_list<std::initializer_list<uint64_t>> lst);
 	~mat();
 	void zeros();
@@ -45,7 +45,7 @@ public:
 	std::vector<uint64_t> & col(const int colnumber);
 	std::vector<uint64_t> col(const int colnumber) const;
 	//std::vector<uint64_t> getColumn(const int colNumber) const;
-	void addColumn(const std::vector<uint64_t> column);
+	void addColumn(const std::vector<uint64_t> & column);
 	void shed_row(const int rowNumber);
 	//void deleteRow(const int row);
 	int n_rows;
@@ -105,6 +105,7 @@ public:
 
 mat join_rows(const mat & left,const mat & right);
 mat join_rows(const mat & left, const std::vector<uint64_t> & right);
+void join_rows_fast(mat & left, const std::vector<uint64_t> & right);
 int findNonZero(mat & input, int row, int startCol);
 //void lu(mat & l, mat & u, mat & p, mat & input);
 int matRank(mat Matrix);
