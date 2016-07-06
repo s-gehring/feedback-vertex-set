@@ -233,7 +233,7 @@ using namespace BinCount;
         return retValue = forest_bipartition_fvs(orig, h, v1, v2, k);
       }
       /*
-      * else it has exactly one neighbour in v1 and on in v2
+      * else it has exactly one neighbour in v1 and one in v2
       * -> every cycle going through w does contain its neighbours
       * -> do not branch and move w to v2
       */
