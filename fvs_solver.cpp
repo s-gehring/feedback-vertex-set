@@ -553,6 +553,7 @@ using namespace BinCount;
       // construct iterative graph
       Graph h;
       orig.induced_subgraph(h, v_iter);
+      h.delete_low_degree_nodes();
       // run compression
       result = compression_fvs(h, f_iter);
       if(result.second) {
