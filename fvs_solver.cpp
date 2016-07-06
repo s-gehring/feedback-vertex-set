@@ -1,5 +1,3 @@
-#include <utility>
-#include <limits.h>
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -137,101 +135,117 @@ using namespace BinCount;
               if(++neighbors > cur_neighbors) {
                   result = candidate;
                   cur_neighbors = neighbors;
-              }
-              
+              } 
           }
       }
     }
     return result;
   }
 
-
-
-  pair<set<Node>, bool> fvs::forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node>& f, set<Node>& v2, int k) {
-  set<Node> fvs;
-  pair<set<Node>, bool> retValue;
-  
-  if (k < 0 || (k == 0 && has_cycle(g))) {
-    //cout << "Returning false, k got small and g has still cycles." << endl;
+  pair<set<Node>, bool> fvs::forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node>& v1, set<Node>& v2, int k) {
+    set<Node> fvs;
+    pair<set<Node>, bool> retValue;
+	/*
+    * no budget but g still has cycles -> return false
+    */
+    if (k < 0 || (k == 0 && has_cycle(g))) {
+      return make_pair(fvs, false);
+    }
+	/*
+    * g is a forest -> return empty set
+    */
+    if (!has_cycle(g)) {
+      return make_pair(fvs, true);
+    }
+    /*
+    * Pick a vertex w of v1 which has least two neighbors in v2
+	* here, we want to pick the vertex with the highest degree!
+    */
+    Node w = two_neighbour_node(g, v1, v2);
+    if (w != INVALID_NODE) {
+      /*
+      * if both neighbours are in the same connected component, i.e. w creates a cycle in g
+      */
+      if (creates_circle(g, v2, w)) {
+        Graph h(g);
+        v1.erase(w);
+        h.remove_node(w);
+        /*
+        * select w and reduce the budget by 1
+        */
+        retValue = forest_bipartition_fvs(orig, h, v1, v2, k - 1);
+        /*
+        * if returning NO, then return NO
+        */
+        if (false == retValue.second) {
+          return make_pair(fvs, false);
+        }
+        /*
+        * else add w to the fvs
+        */
+        else {
+          fvs = retValue.first;
+          fvs.insert(w);
+          return make_pair(fvs, true);
+        }
+      }
+      else {
+        /*
+        * both neighbours of w are in different connected components
+        */
+        Graph h(g);
+        v1.erase(w);
+        h.remove_node(w);
+        /*
+        * branch on w
+        */
+        retValue = forest_bipartition_fvs(orig, h, v1, v2, k - 1);
+        if(retValue.second) {
+          /*
+          * add w to the fvs and reduce the budget by 1
+          */
+          fvs = retValue.first;
+          fvs.insert(w);
+          return make_pair(fvs, true);
+        }
+        else {
+          /* 
+          * do not select w, move w to v2 -> less connected components in g[v2]
+          */
+          v2.insert(w);
+          return forest_bipartition_fvs(orig, g, v1, v2, k);
+        }
+      }
+    }
+    else {
+      /*
+      * pick any vertex w that has degree <= 1 in g[v1]
+      */
+      w = get_lowest_degree_node(g, v1);
+	  /* 
+      * if degree of w <= 1 in the original graph
+	  * delete w from the current graph and do not select it
+      */
+      if (INVALID_NODE != w && orig.get_single_degree(w) < 2) {
+        Graph h(g);
+        v1.erase(w);
+        h.remove_node(w);
+        return retValue = forest_bipartition_fvs(orig, h, v1, v2, k);
+      }
+      /*
+      * else it has exactly one neighbour in v1 and on in v2
+      * -> every cycle going through w does contain its neighbours
+      * -> do not branch and move w to v2
+      */
+      else if (w != INVALID_NODE) {
+        v1.erase(w);
+        v2.insert(w);
+        return forest_bipartition_fvs(orig, g, v1, v2, k);
+      }
+    }
     return make_pair(fvs, false);
   }
 
-  if (!has_cycle(g)) {
-    //cout << "g has no cycle." << endl;
-    //print_graph(g);
-    return make_pair(fvs, true);
-  }
-
-  Node w = two_neighbour_node(g, f, v2); // A vertex of f which has least two neighbors in g-f.
-  //cout << "w: " << w << endl;
-  if (w != INVALID_NODE) {
-    if (creates_circle(g, v2, w)) {
-      //cout << w << " creates a circle in g." << endl;
-      
-      Graph h(g);
-      f.erase(w);
-      h.remove_node(w);
-      retValue = forest_bipartition_fvs(orig, h, f, v2, k - 1);
-      
-    //  cout << "Subcall retuned: " << (retValue.second ? "true" : "false") << endl;
-    //  cout << "Subcall-Set: "; for (const auto& i : retValue.first) { cout << i << ", "; } cout << endl;
-      
-      
-      if (false == retValue.second) {
-    //    cout << "Returning false after subcall. " << endl;
-        return make_pair(fvs, false);
-      }
-      else {
-        fvs = retValue.first;
-        fvs.insert(w);
-        
-    //    cout << "Returning from 3.1: ";
-        //for (const auto& i : fvs) { cout << i << ", "; } cout << endl;
-        return make_pair(fvs, true);
-      }
-    } else {
-      Graph h(g);
-      f.erase(w);
-      h.remove_node(w);
-      retValue = forest_bipartition_fvs(orig, h, f, v2, k - 1);
-
-      if(retValue.second) {
-        fvs = retValue.first;
-        
-        fvs.insert(w);
-        
-      //cout << "Returning: ";
-      //  for (const auto& i : f) { cout << i << ", "; } cout << endl;
-        return make_pair(fvs, true);
-      }
-      else {
-        v2.insert(w);
-        //      cout << "Removing " << w << " from the fvs." << endl;
-        return forest_bipartition_fvs(orig, g, f, v2, k);
-      }
-    }
-  }
-  else {
-    w = get_lowest_degree_node(g, f);
-    if (INVALID_NODE != w && orig.get_single_degree(w) < 2) {
-//      cout << "Out degree of " << w << " is smaller than 2" << endl;
-      Graph h(g);
-      f.erase(w);
-      h.remove_node(w);
-
-      return retValue = forest_bipartition_fvs(orig, h, f, v2, k);
-    } 
-    else if (w != INVALID_NODE) {
-      f.erase(w);
-      v2.insert(w);
-
-//      cout << "Removing " << w << " from the fvs." << endl;
-      return forest_bipartition_fvs(orig, g, f, v2, k);
-    }
-  }
-  
-  return make_pair(fvs, false);
-}
   GraphData fvs::read_graph() {
     GraphData result;
     int current_node_id = 0;
