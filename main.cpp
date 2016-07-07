@@ -200,7 +200,7 @@ int main(int argc, char** argv) {
 		set<Node> partial_solution;
 		if (branching_pairs.size() > 0) {
 			debug cout << "Start branching on " << branching_pairs.size() << " different multi-edges ";
-			debug cout << "for one connected component.";
+			debug cout << "for one connected component." << endl;
 			Bin_count counter(branching_pairs.size());
 			while (!counter.is_full()) {
 				Graph h(it);
