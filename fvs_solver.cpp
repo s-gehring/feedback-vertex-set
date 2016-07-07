@@ -66,12 +66,6 @@ using namespace BinCount;
             neighbors_in_u.insert(it);
         }
     }
-    /*
-    **  TODO: Finish this!
-    **  Currently, this only returns true, if 
-    **  v has two neighbors in U, which are also connected.
-    **  Either use DFS or induced_subgraph() or both.
-    */
     for (const auto& i : neighbors_in_u) {
       stack<Node> s;
       unordered_set<Node> used;

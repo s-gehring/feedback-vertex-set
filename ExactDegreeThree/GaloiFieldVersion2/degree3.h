@@ -3,12 +3,11 @@
 #include <vector>
 #include <algorithm>
 #include <tuple>
-#include <ctime>
-#include "Tests.h"
 #include "lin_parity.h"
 #include "matrix.h"
 #include "graph.hpp"
 #include "fvs_solver.hpp"
+#include "galois.h"
 
 
 //vector<uint64_t> generateIncidenceVector(const Graph& g, const Edge & e, vector<vector<int>>& edgesUsed, int & lastUsedRow, int row_number, const vector<int> & pairNumber, vector<vector<int>>& lastVertexIndex, vector<int> & nodeToRow);

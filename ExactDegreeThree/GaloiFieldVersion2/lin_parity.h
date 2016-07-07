@@ -5,6 +5,7 @@
 
 #include <cstdlib> 
 #include <ctime>
+#include "galois.h"
 
 
 

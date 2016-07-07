@@ -1,11 +1,11 @@
-#include <utility>
-#include <limits.h>
 #include <fstream>
 #include <sstream>
 #include <iostream>
 #include "fvs_solver.hpp"
+#include "bin_count.hpp"
 
 using namespace fvs;
+using namespace BinCount;
 
   void fvs::print_nodes(const set<Node>& s) {
     set<Node>::iterator it = s.begin();
@@ -66,13 +66,36 @@ using namespace fvs;
             neighbors_in_u.insert(it);
         }
     }
-    /*
-    **  TODO: Finish this!
-    **  Currently, this only returns true, if 
-    **  v has two neighbors in U, which are also connected.
-    **  Either use DFS or induced_subgraph() or both.
-    */
+    unordered_set<Node> used;
+    unordered_map<Node, Node> pred;
     for (const auto& i : neighbors_in_u) {
+	  stack<Node> s;
+      s.push(i);
+      while(!s.empty()) {
+
+        Node m = s.top();
+        s.pop();
+        
+        if(used.find(m) != used.end()) continue;
+        used.insert(m);
+        pred[m] = INVALID_NODE;
+        for(const auto &it: g.get_neighbors(m).first) {
+            if(u.find(it) == u.end()) continue;
+            if(used.find(it) == used.end()) {
+                used.insert(it);
+                pred[it] = m;
+                s.insert(it);
+            } else {
+                if(pred[it] != m) {
+                    return true;
+                }
+            }
+        }
+        
+      }
+     } 
+      
+      /*
       pair<Neighborhood, bool> eIt = g.get_neighbors(i); 
       if(!eIt.second) {
           throw std::runtime_error("Error: There is a vertex which is in u, but not in g.");
@@ -83,11 +106,13 @@ using namespace fvs;
           return true;
         }
       }
-    }
+    }*/
     return false;
   }
 
   Node fvs::two_neighbour_node(const Graph& g, const set<Node> &u, const set<Node> &v) {
+    Node result = INVALID_NODE;
+    int cur_neighbors = 1;
     /*
     **  Check every node in U.
     */
@@ -102,101 +127,120 @@ using namespace fvs;
           **  ...which are in V.
           */
           if(v.find(j) != v.end()) {
-              if(++neighbors > 1) return candidate;
+              if(++neighbors > cur_neighbors) {
+                  result = candidate;
+                  cur_neighbors = neighbors;
+              } 
           }
       }
     }
-    return INVALID_NODE;
+    return result;
   }
 
-
-
-  pair<set<Node>, bool> fvs::forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node>& f, set<Node>& v2, int k) {
-  set<Node> fvs;
-  pair<set<Node>, bool> retValue;
-  
-  if (k < 0 || (k == 0 && has_cycle(g))) {
-    //cout << "Returning false, k got small and g has still cycles." << endl;
-    return make_pair(fvs, false);
-  }
-
-  if (!has_cycle(g)) {
-    //cout << "g has no cycle." << endl;
-    //print_graph(g);
-    return make_pair(fvs, true);
-  }
-
-  Node w = two_neighbour_node(g, f, v2); // A vertex of f which has least two neighbors in g-f.
-  //cout << "w: " << w << endl;
-  if (w != INVALID_NODE) {
-    if (creates_circle(g, v2, w)) {
-      //cout << w << " creates a circle in g." << endl;
-      
-      Graph h(g);
-      f.erase(w);
-      h.remove_node(w);
-      retValue = forest_bipartition_fvs(orig, h, f, v2, k - 1);
-      
-    //  cout << "Subcall retuned: " << (retValue.second ? "true" : "false") << endl;
-    //  cout << "Subcall-Set: "; for (const auto& i : retValue.first) { cout << i << ", "; } cout << endl;
-      
-      
-      if (false == retValue.second) {
-    //    cout << "Returning false after subcall. " << endl;
-        return make_pair(fvs, false);
+  pair<set<Node>, bool> fvs::forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node>& v1, set<Node>& v2, int k) {
+    set<Node> fvs;
+    pair<set<Node>, bool> retValue;
+    /*
+    * no budget but g still has cycles -> return false
+    */
+    if (k < 0 || (k == 0 && has_cycle(g))) {
+      return make_pair(fvs, false);
+    }
+    /*
+    * g is a forest -> return empty set
+    */
+    if (!has_cycle(g)) {
+      return make_pair(fvs, true);
+    }
+    /*
+    * Pick a vertex w of v1 which has least two neighbors in v2
+    * here, we want to pick the vertex with the highest degree!
+    */
+    Node w = two_neighbour_node(g, v1, v2);
+    if (w != INVALID_NODE) {
+      /*
+      * if both neighbours are in the same connected component, i.e. w creates a cycle in g
+      */
+      if (creates_circle(g, v2, w)) {
+        Graph h(g);
+        v1.erase(w);
+        h.remove_node(w);
+        /*
+        * select w and reduce the budget by 1
+        */
+        retValue = forest_bipartition_fvs(orig, h, v1, v2, k - 1);
+        /*
+        * if returning NO, then return NO
+        */
+        if (false == retValue.second) {
+          return make_pair(fvs, false);
+        }
+        /*
+        * else add w to the fvs
+        */
+        else {
+          fvs = retValue.first;
+          fvs.insert(w);
+          return make_pair(fvs, true);
+        }
       }
       else {
-        fvs = retValue.first;
-        fvs.insert(w);
-        
-    //    cout << "Returning from 3.1: ";
-        //for (const auto& i : fvs) { cout << i << ", "; } cout << endl;
-        return make_pair(fvs, true);
+        /*
+        * both neighbours of w are in different connected components
+        */
+        Graph h(g);
+        v1.erase(w);
+        h.remove_node(w);
+        /*
+        * branch on w
+        */
+        retValue = forest_bipartition_fvs(orig, h, v1, v2, k - 1);
+        if(retValue.second) {
+          /*
+          * add w to the fvs and reduce the budget by 1
+          */
+          fvs = retValue.first;
+          fvs.insert(w);
+          return make_pair(fvs, true);
+        }
+        else {
+          /* 
+          * do not select w, move w to v2 -> less connected components in g[v2]
+          */
+          v2.insert(w);
+          return forest_bipartition_fvs(orig, g, v1, v2, k);
+        }
       }
     }
     else {
-      Graph h(g);
-      f.erase(w);
-      h.remove_node(w);
-      retValue = forest_bipartition_fvs(orig, h, f, v2, k - 1);
-
-      if(retValue.second) {
-        fvs = retValue.first;
-        
-        fvs.insert(w);
-        
-      //cout << "Returning: ";
-      //  for (const auto& i : f) { cout << i << ", "; } cout << endl;
-        return make_pair(fvs, true);
+      /*
+      * pick any vertex w that has degree <= 1 in g[v1]
+      */
+      w = get_lowest_degree_node(g, v1);
+      /* 
+      * if degree of w <= 1 in the original graph
+      * delete w from the current graph and do not select it
+      */
+      if (INVALID_NODE != w && orig.get_single_degree(w) < 2) {
+        Graph h(g);
+        v1.erase(w);
+        h.remove_node(w);
+        return retValue = forest_bipartition_fvs(orig, h, v1, v2, k);
       }
-      else {
+      /*
+      * else it has exactly one neighbour in v1 and one in v2
+      * -> every cycle going through w does contain its neighbours
+      * -> do not branch and move w to v2
+      */
+      else if (w != INVALID_NODE) {
+        v1.erase(w);
         v2.insert(w);
-        //      cout << "Removing " << w << " from the fvs." << endl;
-        return forest_bipartition_fvs(orig, g, f, v2, k);
+        return forest_bipartition_fvs(orig, g, v1, v2, k);
       }
     }
+    return make_pair(fvs, false);
   }
-  else {
-    w = get_lowest_degree_node(g, f);
-    if (INVALID_NODE != w && orig.get_single_degree(w) < 2) {
-//      cout << "Out degree of " << w << " is smaller than 2" << endl;
-      Graph h(g);
-      f.erase(w);
-      h.remove_node(w);
 
-      return retValue = forest_bipartition_fvs(orig, h, f, v2, k);
-    } 
-    else if (w != INVALID_NODE) {
-      f.erase(w);
-      v2.insert(w);
-
-//      cout << "Removing " << w << " from the fvs." << endl;
-      return forest_bipartition_fvs(orig, g, f, v2, k);
-    }
-  }
-  
-  return make_pair(fvs, false);
-}
   GraphData fvs::read_graph() {
     GraphData result;
     int current_node_id = 0;
@@ -413,30 +457,25 @@ using namespace fvs;
   pair<set<Node>, bool> fvs::compression_fvs(const Graph& orig, const set<Node>& S) {
     Graph g_help(orig);
     size_t k = S.size() - 1;
-    uint64_t n = pow(2, k + 1); // for an fvs of large size, this is too small -> need other approach
+    Bin_count counter(k + 1);
     set<Node> D; // the guessed intersection
     // get nodes of the graph
     set<Node> V;
     for (const auto &it : g_help.get_adjacency_list()) {
       V.insert(it.first);
     }
-    bool current;
     // convert set S to a vector
     vector<Node> T;
     for (set<Node>::iterator it = S.begin(); it != S.end(); ++it) {
       T.push_back(*it);
     }
     pair<set<Node>, bool> result;
-    int h;
-    for (size_t j = 0; j < n; j++) {
-      // guess intersection using binary coding
-      h = j;
+    while(!counter.is_full()) {
+      // guess intersection using the binary counter
       for (size_t l = 0; l < k + 1; l++) {
-        current = h % 2;
-        if (current) {
+        if (counter.at(l)) {
           D.insert(T[l]);
-        }
-        h = (h - current) / 2;
+	      }
       }
       // compute G[S\D]
       set<Node> s_without_d = set_minus(S, D);
@@ -457,6 +496,7 @@ using namespace fvs;
         }
       }
       D.clear();
+	  counter.increase();
     }
     return make_pair(S, false);
   }
@@ -522,6 +562,7 @@ using namespace fvs;
       // construct iterative graph
       Graph h;
       orig.induced_subgraph(h, v_iter);
+      h.delete_low_degree_nodes();
       // run compression
       result = compression_fvs(h, f_iter);
       if(result.second) {
