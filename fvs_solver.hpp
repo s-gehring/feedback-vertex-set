@@ -61,11 +61,11 @@ namespace fvs {
 	* the function returns true.
 	*
 	* @param [in] g The basic graph.
-	* @param [in] u The nodeset that does not induce the subgraph for which were checking the neighbourhood of v.
-	* @param [in] v A node, which might connect a circle in g[u].
+	* @param [in] v A node, which might connect a circle in g[components].
+    * @param [in] components The nodeset, compiled into connected components.
 	* @returns True, if a neighbour of a neighbour of v is a neighbour of v.
 	*/
-	bool creates_circle(Graph& g, const set<Node>& u, const Node& v);
+	bool creates_circle(const Graph& g, const Node v, const unordered_map<Node, unordered_set<Node>* > components);
 
 	/**
 	* @brief Finds a node in u, which has atleast two neighbours in v with respect to g.
