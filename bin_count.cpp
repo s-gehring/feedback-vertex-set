@@ -49,4 +49,8 @@ namespace BinCount {
 	bool Bin_count::is_full() {
 		return full;
 	}
+
+	int Bin_count::get_size() {
+		return size;
+	}
 }
