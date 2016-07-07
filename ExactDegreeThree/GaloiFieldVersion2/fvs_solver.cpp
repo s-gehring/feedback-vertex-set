@@ -175,13 +175,19 @@ using namespace BinCount;
     ** Save all connected components in a set (without duplicates,
     ** for later deletion, since we used new).
     */
-    //set <unordered_set<Node>* > connected_components;
-    vector <unordered_set<Node>* > connected_components;
+    set <unordered_set<Node>* > connected_components;
+    vector <unordered_set<Node>* > connected_vec;
     for(auto &it : mapping) {
-      //connected_components.insert(it.second);
-    	connected_components.push_back(it.second);
+      connected_components.insert(it.second);
+    	connected_vec.push_back(it.second);
     }
-      
+    
+    vector<int> nodeToComponent(g.get_n());
+    for (auto node: v2)
+    {
+      int number=find(connected_vec.begin(), connected_vec.end, node);
+      nodeToComponent[node]=number-connected_vec.begin();
+    }
     /*
     * Pick a vertex w of v1 which has least two neighbors in v2
     * here, we want to pick the vertex with the highest degree!
@@ -219,9 +225,8 @@ using namespace BinCount;
 	    	w = two_neighbour_node(g, v1, v2);
 	}
     }
-    cout <<"test"<<flush;
+    //cout <<"test"<<flush;
     for(auto &it : connected_components) delete(it);
-    cout <<"ddd"<<flush;
     if (w != INVALID_NODE) {
       /*
       * if both neighbours are in the same connected component, i.e. w creates a cycle in g
