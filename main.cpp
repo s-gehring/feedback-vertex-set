@@ -153,7 +153,7 @@ void get_connected_graphs(const Graph &g, const list<set<Edge> > &connected_comp
     debug cout << "Found/Created "<< connected_components.size() << " connected components with "<<i<<" edges in total." <<endl;
 }
 
-set<set<Node>> multi_edge_partitions(set<set<Node>>& m, set<Node>& taken,  Graph g) {
+set<set<Node>> multi_edge_partitions(set<set<Node>>& m, set<Node>& taken,  Graph& g) {
 	set<set<Node>> return_value;
 	AdjacencyList adj = g.get_adjacency_list();
 	// graph is partitioned
@@ -170,12 +170,17 @@ set<set<Node>> multi_edge_partitions(set<set<Node>>& m, set<Node>& taken,  Graph
 		set<Node> new_taken = taken;
 		new_taken.insert(branched_node);
 		// do not take neighbours
-		for (auto &it : adj.begin()->second) {
-			h1.remove_node(it);
-		}
+		// only remove the edges otherwise other multiedges are destroyed too
+		// this is simply done by removing the node itself
 		h1.remove_node(branched_node);
-		set<set<Node>> new_partition = multi_edge_partitions(m, new_taken, h1);
-		m.insert(new_partition.begin(), new_partition.end());
+		// but we can delete neighbours that are now left alone
+		for (auto &it : adj.begin()->second) {
+			if (h1.get_single_degree(it) == 0) {
+				h1.remove_node(it);
+			}
+		}
+		set<set<Node>> new_partition1 = multi_edge_partitions(m, new_taken, h1);
+		m.insert(new_partition1.begin(), new_partition1.end());
 		// 2) do not take it
 		Graph h2(g);
 		new_taken = taken;
@@ -185,8 +190,8 @@ set<set<Node>> multi_edge_partitions(set<set<Node>>& m, set<Node>& taken,  Graph
 			h2.remove_node(it);
 		}
 		h2.remove_node(branched_node);
-		new_partition = multi_edge_partitions(m, new_taken, h2);
-		m.insert(new_partition.begin(), new_partition.end());
+		set<set<Node>> new_partition2 = multi_edge_partitions(m, new_taken, h2);
+		m.insert(new_partition2.begin(), new_partition2.end());
 	}
 	return m;
 }
