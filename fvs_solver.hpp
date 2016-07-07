@@ -10,6 +10,7 @@
     #define debug if(1)
 #endif
 #include "graph.hpp"
+#include "bin_count.hpp"
 
 using namespace std;
 using namespace FvsGraph;
