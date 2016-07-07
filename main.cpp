@@ -153,9 +153,47 @@ void get_connected_graphs(const Graph &g, const list<set<Edge> > &connected_comp
     debug cout << "Found/Created "<< connected_components.size() << " connected components with "<<i<<" edges in total." <<endl;
 }
 
+set<set<Node>> multi_edge_partitions(set<set<Node>>& m, set<Node>& taken,  Graph g) {
+	set<set<Node>> return_value;
+	AdjacencyList adj = g.get_adjacency_list();
+	// graph is partitioned
+	if (adj.size() == 0) {
+		return_value = m;
+		return_value.insert(taken);
+		return return_value;
+	}
+	// branch on one node
+	else {
+		Node branched_node = adj.begin()->first;
+		// 1) take it
+		Graph h1(g);
+		set<Node> new_taken = taken;
+		new_taken.insert(branched_node);
+		// do not take neighbours
+		for (auto &it : adj.begin()->second) {
+			h1.remove_node(it);
+		}
+		h1.remove_node(branched_node);
+		set<set<Node>> new_partition = multi_edge_partitions(m, new_taken, h1);
+		m.insert(new_partition.begin(), new_partition.end());
+		// 2) do not take it
+		Graph h2(g);
+		new_taken = taken;
+		// take all neighbours
+		for (auto &it : adj.begin()->second) {
+			new_taken.insert(it);
+			h2.remove_node(it);
+		}
+		h2.remove_node(branched_node);
+		new_partition = multi_edge_partitions(m, new_taken, h2);
+		m.insert(new_partition.begin(), new_partition.end());
+	}
+	return m;
+}
+
 int main(int argc, char** argv) {
 	// Read graph and store information in variables.
-
+	
 	GraphData graph_data = read_graph();
 
 	set<Node> necessary_nodes = graph_data.necessary_nodes;
@@ -163,14 +201,14 @@ int main(int argc, char** argv) {
 	Graph g = graph_data.graph;
 
 	g.assign_names(node_names);
-
+	
 	// Create original copy.
 	Graph orig(g);
 
 	// preprocessing
 	remove_bridges(g, g.get_articulation_elements().second);
 
-	// iteratively remove semidisjoint cycles
+	//iteratively remove semidisjoint cycles
 	bool progress = true;
 	int sd_vertices = 0;
 	while (progress) {
@@ -185,42 +223,37 @@ int main(int argc, char** argv) {
 		progress = sdcycle.second;
 	}
 	debug cout << "Found " << sd_vertices << " vertices of the FVS while removing semidisjoint cycles." << endl;
-
+	
 	// Split graph on connected components.  
 	std::list<Graph> connected_graphs;
 	get_connected_graphs(g, g.get_connected_components(), connected_graphs);
-
 	list<set<Node> > partial_solutions;
 	set<Node> complete_solution;
 	for (auto &it : connected_graphs) {
 		debug cout << "Trying to find partial solution for graph " << it.get_name() << "/"<<connected_graphs.size()<<" [n=" << it.get_n() << "|m=" << it.get_m() << "]" << endl;
 
 		// contract edges and start branching on multiedges within one connected component
-		vector<Edge> branching_pairs = contract_edges(it);
+		set<Edge> branching_pairs = contract_edges(it);
 		set<Node> partial_solution;
 		if (branching_pairs.size() > 0) {
 			debug cout << "Start branching on " << branching_pairs.size() << " different multi-edges ";
 			debug cout << "for one connected component." << endl;
-			Bin_count counter(branching_pairs.size());
-			while (!counter.is_full()) {
-                debug cout << "Current Branch bin("<< counter.to_string()<<") / 2^"<<branching_pairs.size()<<"..."<<flush;
+			// create graph by using all multi-edges
+			Graph m;
+			m.add_edges(branching_pairs);
+			// generate all partitions
+			set<Node> taken;
+			set<set<Node>> partitions;
+			partitions = multi_edge_partitions(partitions, taken, m);
+			debug cout << "Reduced size from " << pow(2, branching_pairs.size()) << " to ";
+			debug cout << partitions.size() << " partitions of the graph using the multiedges." << endl;
+			// Bin_count counter(branching_pairs.size());
+			for (set<set<Node>>::iterator partition = partitions.begin(); partition != partitions.end(); ++partition) {
 				Graph h(it);
 				set<Node> current_solution;
-				set<Node> branching_nodes;
-				// use the binary counter to decide on a concrete branching of all branching nodes
-				// TODO: this can be simplified because if we choose one vertex to branch on
-				// this may determine the choice for another multi-edge
-				for (int k = 0; k < counter.get_size(); k++) {
-					if (counter.at(k)) {
-						h.remove_node(branching_pairs[k].first);
-						current_solution.insert(branching_pairs[k].first);
-						branching_nodes.insert(branching_pairs[k].first);
-					}
-					else {
-						h.remove_node(branching_pairs[k].second);
-						current_solution.insert(branching_pairs[k].second);
-						branching_nodes.insert(branching_pairs[k].second);
-					}
+				for (set<Node>::iterator it1 = partition->begin(); it1 != partition->end(); ++it1) {
+					h.remove_node(*it1);
+					current_solution.insert(*it1);
 				}
 				set<Node> help_solution = run_iter_comp(h);
 				current_solution.insert(help_solution.begin(), help_solution.end());
@@ -228,8 +261,6 @@ int main(int argc, char** argv) {
 				if (current_solution.size() < partial_solution.size() || partial_solution.size() == 0) {
 					partial_solution = current_solution;
 				}
-				counter.increase();
-                debug cout << "done!"<<endl;
 			}
 		}
 		// if there are no multi-edges, just run iterative compression on the connected component
