@@ -46,6 +46,13 @@ namespace BinCount {
 		*/
 		bool is_full();
 
+		/*
+		* @brief Returns the size of the counter.
+		*
+		* @returns Size of the counter.
+		*/
+		int get_size();
+
 	private:
 		std::vector<bool> counter;
 		int size;
