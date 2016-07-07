@@ -3,9 +3,13 @@
 using namespace std;
 //using namespace fvs;
 
+unordered_map<Node, unordered_set<Node>* > mapping;
+vector<unordered_set<Node>* > connected_components;
+
 int getComponentNumber(const Node & n)
 {
-	return 0;
+	auto it= find(connected_components.begin(),connected_components.end(),mapping[n]);
+	return it - connected_components.begin();
 }
 
 /*int getID(const set<Node> & u,const  Node & n, vector<int> & nodeID, vector<int> & componentID, int & lastRowUsed)
@@ -348,8 +352,10 @@ void findNodes(Graph & g, set<Node> & s, set<Node> & result)
 	}
 }
 
-set<Node> solveDegree3(Graph& g, set<Node>& s, int seed)
+set<Node> solveDegree3(Graph& g, set<Node>& s, int seed, unordered_map<Node, unordered_set<Node>* > map,vector<unordered_set<Node>* >& comp)
 {
+	mapping=map;
+	connected_components=comp;
 	set<Node> feedBackSet;
 	auto result = graphToMatrix(g, s);
 	result.first.print("IncidenceMatrix");

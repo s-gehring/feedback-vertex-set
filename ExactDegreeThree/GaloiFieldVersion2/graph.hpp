@@ -1,4 +1,4 @@
-
+//#pragma once
 #ifndef _H_GRAPH
 #define _H_GRAPH
 
