@@ -90,8 +90,8 @@ void remove_bridges(Graph &g, const unordered_set<Edge> &bridges) {
     debug cout << "Deleted " << bridges.size() << " bridges (useless edges)." <<endl;
 }
 
-vector<Edge> contract_edges(Graph &g) {
-    vector<Edge> branching_pairs;
+set<Edge> contract_edges(Graph &g) {
+    set<Edge> branching_pairs;
     Node u = INVALID_NODE;
     Node v = INVALID_NODE;
     int contracted_edges = 0;
@@ -113,7 +113,7 @@ vector<Edge> contract_edges(Graph &g) {
 	    * instead, we keep a single edge and remember that we have to take one of them into the fvs
 	    */
             if(g.has_edge(u, v)) {
-		branching_pairs.push_back(make_pair(u, v));
+		branching_pairs.insert(make_pair(u, v));
             }
 	    else {
 		g.add_edge(u, v);
