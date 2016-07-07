@@ -168,7 +168,6 @@ int main(int argc, char** argv) {
     
     // Create original copy.
     Graph orig(g);
-    set<Node> complete_solution;
 
     // preprocessing
     remove_bridges(g, g.get_articulation_elements().second);
@@ -176,23 +175,26 @@ int main(int argc, char** argv) {
 
     // iteratively remove semidisjoint cycles
     bool progress = true;
+    int sd_vertices = 0;
     while (progress) {
 	pair<list<Node>, bool> sdcycle = find_semidisjoint_cycle(g);
 	if (sdcycle.second) {
-		complete_solution.insert(sdcycle.first.front());
-		g.remove_node(sdcycle.first.front());
-		sdcycle.first.pop_front();
-		g.delete_low_degree_nodes();
+    	    necessary_nodes.insert(sdcycle.first.front());
+	    g.remove_node(sdcycle.first.front());
+	    sdcycle.first.pop_front();
+	    g.delete_low_degree_nodes();
+	    sd_vertices++;
 	}
 	progress = sdcycle.second;
     }
-    debug cout << "Found " << complete_solution.size() << " vertices of the FVS while removing semidisjoint cycles." << endl;
+    debug cout << "Found " << sd_vertices << " vertices of the FVS while removing semidisjoint cycles." << endl;
 
     // Split graph on connected components.  
     std::list<Graph> connected_graphs;
     get_connected_graphs(g, g.get_connected_components(), connected_graphs);
 
     list<set<Node> > partial_solutions;
+    set<Node> complete_solution;
     for(auto &it : connected_graphs) {
 	    debug cout << "Trying to find partial solution for graph "<<it.get_name()<<" [n="<<it.get_n()<<"|m="<<it.get_m()<<"]"<<endl;	 
         
