@@ -193,7 +193,7 @@ int main(int argc, char** argv) {
 	list<set<Node> > partial_solutions;
 	set<Node> complete_solution;
 	for (auto &it : connected_graphs) {
-		debug cout << "Trying to find partial solution for graph " << it.get_name() << " [n=" << it.get_n() << "|m=" << it.get_m() << "]" << endl;
+		debug cout << "Trying to find partial solution for graph " << it.get_name() << "/"<<connected_graphs.size()<<" [n=" << it.get_n() << "|m=" << it.get_m() << "]" << endl;
 
 		// contract edges and start branching on multiedges within one connected component
 		vector<Edge> branching_pairs = contract_edges(it);
@@ -203,6 +203,7 @@ int main(int argc, char** argv) {
 			debug cout << "for one connected component." << endl;
 			Bin_count counter(branching_pairs.size());
 			while (!counter.is_full()) {
+                debug cout << "Current Branch bin("<< counter.to_string()<<") / 2^"<<branching_pairs.size()<<"..."<<flush;
 				Graph h(it);
 				set<Node> current_solution;
 				set<Node> branching_nodes;
@@ -228,6 +229,7 @@ int main(int argc, char** argv) {
 					partial_solution = current_solution;
 				}
 				counter.increase();
+                debug cout << "done!"<<endl;
 			}
 		}
 		// if there are no multi-edges, just run iterative compression on the connected component

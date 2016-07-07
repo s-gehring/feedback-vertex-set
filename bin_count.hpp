@@ -39,6 +39,11 @@ namespace BinCount {
 		*/
 		void print();
 
+        /*
+        * @brief Returns a printable string.
+        */
+        std::string to_string() const;
+        
 		/*
 		* @brief Checks if the counter can be increased.
 		*
