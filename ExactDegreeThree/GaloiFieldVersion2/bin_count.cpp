@@ -38,15 +38,25 @@ namespace BinCount {
 		std::fill(counter.begin(), counter.end(), 0);
 		full = false;
 	}
+    
+    std::string Bin_count::to_string() const {
+        std::string res = "";
+        for(const auto &it : counter) {
+            res = res + std::to_string(it) ;
 
+        }
+        return res;
+    }
+    
 	void Bin_count::print() {
-		for (std::vector<bool>::iterator it1 = counter.begin(); it1 != counter.end(); ++it1) {
-			std::cout << *it1 << " ";
-		}
-		std::cout << std::endl;
+		std::cout<<to_string()<<std::endl;
 	}
 
 	bool Bin_count::is_full() {
 		return full;
+	}
+
+	int Bin_count::get_size() {
+		return size;
 	}
 }

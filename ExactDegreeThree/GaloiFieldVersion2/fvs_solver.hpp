@@ -2,6 +2,8 @@
 #define FVS_SOLVER_H
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <set>
 #include <vector>
 #include <stack>
@@ -10,6 +12,7 @@
 #endif
 #include "degree3.h"
 #include "graph.hpp"
+#include "bin_count.hpp"
 
 using namespace std;
 using namespace FvsGraph;

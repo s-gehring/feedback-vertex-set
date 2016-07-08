@@ -39,12 +39,24 @@ namespace BinCount {
 		*/
 		void print();
 
+        /*
+        * @brief Returns a printable string.
+        */
+        std::string to_string() const;
+        
 		/*
 		* @brief Checks if the counter can be increased.
 		*
 		* @returns Returns true if the counter cannot be increased anymore.
 		*/
 		bool is_full();
+
+		/*
+		* @brief Returns the size of the counter.
+		*
+		* @returns Size of the counter.
+		*/
+		int get_size();
 
 	private:
 		std::vector<bool> counter;
