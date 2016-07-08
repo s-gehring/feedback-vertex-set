@@ -5,9 +5,7 @@ using namespace std;
 
 //unordered_map<Node, unordered_set<Node>* > mapping;
 //vector<unordered_set<Node>* > connected_components;
-vector<int> nodeToComponent;
-
-int getComponentNumber(const Node & n)
+int getComponentNumber(const Node & n, const vector<int> & nodeToComponent)
 {
 	//auto it= find(connected_components.begin(),connected_components.end(),mapping[n]);
 	//return it - connected_components.begin();
@@ -103,7 +101,7 @@ void generateIncidenceVector(const Graph& g, const Edge & e, vector<vector<int>>
 //	matrix.print("");
 }
 
-pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u)
+pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u,const vector<int> & nodeToComponent)
 {
   //typedef graph_traits<Graph>::vertices_size_type id;
 
@@ -120,9 +118,10 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u)
     nodeIndex[*it]=index;
     index++;
   }*/
-
-  vector<int> nodeToRow(g.get_n());
-  vector<int> componentToRow(g.get_n(), -1);
+	vector<int> nodeToRow(nodeToComponent.size());
+	vector<int> componentToRow(nodeToComponent.size(), -1);
+  //vector<int> nodeToRow(g.get_n());
+  //vector<int> componentToRow(g.get_n(), -1);
   int lastUsedRow = 0;
   for (const auto &it : g.get_adjacency_list()) {
 	  if (u.find(it.first) != u.end())
@@ -132,12 +131,12 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u)
 	  }
 	  else
 	  {
-		  if (componentToRow[getComponentNumber(it.first)] == -1)
+		  if (componentToRow[getComponentNumber(it.first,nodeToComponent)] == -1)
 		  {
-			  componentToRow[getComponentNumber(it.first)] = lastUsedRow;
+			  componentToRow[getComponentNumber(it.first,nodeToComponent)] = lastUsedRow;
 			  lastUsedRow++;
 		  }
-		  nodeToRow[it.first] = componentToRow[getComponentNumber(it.first)];
+		  nodeToRow[it.first] = componentToRow[getComponentNumber(it.first,nodeToComponent)];
 	  }
   }
   cout <<"Number of Nodes: "<<lastUsedRow << endl;
@@ -194,10 +193,10 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u)
   int columnNumber=0;
   for(auto & p: edgePairs)
   {
-	generateIncidenceVector(g, p.first, edgesUsed, lastUsedRow,matrix ,columnNumber, pairNumber, lastVertexIndex, nodeToRow);
-	columnNumber++;
-	generateIncidenceVector(g, p.second, edgesUsed, lastUsedRow,matrix, columnNumber, pairNumber, lastVertexIndex, nodeToRow);
-	columnNumber++;
+	  generateIncidenceVector(g, p.first, edgesUsed, lastUsedRow,matrix ,columnNumber, pairNumber, lastVertexIndex, nodeToRow);
+	  columnNumber++;
+	  generateIncidenceVector(g, p.second, edgesUsed, lastUsedRow,matrix, columnNumber, pairNumber, lastVertexIndex, nodeToRow);
+	  columnNumber++;
     /*auto first=generateIncidenceVector(g,p.first,edgesUsed,lastUsedRow,row_number,pairNumber,lastVertexIndex, nodeToRow);
     auto second=generateIncidenceVector(g,p.second,edgesUsed,lastUsedRow,row_number,pairNumber,lastVertexIndex, nodeToRow);
     join_rows_fast(matrix,first);
@@ -354,13 +353,13 @@ void findNodes(Graph & g, set<Node> & s, set<Node> & result)
 	}
 }
 
-set<Node> solveDegree3(Graph& g, set<Node>& s, int seed, vector<int> nTC)
+set<Node> solveDegree3(Graph& g, set<Node>& s, int seed, const vector<int> & nodeToComponent)
 {
 	//mapping=map;
 	//connected_components=comp;
-	nodeToComponent=ntc;
+//	nodeToComponent=nTC;
 	set<Node> feedBackSet;
-	auto result = graphToMatrix(g, s);
+	auto result = graphToMatrix(g, s,nodeToComponent);
 	result.first.print("IncidenceMatrix");
 	mat instance = colinearToLinear(result.first);
 	instance.print("transformed");

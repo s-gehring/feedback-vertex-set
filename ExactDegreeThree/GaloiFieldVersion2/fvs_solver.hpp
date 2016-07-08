@@ -65,8 +65,8 @@ namespace fvs {
     * @param [in] components The nodeset, compiled into connected components.
 	* @returns True, if a neighbour of a neighbour of v is a neighbour of v.
 	*/
-	bool creates_circle(const Graph& g, const Node v, const unordered_map<Node, unordered_set<Node>* > components);
-
+	//bool creates_circle(const Graph& g, const Node v, const unordered_map<Node, unordered_set<Node>* > components);
+	bool creates_circle(const Graph& g, const Node v, const vector<int> & nodeToComponent);
 	/**
 	* @brief Finds a node in u, which has atleast two neighbours in v with respect to g.
 	*
