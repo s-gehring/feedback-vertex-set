@@ -2,7 +2,6 @@
 #include <sstream>
 #include <iostream>
 #include "fvs_solver.hpp"
-#include "bin_count.hpp"
 
 using namespace fvs;
 using namespace BinCount;
@@ -559,8 +558,6 @@ using namespace BinCount;
     }
     // compute 2-approximation
     set<Node> fvs_approx = two_approx_fvs(g);
-    debug cout << "2 approximation of size " << fvs_approx.size() << " is: " << endl;
-    debug orig.print_nodeset(fvs_approx);
     // use any subset of half size
     int k = 0.5*(fvs_approx.size()+fvs_approx.size()%2);
     set<Node> v_prime;
