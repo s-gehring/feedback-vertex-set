@@ -109,7 +109,7 @@ using namespace BinCount;
     */
    // unordered_map<Node, unordered_set<Node>* > mapping;
     stack<Node> s;
-    int componentNumber=0;
+    int componentNumber=-1;
     int maxIndex=-1;
     for (const auto &it : g.get_adjacency_list()) {
       if(it.first>maxIndex)
@@ -121,8 +121,8 @@ using namespace BinCount;
     for(const auto &it : v2) {
        if (nodeToComponent[it]==-1)
        {
-          nodeToComponent[it]=componentNumber;
           componentNumber++;
+          nodeToComponent[it]=componentNumber;
           s.push(it);
        }
       while(!s.empty()) {

@@ -329,9 +329,37 @@ mat colinearToLinear(const mat & input)
   return finalMatrix.rearrangeMatrix(arrangement);
 }
 
+void print_edges(const set<Edge>& s) {
+    set<Edge>::iterator it = s.begin();
+    if (s.size() > 0) {
+      cout << "{" << (*it).first<<"-" << (*it).second;
+      while (++it != s.end()) {
+
+        cout << ", " << (*it).first<<"-" << (*it).second;
+      }
+      cout << "}" << endl;
+    }
+    else {
+      cout << "{}" << endl;
+    }
+  }
+
+
+void print_graph(Graph &g)
+{
+  for (const auto &it : g.get_adjacency_list()) {
+	  Neighborhood nextToFirstNode = g.get_neighbors(it.first).first;
+	  for (const auto& secondNode : nextToFirstNode) {
+		  cout<<it.first<< "-" <<secondNode<< endl;
+      }
+  }
+}
+
 void findNodes(Graph & g, set<Node> & s, set<Node> & result)
 {
+	print_graph(g);
 	auto mst=g.minimal_spanning_forest();
+	print_edges(mst);
 	for (const auto& firstNode : s) {
 		Neighborhood nextToFirstNode = g.get_neighbors(firstNode).first;
 		for (const auto& secondNode : nextToFirstNode) {
@@ -353,11 +381,28 @@ void findNodes(Graph & g, set<Node> & s, set<Node> & result)
 	}
 }
 
+void print_nodes(const set<Node>& s) {
+    set<Node>::iterator it = s.begin();
+    if (s.size() > 0) {
+      cout << "{" << *it;
+      while (++it != s.end()) {
+
+        cout << ", " << *it;
+      }
+      cout << "}" << endl;
+    }
+    else {
+      cout << "{}" << endl;
+    }
+  }
+
 set<Node> solveDegree3(Graph& g, set<Node>& s, int seed, const vector<int> & nodeToComponent)
 {
 	//mapping=map;
 	//connected_components=comp;
 //	nodeToComponent=nTC;
+	print_graph(g);
+	print_nodes(s);
 	set<Node> feedBackSet;
 	auto result = graphToMatrix(g, s,nodeToComponent);
 	result.first.print("IncidenceMatrix");
