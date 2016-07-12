@@ -86,8 +86,14 @@ class Graph {
           */
           bool is_deg_three() const;
   
-          int get_n() const;
-          int get_m() const;
+          /**
+          * @brief Returns true iff there exists no node in v1 of degree > 3.
+          */
+          bool is_deg_most_three_in_set(const std::set<Node> v1) const;
+    
+    
+          size_t get_n() const;
+          size_t get_m() const;
           
           /*
           * @brief Prints the graph in human readable way.
