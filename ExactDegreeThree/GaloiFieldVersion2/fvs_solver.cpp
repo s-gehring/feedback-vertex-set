@@ -80,7 +80,7 @@ using namespace BinCount;
     return result;
   }
 
-  pair<set<Node>, bool> fvs::forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node>& v1, set<Node>& v2, int k) {
+  pair<set<Node>, bool> fvs::forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node> v1, set<Node> v2, int k) {
     if (v1.size()+v2.size()!=g.get_n())
     {
       throw std::runtime_error("some nodes are neither in v1 nor in v2");
@@ -184,19 +184,18 @@ using namespace BinCount;
     	//if (g.is_deg_three())
       if (g.is_deg_most_three_in_set(v1))
     	{
-        //I know that here I violate that every node is in v1 or in v2
-        //but I am not using this wrong sets to call fvs::forest_bipartition_fvs
-        g.delete_low_degree_nodes();
+        Graph h(g);
+        h.delete_low_degree_nodes();
         set<Node> v3;
         for(auto v: v1)
         {
-          if (g.get_neighbors(v).second)
+          if (h.get_neighbors(v).second)
           {
             v3.insert(v);
           }
         }
     		//insert seed
-    		auto subFVS= solveDegree3(g,v3,0,nodeToComponent);
+    		auto subFVS= solveDegree3(h,v3,0,nodeToComponent);
     		if (fvs.size()+subFVS.size()<=k)
     		{
     			fvs.insert(subFVS.cbegin(), subFVS.cend());

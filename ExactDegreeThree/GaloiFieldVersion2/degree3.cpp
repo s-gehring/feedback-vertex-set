@@ -171,22 +171,15 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u,const ve
   }
   cout<<"Number of edges: "<<edgeNumber <<" Number of nEdges: "<<g.get_m() <<endl << "Number of pairs: " << edgePairs.size() << endl <<"Max Index: " <<nodeToComponent.size()<< endl;
   vector<Edge> assignment;
-  //int row_number = g.get_n() + 2 * edgePairs.size() - g.get_m();
   vector<vector<int>> edgesUsed;
   vector<vector<int>> lastVertexIndex;
   for (int i=0;i<g.get_n();i++)
   {
     vector<int> v(g.get_n(),0);
-//    vector<int> w(g.get_n(),nodeToRow[i]);
-	vector<int> w(g.get_n(), -1);
+    vector<int> w(g.get_n(), -1);
     edgesUsed.push_back(v);
     lastVertexIndex.push_back(w);
   }
-  //int lastUsedRow=g.get_n();
-  /*for (int i=0;i<num_vertices(g);i++)
-  {
-    lastVertexIndex[i]=i;
-  }*/
   int row_number = lastUsedRow + 2 * edgePairs.size() - edgeNumber;
   cout << "Number of rows: " << row_number << endl<< "Number of columns: "<<2*edgePairs.size()<<endl <<"Number of entries: "<< row_number* 2 * edgePairs.size() <<endl;
   mat matrix(row_number,edgePairs.size()*2);
