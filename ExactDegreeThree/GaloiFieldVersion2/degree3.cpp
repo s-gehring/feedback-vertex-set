@@ -169,7 +169,7 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u,const ve
         }
       }
   }
-  cout<<"Number of edges: "<<edgeNumber <<endl << "Number of pairs: " << edgePairs.size() << endl;
+  cout<<"Number of edges: "<<edgeNumber <<" Number of nEdges: "<<g.get_m() <<endl << "Number of pairs: " << edgePairs.size() << endl <<"Max Index: " <<nodeToComponent.size()<< endl;
   vector<Edge> assignment;
   //int row_number = g.get_n() + 2 * edgePairs.size() - g.get_m();
   vector<vector<int>> edgesUsed;
@@ -357,9 +357,9 @@ void print_graph(Graph &g)
 
 void findNodes(Graph & g, set<Node> & s, set<Node> & result)
 {
-	print_graph(g);
+	//print_graph(g);
 	auto mst=g.minimal_spanning_forest();
-	print_edges(mst);
+	//print_edges(mst);
 	for (const auto& firstNode : s) {
 		Neighborhood nextToFirstNode = g.get_neighbors(firstNode).first;
 		for (const auto& secondNode : nextToFirstNode) {

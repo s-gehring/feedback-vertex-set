@@ -678,6 +678,7 @@ void mat::freeMat()
 		}
 		delete[] nMat;
 	}
+	nMat=nullptr;
 }
 
 /*std::pair<std::vector<int>,mat> mat::inverseSubmatrix()

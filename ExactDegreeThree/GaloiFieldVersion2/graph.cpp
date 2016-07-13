@@ -99,16 +99,29 @@ namespace FvsGraph{
           }
     
           bool Graph::is_deg_three() const {
+            if(get_low_degree_nodes().size() != get_n()) return false;
             for(const auto &it :get_low_degree_nodes()) {
               if(get_single_degree(it) < 3) return false; 
             }
             return true;
           }
+          bool Graph::is_deg_most_three_in_set(const std::set<Node> v1) const {
+            for(const auto &u : v1) {
+                int neighbors = 0;
+                for(const auto &v : get_neighbors(u).first) {
+                //    if(v1.find(v) != v1.end()) {
+                        if(++neighbors > 3) return false;
+                //    }
+                }
+            }
+              return true;
+          }
+          
   
-          int Graph::get_n() const {
+          size_t Graph::get_n() const {
             return n;
           }
-          int Graph::get_m() const {
+          size_t Graph::get_m() const {
             return m; 
           }
           

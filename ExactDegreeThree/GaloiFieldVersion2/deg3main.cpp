@@ -2,6 +2,7 @@
 #include <vector>
 #include <algorithm>
 #include <tuple>
+#include "fvs_solver.hpp"
 #include "degree3.h"
 #include "Tests.h"
 
@@ -27,7 +28,8 @@ int main(int argc, char** argv)
 	//s.erase(1);
 	Tests test;
 	test.testAll();
-	solveDegree3(g,s,0);
+	vector<int> nodeToComponent(g.get_n());
+	solveDegree3(g,s,0,nodeToComponent);
    /*for(int i=0;i<test.size();i+=2)
    {
 	   cout<<"Delete note from "<<source(result.second[i],g) <<endl;
