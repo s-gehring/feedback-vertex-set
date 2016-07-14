@@ -39,6 +39,14 @@ namespace BinCount {
 		full = false;
 	}
     
+    size_t Bin_count::get_true_values() {
+        size_t x = 0;
+        for(const auto &it:counter) {
+            if(it) ++x;   
+        }
+        return x;
+    }
+    
     std::string Bin_count::to_string() const {
         std::string res = "";
         for(const auto &it : counter) {

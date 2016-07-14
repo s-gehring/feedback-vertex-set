@@ -57,6 +57,12 @@ namespace BinCount {
 		* @returns Size of the counter.
 		*/
 		int get_size();
+        
+        /*
+        * @brief Gets number of ones.
+        *
+        */
+        size_t get_true_values();
 
 	private:
 		std::vector<bool> counter;
