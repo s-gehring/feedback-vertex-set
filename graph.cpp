@@ -34,6 +34,24 @@ namespace FvsGraph{
               return mst;
           }
     
+          bool Graph::reaches(const Node &u, const Node &v) const{
+              std::unordered_set<Node> done;
+              std::stack<Node> s;
+              s.push(u);
+              while(!s.empty()) {
+                Node u = s.top();
+                s.pop();
+                for(const auto &x : get_neighbors(u).first) {
+                  if(done.find(x) == done.end()) {
+                    if(x == v) return true;
+                      s.push(x);
+                      done.insert(x);
+                  }
+                }
+              }
+              return false;
+          }
+    
           bool Graph::compare_node_degrees(const std::pair<Node, Neighborhood> u, const std::pair<Node, Neighborhood> v) {
                return u.second.size() > v.second.size();
           }
@@ -427,7 +445,7 @@ namespace FvsGraph{
               return std::make_pair<std::list<Node>, bool>(std::list<Node>(), false);
           }
           
-          int Graph::articulate(const Node u, bool vis[], int dsc[], int low[], int par[], std::unordered_set<Node> &a_n, std::unordered_set<Edge> &a_e, int time) const {
+          int Graph::articulate(const Node u, bool vis[], int dsc[], int low[], int par[], std::set<Node> &a_n, std::unordered_set<Edge> &a_e, int time) const {
             vis[u] = true;
             dsc[u] = time++;
             int min = dsc[u];
@@ -464,14 +482,19 @@ namespace FvsGraph{
             return min;
           }
           
-          std::pair<std::unordered_set<Node>, std::unordered_set<Edge> > Graph::get_articulation_elements() const {
+          std::pair<std::set<Node>, std::unordered_set<Edge> > Graph::get_articulation_elements() const {
             // TODO: n = max|V| over all time
+            int n = INVALID_NODE;
+            for(const auto &it : adj) {
+                if(it.first > n) n = it.first+1;
+            }
+              
             bool *vis = new bool[n];
             int *dsc = new int[n];
             int *low = new int[n];
             int *par = new int[n];
             
-            std::unordered_set<Node> art_nodes;
+            std::set<Node> art_nodes;
             std::unordered_set<Edge> art_edges;
             
             for(const auto &i : adj) {

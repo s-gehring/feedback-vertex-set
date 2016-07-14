@@ -42,6 +42,7 @@ class Graph {
       
       
       public:
+    
           /**
           * @brief Compares tuples of nodes and their neighborhood by their neighborhood size.
           */
@@ -52,6 +53,11 @@ class Graph {
           */
           void print_nodeset(const std::set<Node> U) const;
   
+          /**
+          * @brief Shows if u can be reached by v.
+          *
+          */
+          bool reaches(const Node &u, const Node &v) const;
           /**
           * @brief Computes a minimal spanning forest for the current graph.
           *
@@ -406,7 +412,7 @@ class Graph {
           * if and only if removal of this element
           * increases the number of connected components in G.
           */
-          std::pair<std::unordered_set<Node>, std::unordered_set<Edge> > get_articulation_elements() const;
+          std::pair<std::set<Node>, std::unordered_set<Edge> > get_articulation_elements() const;
   
           
           /*
@@ -426,7 +432,7 @@ class Graph {
           int nodes_with_deg_three;
   
   
-          int articulate(const Node u, bool vis[], int dsc[], int low[], int par[], std::unordered_set<Node> &a_n, std::unordered_set<Edge> &a_e, int time) const;
+          int articulate(const Node u, bool vis[], int dsc[], int low[], int par[], std::set<Node> &a_n, std::unordered_set<Edge> &a_e, int time) const;
           
   
   
