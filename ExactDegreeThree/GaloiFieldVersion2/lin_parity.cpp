@@ -260,7 +260,7 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 	}
 	int counter = 0;			   						//for positioning vector_parity 
 
-	cout<<"------------------Algorithm start------43---test---------"<< endl;
+	cout<<"------------------Algorithm start-----------"<< endl;
 	cout << "Startmatrix M :"<<endl;
 	if (row < 11) print_matrix(gal,row, col, M);
 	else cout << "too big, will not write it down" <<endl;
@@ -314,10 +314,10 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 			}
 		}
 
-		print_matrix(gal, row, col, M_prime);
+		
 		M = M_prime;
 
-		print_matrix(gal, row, col, M);
+		//print_matrix(gal, row, col, M);
 
 	}
 
@@ -334,7 +334,7 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 	uint64_t** Y_inverse = invertMatrix(gal, Y,  row);
 	cout << "done" << endl;
 
-	print_matrix(gal, row, row, Y_inverse);
+	//print_matrix(gal, row, row, Y_inverse);
 
 	
 
