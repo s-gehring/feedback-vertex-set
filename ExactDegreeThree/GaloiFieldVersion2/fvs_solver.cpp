@@ -3,6 +3,8 @@
 using namespace fvs;
 using namespace BinCount;
 
+bool degree3=true;
+
   void fvs::print_nodes(const set<Node>& s) {
     set<Node>::iterator it = s.begin();
     if (s.size() > 0) {
@@ -103,7 +105,6 @@ using namespace BinCount;
     /*
     * Get partitioning of v2 into connected components.
     */
-   // unordered_map<Node, unordered_set<Node>* > mapping;
     stack<Node> s;
     int componentNumber=-1;
     int maxIndex=-1;
@@ -124,14 +125,6 @@ using namespace BinCount;
       while(!s.empty()) {
         Node v = s.top();
         s.pop();
-        //unordered_set<Node>* new_connected_component;
-        /*if(mapping.find(v) == mapping.end()) {
-          new_connected_component = new unordered_set<Node>;
-          new_connected_component->insert(v);
-          mapping[v] = new_connected_component;
-        } else {
-          new_connected_component = mapping[v];
-        }*/
         for(const auto &neigh: g.get_neighbors(v).first) {
           /*
           **  Ignore neighbors, which are not in v2
@@ -182,7 +175,7 @@ using namespace BinCount;
     if (!cycle)
     {
     	//if (g.is_deg_three())
-      if (g.is_deg_most_three_in_set(v1))
+      if (g.is_deg_most_three_in_set(v1) && degree3)
     	{
         Graph h(g);
         h.delete_low_degree_nodes();
@@ -196,13 +189,38 @@ using namespace BinCount;
         }
     		//insert seed
     		auto subFVS= solveDegree3(h,v3,0,nodeToComponent);
+        degree3=false;
+        auto subFVS2=forest_bipartition_fvs(orig, g,v1, v2,k);
+        degree3=true;
     		if (fvs.size()+subFVS.size()<=k)
     		{
     			fvs.insert(subFVS.cbegin(), subFVS.cend());
+          if (subFVS2.second!=true)
+          {
+            h.print();
+            cout<<"----"<<endl;
+            g.print_tidy();
+            g.print_nodeset(v1);
+            h.print_nodeset(v3);
+            cout<<k<<endl;
+            h.print_nodeset(subFVS);
+            throw;
+          }
     			return make_pair(fvs, true);
     		}
     		else
     		{
+          if (subFVS2.second!=false)
+          {
+            h.print();
+            cout<<"----"<<endl;
+            g.print_tidy();
+            g.print_nodeset(v1);
+            h.print_nodeset(v3);
+            cout<<k<<endl;
+            h.print_nodeset(subFVS);
+            throw;
+          }
     			return make_pair(fvs,false);
     		}
     	}

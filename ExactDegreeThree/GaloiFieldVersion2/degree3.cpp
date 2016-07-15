@@ -161,9 +161,9 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u,const ve
         //neighbours.push_back(nodeIndex[target(*it, g)]);
       }
       pairNumber[nodeToRow[firstNode]]+=neighbours.size()-1;
-      for (int i=0;i<neighbours.size();i++)
+      for (size_t i=0;i<neighbours.size();i++)
       {
-        for(int j=0;j<i;j++)
+        for(size_t j=0;j<i;j++)
         {
             edgePairs.insert(make_pair(neighbours[i],neighbours[j]));
         }
