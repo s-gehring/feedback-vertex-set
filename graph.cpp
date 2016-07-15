@@ -125,11 +125,9 @@ namespace FvsGraph{
           }
           bool Graph::is_deg_most_three_in_set(const std::set<Node> v1) const {
             for(const auto &u : v1) {
-                int neighbors = 0;
-                for(const auto &v : get_neighbors(u).first) {
-                    if(v1.find(v) != v1.end()) {
-                        if(++neighbors > 3) return false;
-                    }
+                if (get_neighbors(u).first.size()>3)
+                {
+                  return false;
                 }
             }
               return true;

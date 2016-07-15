@@ -83,10 +83,6 @@ bool degree3=true;
   }
 
   pair<set<Node>, bool> fvs::forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node> v1, set<Node> v2, int k) {
-    if (v1.size()+v2.size()!=g.get_n())
-    {
-      throw std::runtime_error("some nodes are neither in v1 nor in v2");
-    }
     set<Node> fvs;
     pair<set<Node>, bool> retValue;
     /*
@@ -101,7 +97,6 @@ bool degree3=true;
     if (!has_cycle(g)) {
       return make_pair(fvs, true);
     }
-  
     /*
     * Get partitioning of v2 into connected components.
     */
@@ -134,9 +129,7 @@ bool degree3=true;
             /*
             **  neigh is in no connected component right now.
             */
-            //new_connected_component->insert(neigh);
             nodeToComponent[neigh]=componentNumber;
-            //mapping[neigh] = new_connected_component;
             s.push(neigh);
           }
         }
@@ -145,24 +138,11 @@ bool degree3=true;
       }
     }
     /*
-    **  For printing the connected component, which
-    **  were computed just now.
-    **
-    cout << "Connected Components: "<<endl;
-    for(const auto &it : mapping) {
-      cout <<" {["<<(void*)(it.second)<<"] ";
-      for(const auto &it2 : *(it.second)) {
-         cout << it2<<",";
-      }
-      cout <<"},"<<endl;
-    }
-    */
-    /*
     * Pick a vertex w of v1 which has least two neighbors in v2
     * here, we want to pick the vertex with the highest degree!
     */
-	bool cycle =false;
-	Node w;
+	  bool cycle =false;
+	  Node w;
     for (const auto& candidate : v1)
     {
     	if (creates_circle(g,candidate,nodeToComponent))
@@ -174,7 +154,6 @@ bool degree3=true;
     }
     if (!cycle)
     {
-    	//if (g.is_deg_three())
       if (g.is_deg_most_three_in_set(v1) && degree3)
     	{
         Graph h(g);
@@ -192,18 +171,11 @@ bool degree3=true;
         degree3=false;
         auto subFVS2=forest_bipartition_fvs(orig, g,v1, v2,k);
         degree3=true;
-    		if (fvs.size()+subFVS.size()<=k)
+    		if (fvs.size()+subFVS.size()<= (unsigned) k)
     		{
     			fvs.insert(subFVS.cbegin(), subFVS.cend());
           if (subFVS2.second!=true)
           {
-            h.print();
-            cout<<"----"<<endl;
-            g.print_tidy();
-            g.print_nodeset(v1);
-            h.print_nodeset(v3);
-            cout<<k<<endl;
-            h.print_nodeset(subFVS);
             throw;
           }
     			return make_pair(fvs, true);
@@ -212,13 +184,6 @@ bool degree3=true;
     		{
           if (subFVS2.second!=false)
           {
-            h.print();
-            cout<<"----"<<endl;
-            g.print_tidy();
-            g.print_nodeset(v1);
-            h.print_nodeset(v3);
-            cout<<k<<endl;
-            h.print_nodeset(subFVS);
             throw;
           }
     			return make_pair(fvs,false);
@@ -232,9 +197,7 @@ bool degree3=true;
     if (w != INVALID_NODE) {
       /*
       * if both neighbours are in the same connected component, i.e. w creates a cycle in g
-      */
-      // creates_circle(g, w, mapping);      
-      
+      */      
       if (cycle) {
         Graph h(g);
         v1.erase(w);

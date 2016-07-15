@@ -1,14 +1,16 @@
-
 #ifndef FVS_SOLVER_H
 #define FVS_SOLVER_H
 
 #include <iostream>
+#include <fstream>
+#include <sstream>
 #include <set>
 #include <vector>
 #include <stack>
 #ifndef debug
     #define debug if(1)
 #endif
+#include "degree3.h"
 #include "graph.hpp"
 #include "bin_count.hpp"
 
@@ -66,8 +68,8 @@ namespace fvs {
     * @param [in] components The nodeset, compiled into connected components.
 	* @returns True, if a neighbour of a neighbour of v is a neighbour of v.
 	*/
-	bool creates_circle(const Graph& g, const Node v, const unordered_map<Node, unordered_set<Node>* > components);
-
+	//bool creates_circle(const Graph& g, const Node v, const unordered_map<Node, unordered_set<Node>* > components);
+	bool creates_circle(const Graph& g, const Node v, const vector<int> & nodeToComponent);
 	/**
 	* @brief Finds a node in u, which has atleast two neighbours in v with respect to g.
 	*
@@ -130,7 +132,7 @@ namespace fvs {
 	* @returns A pair of a set of nodes and a bool. The set of nodes contains a part of the feedback
 	*		vertex set. The bool will be false, if the algorithm decides that there is no fvs.
 	*/
-	pair<set<Node>, bool> forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node>& f, set<Node>& v2, int k);
+	pair<set<Node>, bool> forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node> f, set<Node> v2, int k);
 
 	/**
 	*@brief: Tries to decrease the size of a given fvs in a given graph by 1.

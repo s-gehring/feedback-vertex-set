@@ -1,10 +1,9 @@
-#include <fstream>
-#include <sstream>
-#include <iostream>
 #include "fvs_solver.hpp"
 
 using namespace fvs;
 using namespace BinCount;
+
+bool degree3=false;
 
   void fvs::print_nodes(const set<Node>& s) {
     set<Node>::iterator it = s.begin();
@@ -38,16 +37,18 @@ using namespace BinCount;
     return INVALID_NODE;
   }
 
-  bool fvs::creates_circle(const Graph& g, const Node v, const unordered_map<Node, unordered_set<Node>* > components) {
-    unordered_set<Node>* allowed = nullptr;
+  bool fvs::creates_circle(const Graph& g, const Node v, const vector<int> & nodeToComponent) {
+    vector<bool> used (nodeToComponent.size(),false);
     for(const auto &it : g.get_neighbors(v).first) {
-      if(components.find(it) != components.end()) {
-        if(allowed == nullptr) {
-          allowed = components.find(it)->second; 
-        } else {
-          if(allowed != components.find(it)->second) return true;
-          allowed = components.find(it)->second;
+      if(nodeToComponent[it] != -1) {
+	  	  if (used[nodeToComponent[it]])
+	  	  { 
+	  	  	return true;
         }
+	    	else
+	  	  {
+	  	  	used[nodeToComponent[it]]=true;
+	  	  }
       }
       
     }
@@ -81,7 +82,7 @@ using namespace BinCount;
     return result;
   }
 
-  pair<set<Node>, bool> fvs::forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node>& v1, set<Node>& v2, int k) {
+  pair<set<Node>, bool> fvs::forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node> v1, set<Node> v2, int k) {
     set<Node> fvs;
     pair<set<Node>, bool> retValue;
     /*
@@ -96,52 +97,40 @@ using namespace BinCount;
     if (!has_cycle(g)) {
       return make_pair(fvs, true);
     }
-  
     /*
     * Get partitioning of v2 into connected components.
     */
-    unordered_map<Node, unordered_set<Node>* > mapping;
     stack<Node> s;
+    int componentNumber=-1;
+    int maxIndex=-1;
+    for (const auto &it : g.get_adjacency_list()) {
+      if(it.first>maxIndex)
+       {
+         maxIndex=it.first;
+       }
+    }
+    vector<int> nodeToComponent(maxIndex+1,-1);
     for(const auto &it : v2) {
-      s.push(it);
+       if (nodeToComponent[it]==-1)
+       {
+          componentNumber++;
+          nodeToComponent[it]=componentNumber;
+          s.push(it);
+       }
       while(!s.empty()) {
         Node v = s.top();
         s.pop();
-        unordered_set<Node>* new_connected_component;
-        if(mapping.find(v) == mapping.end()) {
-          new_connected_component = new unordered_set<Node>;
-          new_connected_component->insert(v);
-          mapping[v] = new_connected_component;
-        } else {
-          new_connected_component = mapping[v];
-        }
         for(const auto &neigh: g.get_neighbors(v).first) {
           /*
           **  Ignore neighbors, which are not in v2
           */
           if(v2.find(neigh) == v2.end()) continue;
-          if(mapping.find(neigh) == mapping.end()) {
+          if(nodeToComponent[neigh] == -1) {
             /*
             **  neigh is in no connected component right now.
             */
-            new_connected_component->insert(neigh);
-            mapping[neigh] = new_connected_component;
+            nodeToComponent[neigh]=componentNumber;
             s.push(neigh);
-          } else {
-            /*  
-            **  neigh already has a connected component.
-            **  union both neighborhoods if they're not
-            **  identical (if they're identical just
-            **  continue with the next neighbor).
-            **  Treat the union result as the new connected
-            **  component and delete out temporary set.
-            */
-            if(new_connected_component == mapping[neigh]) continue;
-            
-            mapping[neigh]->insert(new_connected_component->begin(), new_connected_component->end());
-            delete(new_connected_component);
-            new_connected_component = mapping[neigh];
-
           }
         }
         
@@ -149,43 +138,67 @@ using namespace BinCount;
       }
     }
     /*
-    **  For printing the connected component, which
-    **  were computed just now.
-    **
-    cout << "Connected Components: "<<endl;
-    for(const auto &it : mapping) {
-      cout <<" {["<<(void*)(it.second)<<"] ";
-      for(const auto &it2 : *(it.second)) {
-         cout << it2<<",";
-      }
-      cout <<"},"<<endl;
-    }
-    */
-    
-    /*
-    ** Save all connected components in a set (without duplicates,
-    ** for later deletion, since we used new).
-    */
-    set<unordered_set<Node>* > connected_components;
-    for(auto &it : mapping) {
-      connected_components.insert(it.second);
-    }
-    
-      
-    /*
     * Pick a vertex w of v1 which has least two neighbors in v2
     * here, we want to pick the vertex with the highest degree!
     */
-    Node w = two_neighbour_node(g, v1, v2);
+	  bool cycle =false;
+	  Node w;
+    for (const auto& candidate : v1)
+    {
+    	if (creates_circle(g,candidate,nodeToComponent))
+    	{
+    		w=candidate;
+    		cycle=true;
+    		break;
+    	}
+    }
+    if (!cycle)
+    {
+      if (g.is_deg_most_three_in_set(v1) && degree3)
+    	{
+        Graph h(g);
+        h.delete_low_degree_nodes();
+        set<Node> v3;
+        for(auto v: v1)
+        {
+          if (h.get_neighbors(v).second)
+          {
+            v3.insert(v);
+          }
+        }
+    		//insert seed
+    		auto subFVS= solveDegree3(h,v3,0,nodeToComponent);
+        degree3=false;
+        auto subFVS2=forest_bipartition_fvs(orig, g,v1, v2,k);
+        degree3=true;
+    		if (fvs.size()+subFVS.size()<= (unsigned) k)
+    		{
+    			fvs.insert(subFVS.cbegin(), subFVS.cend());
+          if (subFVS2.second!=true)
+          {
+            throw;
+          }
+    			return make_pair(fvs, true);
+    		}
+    		else
+    		{
+          if (subFVS2.second!=false)
+          {
+            throw;
+          }
+    			return make_pair(fvs,false);
+    		}
+    	}
+    	else
+    	{
+	    	w = two_neighbour_node(g, v1, v2);
+	    }
+    }
     if (w != INVALID_NODE) {
       /*
       * if both neighbours are in the same connected component, i.e. w creates a cycle in g
-      */
-      bool create_cycle = creates_circle(g, w, mapping);
-      for(auto &it : connected_components) delete(it);
-      
-      
-      if (create_cycle) {
+      */      
+      if (cycle) {
         Graph h(g);
         v1.erase(w);
         h.remove_node(w);
@@ -558,6 +571,8 @@ using namespace BinCount;
     }
     // compute 2-approximation
     set<Node> fvs_approx = two_approx_fvs(g);
+    //debug cout << "2 approximation of size " << fvs_approx.size() << " is: " << endl;
+    //debug orig.print_nodeset(fvs_approx);
     // use any subset of half size
     int k = 0.5*(fvs_approx.size()+fvs_approx.size()%2);
     set<Node> v_prime;
