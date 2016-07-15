@@ -1,4 +1,3 @@
-
 #include "fvs_solver.hpp"
 
 using namespace fvs;
@@ -133,7 +132,6 @@ void get_connected_graphs(const Graph &g, const list<set<Edge> > &connected_comp
     for(const auto &cc : connected_components) {
         Graph* h = new Graph();
         /*cout << "Adding: "<<endl;
-
         for(const auto &ccc : cc) {
             ++i;
             //cout << "("<<g.get_node_name(ccc.first) <<","<<g.get_node_name(ccc.second)<<"),";	
