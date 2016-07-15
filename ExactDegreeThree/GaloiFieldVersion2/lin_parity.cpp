@@ -260,9 +260,9 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 	}
 	int counter = 0;			   						//for positioning vector_parity 
 
-	cout<<"------------------Algorithm start-----23------"<< endl;
+	cout<<"------------------Algorithm start-----------"<< endl;
 	cout << "Startmatrix M :"<<endl;
-	if (row < 11) print_matrix(gal,row, col, M);
+	if (row < 13) print_matrix(gal,row, col, M);
 	else cout << "too big, will not write it down" <<endl;
 
 	cout << "Computing Y...";
@@ -270,15 +270,16 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 	cout << "done." << endl;
 	//print_matrix(gal, row, row, Y);
 
+	uint64_t** Y_copy_det = copy_matrix(Y, row, row);
 
 	cout << "Computing determinant of Y ...";
-	uint64_t det = gauss.determinant(gal, row, Y);	
+	uint64_t det = gauss.determinant(gal, row, Y_copy_det);	
 	cout << "done. Det(Y) = " << gal.to_string(det) << endl;
 
-	
+	my_free(Y_copy_det, row);
 	
 	if (det == 0) {
-		//Hier ist Y zerstört durch det
+		
 		cout << endl << endl << "THERE IS NO PARITY BASIS" << endl << "Searching for redundant rows of Y.." ;
 
 		std::vector<int> del_row  = findRedundantRows(Y, row, row);
@@ -288,6 +289,14 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 		for(int kk = 0; kk < del_row.size(); kk++){
 			cout << "del_row[" << kk << "] = " << del_row[kk] << endl;
 		}
+
+		if (row == 0){
+			//alles wird gelöscht, es gibt kein pair
+			int* parity_basis = new int[row];		    //in here we will store the indices of the columns that built the parity basis
+			*length = 0;
+			return parity_basis;
+		}
+
 
 		//delete the rows in M
 		uint64_t** M_prime = new uint64_t*[row];
@@ -316,8 +325,10 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 
 		
 		M = M_prime;
-
+		//cout<<"fedditsch" <<endl;
 		//print_matrix(gal, row, col, M);
+
+
 
 	}
 
@@ -329,6 +340,9 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 	Y = create_Y( gal, M, row, col, random_values);
 	cout << "done." << endl;
 	//print_matrix(gal, row, row, Y);
+
+	
+
 
 	cout << "Computing Inverse Y^-1 ...";
 	uint64_t** Y_inverse = invertMatrix(gal, Y,  row);
