@@ -121,7 +121,7 @@ uint64_t** create_Y_naive(Galois gal, uint64_t **M, int row, int col, uint64_t *
 	return result_matrix;
 }
 
-
+/*
 int* simple_parity(Galois gal, uint64_t** M, int row, int col){
 	Gauss gauss;
 	uint64_t* random_values = new uint64_t[col/2]; 		//stores the randomvalues x_i, created in create_Y (needed later on) 
@@ -154,6 +154,7 @@ int* simple_parity(Galois gal, uint64_t** M, int row, int col){
 
 		M.print("Reduced M (and new instance for parity-basis-algo with less rows):");
 		*/
+		/*
 	}
 
 	Y = create_Y( gal, M, row, col, random_values);
@@ -208,7 +209,7 @@ int* simple_parity(Galois gal, uint64_t** M, int row, int col){
 	return parity_basis;
 }
 
-
+*/
 /*
  * gibt U = x_i * ( b_i  c_i ) zurück, also x_i * ( i-th col   i+1-th col )
  * U ist also size x 2 matrix
@@ -259,9 +260,9 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 	}
 	int counter = 0;			   						//for positioning vector_parity 
 
-	cout<<"------------------Algorithm start------------------"<< endl;
+	cout<<"------------------Algorithm start-----------"<< endl;
 	cout << "Startmatrix M :"<<endl;
-	if (row < 11) print_matrix(gal,row, col, M);
+	if (row < 13) print_matrix(gal,row, col, M);
 	else cout << "too big, will not write it down" <<endl;
 
 	cout << "Computing Y...";
@@ -269,24 +270,33 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 	cout << "done." << endl;
 	//print_matrix(gal, row, row, Y);
 
+	uint64_t** Y_copy_det = copy_matrix(Y, row, row);
 
 	cout << "Computing determinant of Y ...";
-	uint64_t det = gauss.determinant(gal, row, Y);	
+	uint64_t det = gauss.determinant(gal, row, Y_copy_det);	
 	cout << "done. Det(Y) = " << gal.to_string(det) << endl;
 
-	
+	my_free(Y_copy_det, row);
 	
 	if (det == 0) {
-		//Hier ist Y zerstört durch det
+		
 		cout << endl << endl << "THERE IS NO PARITY BASIS" << endl << "Searching for redundant rows of Y.." ;
 
 		std::vector<int> del_row  = findRedundantRows(Y, row, row);
 		cout << "done " <<endl;
 		row -= del_row.size(); 
-
+		sort(del_row.begin(), del_row.end());
 		for(int kk = 0; kk < del_row.size(); kk++){
 			cout << "del_row[" << kk << "] = " << del_row[kk] << endl;
 		}
+
+		if (row == 0){
+			//alles wird gelöscht, es gibt kein pair
+			int* parity_basis = new int[row];		    //in here we will store the indices of the columns that built the parity basis
+			*length = 0;
+			return parity_basis;
+		}
+
 
 		//delete the rows in M
 		uint64_t** M_prime = new uint64_t*[row];
@@ -294,19 +304,35 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
     			M_prime[k]= new uint64_t[col];
 		}
 
-		int couter = 0;	
-		for (int i = 0; i < row; i++ ){
-			if ( i == del_row[couter]) couter++;
-			for(int j = 0; j < col; j++){
-				M_prime[i][j] = M[i-counter][j];
+	
+
+		int counter = 0;	
+		for (int i = 0; i < row + del_row.size() ; i++ ){
+			if ((counter < del_row.size()) &&   (i == del_row[counter])) {
+		
+				counter++;
+			}
+			else{
+				
+				for(int j = 0; j < col; j++){
+					
+					M_prime[i-counter][j] = M[i][j];
+					
+					
+				}
 			}
 		}
 
+		
 		M = M_prime;
-
+		//cout<<"fedditsch" <<endl;
 		//print_matrix(gal, row, col, M);
 
+
+
 	}
+
+	
 
 
 	cout << "Computing again Y...";
@@ -315,9 +341,14 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 	cout << "done." << endl;
 	//print_matrix(gal, row, row, Y);
 
+	
+
+
 	cout << "Computing Inverse Y^-1 ...";
 	uint64_t** Y_inverse = invertMatrix(gal, Y,  row);
 	cout << "done" << endl;
+
+	//print_matrix(gal, row, row, Y_inverse);
 
 	
 
@@ -336,12 +367,15 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 		uint64_t** U = get_U(gal, M, row,random_values[i/2], i);	
  		
  		uint64_t** SMW_det = SMW_matrix(gal,  V, Y_inverse, U, row);
-		uint64_t** SMW = copy_matrix(SMW_det, 2,2);
-		uint64_t det_SMW = gauss.determinant(gal, 2, SMW_det);
+ 		
 
+		uint64_t** SMW = copy_matrix(SMW_det, 2,2);
+		
+		uint64_t det_SMW = gauss.determinant(gal, 2, SMW_det);
+		
 		my_free(SMW_det,2);
 
-		cout<< "det von Y_prime durch trick ist " << gal.to_string(det_SMW) << endl;
+		cout<< "det von Y_prime durch smallrankupdate ist " << gal.to_string(det_SMW) << endl;
 		
 
 		if (det_SMW != 0){ //if det(Y_prime) != 0
