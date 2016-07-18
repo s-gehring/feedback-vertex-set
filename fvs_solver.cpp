@@ -201,22 +201,22 @@ bool degree3=true;
           complete_solution.insert(subFVS.cbegin(), subFVS.cend());
         }
         degree3=false;
-        auto subFVS2=forest_bipartition_fvs(orig, g,v1, v2,k,ga);
+        //auto subFVS2=forest_bipartition_fvs(orig, g,v1, v2,k,ga);
         degree3=true;
         if (fvs.size()+complete_solution.size()<= (unsigned) k)
     		{
     			fvs.insert(complete_solution.cbegin(), complete_solution.cend());
-          if (subFVS2.second!=true)
+          //if (subFVS2.second!=true)
           {
-            throw;
+          //  throw;
           }
     			return make_pair(fvs, true);
     		}
     		else
     		{
-          if (subFVS2.second!=false)
+          //if (subFVS2.second!=false)
           {
-            throw;
+          //  throw;
           }
     			return make_pair(fvs,false);
     		}
