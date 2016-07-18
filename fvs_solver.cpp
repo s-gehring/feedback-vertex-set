@@ -3,7 +3,7 @@
 using namespace fvs;
 using namespace BinCount;
 
-bool degree3=true;
+bool degree3=false;
 
   void fvs::print_nodes(const set<Node>& s) {
     set<Node>::iterator it = s.begin();
