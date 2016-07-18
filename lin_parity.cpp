@@ -253,6 +253,8 @@ uint64_t** get_U(Galois gal, uint64_t** M, int size, uint64_t random, int i){
  }
 
 int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length){
+	int check = 0;
+	int row_difference = 0;
 	Gauss gauss;
 	uint64_t* random_values = new uint64_t[col/2]; 		//stores the randomvalues x_i, created in create_Y (needed later on) 
 	for (int i = 0; i < col/2; i++){
@@ -279,19 +281,24 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 	my_free(Y_copy_det, row);
 	
 	if (det == 0) {
-		
+		check = 1;
 		// cout << endl << endl << "THERE IS NO PARITY BASIS" << endl << "Searching for redundant rows of Y.." ;
-
+		
 		std::vector<int> del_row  = findRedundantRows(Y, row, row);
 		// cout << "done " <<endl;
 		row -= del_row.size(); 
+		row_difference = del_row.size();
 		sort(del_row.begin(), del_row.end());
-		for(unsigned int kk = 0; kk < del_row.size(); kk++){
-			// cout << "del_row[" << kk << "] = " << del_row[kk] << endl;
-		}
+		
+		/*for(unsigned int kk = 0; kk < del_row.size(); kk++){
+			 cout << "del_row[" << kk << "] = " << del_row[kk] << endl;
+		}*/
 
 		if (row == 0){
 			//alles wird gelöscht, es gibt kein pair
+			delete[] random_values;
+			my_free(Y, row + row_difference);
+
 			int* parity_basis = new int[row];		    //in here we will store the indices of the columns that built the parity basis
 			*length = 0;
 			return parity_basis;
@@ -322,9 +329,8 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 				}
 			}
 		}
-
 		
-		M = M_prime;
+		M =  M_prime;
 		//cout<<"fedditsch" <<endl;
 		//print_matrix(gal, row, col, M);
 
@@ -337,7 +343,10 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 
 	// cout << "Computing again Y...";
 	//my_free(Y, row); 
-	Y = create_Y( gal, M, row, col, random_values);
+	if (check == 1){
+		my_free(Y, row + row_difference);
+		Y = create_Y( gal, M, row, col, random_values);
+	}
 	// cout << "done." << endl;
 	//print_matrix(gal, row, row, Y);
 
