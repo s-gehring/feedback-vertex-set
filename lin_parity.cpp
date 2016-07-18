@@ -298,7 +298,7 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 			//alles wird gelöscht, es gibt kein pair
 			delete[] random_values;
 			my_free(Y, row + row_difference);
-
+			my_free(M, row + row_difference);
 			int* parity_basis = new int[row];		    //in here we will store the indices of the columns that built the parity basis
 			*length = 0;
 			return parity_basis;
