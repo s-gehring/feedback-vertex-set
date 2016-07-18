@@ -424,7 +424,7 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 
 	my_free(Y, row);
 	my_free(Y_inverse, row);
-	
+	my_free(M, row);
 
 	//print_vector_normal(row, parity_basis);
 	return parity_basis;
