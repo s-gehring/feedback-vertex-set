@@ -49,7 +49,7 @@ mat::mat()
 
 mat::~mat()
 {
-	freeMat();
+//	freeMat();
 }
 
 mat::mat(std::initializer_list<std::initializer_list<uint64_t>> lst)

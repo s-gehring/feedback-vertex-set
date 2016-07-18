@@ -329,8 +329,13 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 				}
 			}
 		}
-		
-		M =  M_prime;
+
+		my_free(M, row + row_difference);
+
+
+		M = M_prime;
+
+
 		//cout<<"fedditsch" <<endl;
 		//print_matrix(gal, row, col, M);
 
@@ -400,6 +405,7 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 			my_free(V, 2);
 			my_free(SMW, 2);
 			my_free(hilf, row);
+			my_free(update_matrix, row);
 		
 		}
 		else{
@@ -415,6 +421,10 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 
 	delete [] random_values;
 	*length = row;
+
+	my_free(Y, row);
+	my_free(Y_inverse, row);
+	
 
 	//print_vector_normal(row, parity_basis);
 	return parity_basis;

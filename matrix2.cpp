@@ -158,7 +158,7 @@ uint64_t** invertMatrix(Galois gal, uint64_t** mat, int size)
 
     if(det == 0)  // Determinant is 0  -> matrix not invertable
 	{
-        cout << "ERROR" << endl;
+        
         return 0;
 	}
  
