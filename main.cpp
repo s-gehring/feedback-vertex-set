@@ -127,17 +127,17 @@ set<Edge> contract_edges(Graph &g) {
     return branching_pairs;
 }
 
-void get_connected_graphs(const Graph &g, const list<set<Edge> > &connected_components, list<Graph> &connected_graphs) {
+/*void get_connected_graphs(const Graph &g, const list<set<Edge> > &connected_components, list<Graph> &connected_graphs) {
     int i = 0;
     for(const auto &cc : connected_components) {
-        Graph* h = new Graph();
+        Graph* h = new Graph();*/
         /*cout << "Adding: "<<endl;
         for(const auto &ccc : cc) {
             ++i;
             //cout << "("<<g.get_node_name(ccc.first) <<","<<g.get_node_name(ccc.second)<<"),";	
         }
         cout <<endl;*/
-        h->add_edges(cc);
+        /*h->add_edges(cc);
         h->assign_names(g.get_mapping());
         
         i+= cc.size(); 
@@ -149,7 +149,7 @@ void get_connected_graphs(const Graph &g, const list<set<Edge> > &connected_comp
         connected_graphs.push_back(*h);
     }
     debug cout << "Found/Created "<< connected_components.size() << " connected components with "<<i<<" edges in total." <<endl;
-}
+}*/
 
 set<set<Node>> multi_edge_partitions(set<set<Node>>& m, set<Node>& taken,  Graph& g) {
 	set<set<Node>> return_value;

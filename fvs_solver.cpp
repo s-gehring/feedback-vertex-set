@@ -3,7 +3,7 @@
 using namespace fvs;
 using namespace BinCount;
 
-bool degree3=false;
+bool degree3=true;
 
   void fvs::print_nodes(const set<Node>& s) {
     set<Node>::iterator it = s.begin();
@@ -80,6 +80,30 @@ bool degree3=false;
       }
     }
     return result;
+  }
+  
+  void fvs::get_connected_graphs(const Graph &g, const list<set<Edge> > &connected_components, list<Graph> &connected_graphs) {
+    int i = 0;
+    for(const auto &cc : connected_components) {
+        Graph* h = new Graph();
+        /*cout << "Adding: "<<endl;
+        for(const auto &ccc : cc) {
+            ++i;
+            //cout << "("<<g.get_node_name(ccc.first) <<","<<g.get_node_name(ccc.second)<<"),";	
+        }
+        cout <<endl;*/
+        h->add_edges(cc);
+        h->assign_names(g.get_mapping());
+        
+        i+= cc.size(); 
+        // Confused that this number seems unreasonably high?
+        // Keep in mind, that we ignore double edges, which are counted multiple times here.
+        // Other than that, paths are ignored, because trivial.
+        
+        if(h->get_n() > 0 && h->get_m() > 0)
+        connected_graphs.push_back(*h);
+    }
+    debug cout << "Found/Created "<< connected_components.size() << " connected components with "<<i<<" edges in total." <<endl;
   }
 
   pair<set<Node>, bool> fvs::forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node> v1, set<Node> v2, int k) {
@@ -158,22 +182,30 @@ bool degree3=false;
     	{
         Graph h(g);
         h.delete_low_degree_nodes();
-        set<Node> v3;
-        for(auto v: v1)
-        {
-          if (h.get_neighbors(v).second)
-          {
-            v3.insert(v);
-          }
-        }
+        std::list<Graph> connected_graphs;
+        get_connected_graphs(h, h.get_connected_components(), connected_graphs);
+        //list<set<Node> > partial_solutions;
+        set<Node> complete_solution;
+        //int totalFvsSize=0;
+        for (auto &it : connected_graphs) {
     		//insert seed
-    		auto subFVS= solveDegree3(h,v3,0,nodeToComponent);
+          set<Node> v3;
+          for(auto v: v1)
+          {
+           if (it.get_neighbors(v).second)
+           {
+             v3.insert(v);
+           }
+          }
+    		  auto subFVS= solveDegree3(it,v3,0,nodeToComponent);
+          complete_solution.insert(subFVS.cbegin(), subFVS.cend());
+        }
         degree3=false;
         auto subFVS2=forest_bipartition_fvs(orig, g,v1, v2,k);
         degree3=true;
-    		if (fvs.size()+subFVS.size()<= (unsigned) k)
+        if (fvs.size()+complete_solution.size()<= (unsigned) k)
     		{
-    			fvs.insert(subFVS.cbegin(), subFVS.cend());
+    			fvs.insert(complete_solution.cbegin(), complete_solution.cend());
           if (subFVS2.second!=true)
           {
             throw;

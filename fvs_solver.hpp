@@ -198,6 +198,9 @@ namespace fvs {
 	void print_nodes(const set<Node>& s);
 	
 	enum direction_tag { forward, inverse };
+	
+	void get_connected_graphs(const Graph &g, const list<set<Edge> > &connected_components, list<Graph> &connected_graphs);
+
 }
 
 #endif /* FVS_SOLVER_H */

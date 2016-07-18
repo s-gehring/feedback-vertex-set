@@ -166,7 +166,8 @@ void print_edges(const set<Edge>& s) {
 void findNodes(Graph & g, set<Node> & s, set<Node> & result)
 {
 	auto mst=g.minimal_spanning_forest();
-	for (const auto& firstNode : s) {
+    for(const auto &it : g.get_adjacency_list()) {
+		Node firstNode=it.first;
 		Neighborhood nextToFirstNode = g.get_neighbors(firstNode).first;
 		for (const auto& secondNode : nextToFirstNode) {
 			Edge e;
@@ -189,7 +190,7 @@ void findNodes(Graph & g, set<Node> & s, set<Node> & result)
 
 set<Node> solveDegree3(Graph& g, set<Node>& s, int seed, const vector<int> & nodeToComponent)
 {
-  g.print();
+  g.print_tidy();
   g.print_nodeset(s);
 	set<Node> feedBackSet;
 	auto result = graphToMatrix(g, s,nodeToComponent);
