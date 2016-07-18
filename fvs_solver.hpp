@@ -8,7 +8,7 @@
 #include <vector>
 #include <stack>
 #ifndef debug
-    #define debug if(1)
+    #define debug if(0)
 #endif
 #include "degree3.h"
 #include "graph.hpp"
