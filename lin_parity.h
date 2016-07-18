@@ -8,16 +8,39 @@
 #include "galois.h"
 
 
-
-//using namespace arma;
-
 using namespace std;
-//using namespace boost::numeric::ublas;
+
+
+/**
+	* @brief Creates a random value
+	*
+	* Creates a non-zero integral random value between 1 and max.
+	*
+	* @param [in] max THe upper bound for the integral random value.
+	*
+	* @return random value
+	*/
 int get_random_value(int max);
+
+
 /* Creates the compact Matrix Y and stores the random values x_i in vector random_values
  * so random_values has to be a "column of M-half-dim" vec (a pointer of it)
  * random values are integral between 1 and max_random_value
  */ 
+
+ /**
+	* @brief Swaps two rows of the matrix
+	*
+	* Manipulates the delivered matrix by swaping row "line1" with the row "line2".
+	* If the indixes are not in matrix, it will return false, otherwise (successfully swapped) true
+	*
+	* @param [in] mat The matrix of size row x col
+	* @param [in] row the number of rows of the delivered matrix
+    * @param [in] col the number of collumns of the delivered matrix
+    * @param [in] line1 the index of the first row to swap
+    * @param [in] line2 the index of the second row to swap
+	* @returns true if sussessfull, false otherwise
+	*/
 uint64_t** create_Y(Galois gal, uint64_t **M, int row, int col, uint64_t *random_values);
 
 /*
