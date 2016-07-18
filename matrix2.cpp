@@ -157,7 +157,10 @@ uint64_t** invertMatrix(Galois gal, uint64_t** mat, int size)
 
 
     if(det == 0)  // Determinant is 0  -> matrix not invertable
+	{
+	 	my_free(A, size);
         return 0;
+	}
  
     // Jordan-part of the algorithm
     for(int k = size-1; k > 0; --k)
