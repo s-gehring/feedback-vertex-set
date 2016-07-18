@@ -432,8 +432,9 @@ class Graph {
           int nodes_with_deg_three;
   
   
-          int articulate(const Node u, bool vis[], int dsc[], int low[], int par[], std::set<Node> &a_n, std::unordered_set<Edge> &a_e, int time) const;
-          
+          //int articulate(const Node u, bool vis[], int dsc[], int low[], int par[], std::set<Node> &a_n, std::unordered_set<Edge> &a_e, int time) const;
+          int articulate(const Node u, std::vector<bool>& vis, std::vector<int>& dsc, std::vector<int>& low, std::vector<int>& par, std::set<Node> &a_n, std::unordered_set<Edge> &a_e, int time) const;
+
   
   
 };

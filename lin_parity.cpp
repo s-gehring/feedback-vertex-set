@@ -260,7 +260,7 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 	for (int i = 0; i < col/2; i++){
 		random_values[i] = 0;
 	}
-	int counter = 0;			   						//for positioning vector_parity 
+	int counter2 = 0;			   						//for positioning vector_parity 
 
 	/*cout<<"------------------Algorithm start-----------"<< endl;
 	cout << "Startmatrix M :"<<endl;
@@ -313,7 +313,7 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 
 	
 
-		unsigned int counter = 0;	
+		unsigned int counter = 0;
 		for (unsigned int i = 0; i < row + del_row.size() ; i++ ){
 			if ((counter < del_row.size()) &&   (i == (unsigned) del_row[counter])) {
 		
@@ -412,10 +412,13 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 			my_free(U, row);
 			my_free(V, 2);
 			my_free(SMW, 2);
-			
-			parity_basis[counter] = i;
-			parity_basis[counter+1] = i+1;
-			counter = counter + 2;
+			if (counter2>=row)
+			{
+				throw std::runtime_error("OVERFLOW");
+			}
+			parity_basis[counter2] = i;
+			parity_basis[counter2+1] = i+1;
+			counter2 = counter2 + 2;
 		}
 	}
 
