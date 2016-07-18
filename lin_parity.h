@@ -34,7 +34,8 @@ int get_random_value(int max);
 	* @brief Create the compact matrix representation for the linear matriod parity problem
 	*
 	* Creates matrix Y of algorithm 4.1, the compact representation of the linear matroid parity problem.
-	* The used random values will be stored in the vector "random_values" (for later use)
+	* The used random values will be stored in the vector "random_values" (for later use).
+	* the random value
 	*
 	* @param [in] mat The matrix of size row x col
 	* @param [in] row the number of rows of the delivered matrix
