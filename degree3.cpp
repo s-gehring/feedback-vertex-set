@@ -188,7 +188,7 @@ void findNodes(Graph & g, set<Node> & s, set<Node> & result)
 	}
 }
 
-set<Node> solveDegree3(Graph& g, set<Node>& s, int seed, const vector<int> & nodeToComponent)
+set<Node> solveDegree3(Graph& g, set<Node>& s, int seed, const vector<int> & nodeToComponent,Galois & ga)
 {
   g.print_tidy();
   g.print_nodeset(s);
@@ -201,10 +201,6 @@ set<Node> solveDegree3(Graph& g, set<Node>& s, int seed, const vector<int> & nod
 	{
 		return feedBackSet;
 	}
-	Galois ga;
-	ga.set_w(16);
-	ga.set_mode_logtb();
-	ga.seed(seed);
 	int length;
 	int* res = simple_parity_fast(ga, instance.toNMatrix(), instance.getHeight(), instance.getWidth(), &length);
 	for (int i = 0; i < length; i++)

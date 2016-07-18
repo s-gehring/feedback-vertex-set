@@ -326,9 +326,10 @@ void mat::extractMatrix(std::vector<int> rowCols, const std::vector<int> & arran
 	{
 		matrix.erase(matrix.begin()+i);
 	}
-	std::sort(rowCols.begin(), rowCols.end(), [&arrangement](int & left, int & right) {
+	throw std::runtime_error("uncomment");
+	/*std::sort(rowCols.begin(), rowCols.end(), [&arrangement](int & left, int & right) {
 		return arrangement[left] > arrangement[right];
-	});
+	});*/
 	for (auto i: rowCols)
 	{
 		for (auto & j : matrix)

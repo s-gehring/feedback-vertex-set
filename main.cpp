@@ -60,9 +60,9 @@ void output_arti_elems_bridges(const Graph& g) {
 *
 * @param [in] g The filepath of the file where the graph is in.
 */
-set<Node> run_iter_comp(Graph g) {
+set<Node> run_iter_comp(Graph g,Galois& ga) {
     // compute min fvs by using iterative compression
-    set<Node> min_fvs = compute_min_fvs(g);
+    set<Node> min_fvs = compute_min_fvs(g, ga);
     // sanity check and output of the results
     if (is_fvs(g, min_fvs)) {
 	return min_fvs;
@@ -195,7 +195,10 @@ set<set<Node>> multi_edge_partitions(set<set<Node>>& m, set<Node>& taken,  Graph
 
 int main(int argc, char** argv) {
 	// Read graph and store information in variables.
-	
+	Galois ga;
+    ga.set_w(16);
+    ga.set_mode_logtb();
+    ga.seed(0);
 	GraphData graph_data = read_graph();
 
 	set<Node> necessary_nodes = graph_data.necessary_nodes;
@@ -295,7 +298,7 @@ int main(int argc, char** argv) {
                         h.remove_node(*it1);
                         current_solution.insert(*it1);
                     }
-                    set<Node> help_solution = run_iter_comp(h);
+                    set<Node> help_solution = run_iter_comp(h,ga);
                     current_solution.insert(help_solution.begin(), help_solution.end());
                     // found a new best partial solution using the current multi-edge branching nodes
                     if (current_solution.size() < partial_solution.size() || partial_solution.size() == 0) {
@@ -306,7 +309,7 @@ int main(int argc, char** argv) {
             // if there are no multi-edges, just run iterative compression on the connected component
             else {
                 debug cout << "There are no multi-edges." << endl;
-                partial_solution = run_iter_comp(it);
+                partial_solution = run_iter_comp(it,ga);
             }
             partial_solutions.push_back(partial_solution);
             debug cout << "Found partial solution: ";

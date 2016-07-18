@@ -14,6 +14,6 @@ void generateIncidenceVector(const Graph& g, const Edge & e, vector<vector<int>>
 pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u, const vector<int>& nodeToComponent);
 mat transformFullRowRank(mat input);
 mat matrixToStadardForm(const mat & input);
-set<Node> solveDegree3(Graph& g, set<Node>& s, int seed, const vector<int>& nodeToComponent);
+set<Node> solveDegree3(Graph& g, set<Node>& s, int seed, const vector<int>& nodeToComponent, Galois& ga);
 int getComponentNumber(const Node & n,const vector<int>& nodeToComponent);
 void findNodes(Graph & g, set<Node> & s, set<Node> & result);
