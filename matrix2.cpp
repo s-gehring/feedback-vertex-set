@@ -96,12 +96,13 @@ bool swapLine(uint64_t** mat, int row, int col, int line1, int line2)
 uint64_t** invertMatrix(Galois gal, uint64_t** mat, int size)
 {
 
+  //get space for the inverted matrix
 	uint64_t** inv= new uint64_t*[size];
 	for (int i=0; i<size; i++){
     	inv[i]= new uint64_t[size];
 	}
-    // Eine sizex2*size Matrix für den Gauß-Jordan-Algorithmus aufbauen
    
+   //Get a size x 2*size matrix for the Gauß-Jordan_Algorithm
     uint64_t** A= new uint64_t*[size];
 	for (int i=0; i<size; i++){
     	A[i]= new uint64_t[size*2];
@@ -115,10 +116,11 @@ uint64_t** invertMatrix(Galois gal, uint64_t** mat, int size)
             A[i][j] = (i==j-size) ? (uint64_t) 1 : (uint64_t) 0;
     }
  
-    // Gauß-Algorithmus.
+    // Gauß-Algorithm
     for(int k = 0; k < size-1; ++k)
     {
-        // Zeilen vertauschen, falls das Pivotelement eine Null ist
+        
+      //Swapp rows, if pivot element is zero
         if(A[k][k] == 0)
         {
             for(int i = k+1; i < size; ++i)
@@ -130,11 +132,12 @@ uint64_t** invertMatrix(Galois gal, uint64_t** mat, int size)
                     break;
                 }
                 else if(i==size-1)
-                    return 0; // Es gibt kein Element != 0
+                    return 0; // There is no element != 0
             }
         }
  
-        // Einträge unter dem Pivotelement eliminieren
+        
+        //Eliminate elements under the pivot element
         for(int i = k+1; i < size; ++i)
         {
             uint64_t p =  gal.divide(A[i][k],A[k][k]);     
@@ -144,7 +147,7 @@ uint64_t** invertMatrix(Galois gal, uint64_t** mat, int size)
         }
     }
  
-    // Determinante der Matrix berechnen
+    //Compute determinant
    
     uint64_t det = A[0][0];
   	for (int i = 1; i < size; i++)
@@ -153,10 +156,10 @@ uint64_t** invertMatrix(Galois gal, uint64_t** mat, int size)
   	}
 
 
-    if(det == 0)  // Determinante ist =0 -> Matrix nicht invertierbar
+    if(det == 0)  // Determinant is 0  -> matrix not invertable
         return 0;
  
-    // Jordan-Teil des Algorithmus durchführen
+    // Jordan-part of the algorithm
     for(int k = size-1; k > 0; --k)
     {
         for(int i = k-1; i >= 0; --i)
@@ -168,7 +171,8 @@ uint64_t** invertMatrix(Galois gal, uint64_t** mat, int size)
         }
     }
  
-    // Einträge in der linker Matrix auf 1 normieren und in inv schreiben
+    
+    // norm entries of left matrix to one and write them into matrix inv
     for(int i = 0; i < size; ++i)
     {
         uint64_t f = A[i][i];
