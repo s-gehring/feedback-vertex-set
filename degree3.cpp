@@ -190,13 +190,13 @@ void findNodes(Graph & g, set<Node> & s, set<Node> & result)
 
 set<Node> solveDegree3(Graph& g, set<Node>& s, int seed, const vector<int> & nodeToComponent,Galois & ga)
 {
-  g.print_tidy();
-  g.print_nodeset(s);
+  //g.print_tidy();
+  //g.print_nodeset(s);
 	set<Node> feedBackSet;
 	auto result = graphToMatrix(g, s,nodeToComponent);
-	result.first.print("IncidenceMatrix");
+	//result.first.print("IncidenceMatrix");
 	mat instance = colinearToLinear(result.first);
-	instance.print("transformed");
+	//instance.print("transformed");
 	if (instance==eye<mat>(0,0))
 	{
 		return feedBackSet;
@@ -205,7 +205,7 @@ set<Node> solveDegree3(Graph& g, set<Node>& s, int seed, const vector<int> & nod
 	int* res = simple_parity_fast(ga, instance.toNMatrix(), instance.getHeight(), instance.getWidth(), &length);
 	for (int i = 0; i < length; i++)
 	{
-		cout << "Delete edge from " << result.second[res[i]].first << " to " << result.second[res[i]].second << endl;
+		//cout << "Delete edge from " << result.second[res[i]].first << " to " << result.second[res[i]].second << endl;
 		g.remove_edge(result.second[res[i]].first, result.second[res[i]].second);
 	}
 	for (int i=0;i<length;i+=2)
@@ -213,9 +213,9 @@ set<Node> solveDegree3(Graph& g, set<Node>& s, int seed, const vector<int> & nod
 		feedBackSet.insert(result.second[res[i]].first);
 	}
 	findNodes(g, s, feedBackSet);
-	for (Node n : feedBackSet)
+	//for (Node n : feedBackSet)
 	{
-		cout << "Delete node: " << n << endl;
+		//cout << "Delete node: " << n << endl;
 	}
 	delete[] res;
 	return feedBackSet;

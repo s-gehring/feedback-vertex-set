@@ -1,4 +1,7 @@
 #pragma once
+#ifndef debug
+    #define debug if(1)
+#endif
 #include <iostream>
 #include <vector>
 #include <algorithm>
