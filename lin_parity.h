@@ -2,7 +2,9 @@
 #define LIN_PARITY_H_
 
 #include <iostream>
-
+#ifndef debug
+    #define debug if(1)
+#endif
 #include <cstdlib> 
 #include <ctime>
 #include "galois.h"

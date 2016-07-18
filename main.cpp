@@ -4,7 +4,7 @@ using namespace fvs;
 using namespace FvsGraph;
 using namespace BinCount;
 #ifndef debug
-    #define debug if(true)
+    #define debug if(1)
 #endif
 #define MAX_OUTPUT_ARTICULATION 40
 

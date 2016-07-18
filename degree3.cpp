@@ -54,7 +54,7 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u,const ve
 		  nodeToRow[it.first] = componentToRow[getComponentNumber(it.first,nodeToComponent)];
 	  }
   }
-  cout <<"Number of Nodes: "<<lastUsedRow << endl;
+  //cout <<"Number of Nodes: "<<lastUsedRow << endl;
   vector<int> pairNumber(g.get_n(),0);
   size_t edgeNumber = 0;
   for (const auto& firstNode : u) {
@@ -79,7 +79,7 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u,const ve
         }
       }
   }
-  cout<<"Number of edges: "<<edgeNumber <<" Number of nEdges: "<<g.get_m() <<endl << "Number of pairs: " << edgePairs.size() << endl <<"Max Index: " <<nodeToComponent.size()<< endl;
+  //cout<<"Number of edges: "<<edgeNumber <<" Number of nEdges: "<<g.get_m() <<endl << "Number of pairs: " << edgePairs.size() << endl <<"Max Index: " <<nodeToComponent.size()<< endl;
   vector<Edge> assignment;
   vector<vector<int>> edgesUsed;
   vector<vector<int>> lastVertexIndex;
@@ -91,7 +91,7 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u,const ve
     lastVertexIndex.push_back(w);
   }
   int row_number = lastUsedRow + 2 * edgePairs.size() - edgeNumber;
-  cout << "Number of rows: " << row_number << endl<< "Number of columns: "<<2*edgePairs.size()<<endl <<"Number of entries: "<< row_number* 2 * edgePairs.size() <<endl;
+  //cout << "Number of rows: " << row_number << endl<< "Number of columns: "<<2*edgePairs.size()<<endl <<"Number of entries: "<< row_number* 2 * edgePairs.size() <<endl;
   mat matrix(row_number,edgePairs.size()*2);
   int columnNumber=0;
   for(auto & p: edgePairs)

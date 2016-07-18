@@ -37,7 +37,7 @@ uint64_t** create_Y(Galois gal, uint64_t **M, int row, int col, uint64_t *random
 			random_values[i/2] = gal.uniform_random_element(); // if no specific random_value vector is handed, a new random value is assigned 	(!=0)
 		}
 		//random_values[i/2] = (uint64_t) 1;
-		if (col < 30) {debug cout << "Random value ist " << gal.to_string(random_values[i/2]) << endl;}	//if something goes wrong, you can see the random value on the console
+		//if (col < 30) {debug cout << "Random value ist " << gal.to_string(random_values[i/2]) << endl;}	//if something goes wrong, you can see the random value on the console
 
 		for(int row_index = 0 ; row_index < row; row_index++){		//row ist die dimension von Y (Y is row x row matrix, want to update Y)
 			for (int col_index = 0; col_index < row ; col_index++){
@@ -82,7 +82,7 @@ uint64_t** create_Y_naive(Galois gal, uint64_t **M, int row, int col, uint64_t *
 			random_values[i/2] = gal.uniform_random_element(); // if no specific random_value vector is handed, a new random value is assigned (!=0)
 		}
 		//random_values[i/2] = (uint64_t) 1;
-		debug cout << "Random value ist " << gal.to_string(random_values[i/2]) << endl;	//if something goes wrong, you can see the random value on the console
+		// cout << "Random value ist " << gal.to_string(random_values[i/2]) << endl;	//if something goes wrong, you can see the random value on the console
 
 		uint64_t* b = new uint64_t[row];
 		
@@ -106,8 +106,8 @@ uint64_t** create_Y_naive(Galois gal, uint64_t **M, int row, int col, uint64_t *
 		//print_matrix(gal, row, row, wedge);
 		scalar_matrix(gal, wedge, random_values[i/2], row, row);
 
-		debug cout << "komponente von i = " << i  << endl << endl << endl;
-		debug print_matrix(gal, row, row, wedge);
+		// cout << "komponente von i = " << i  << endl << endl << endl;
+		// print_matrix(gal, row, row, wedge);
 
 		add_matrix(gal, result_matrix, wedge, row, row);
 		//cout << endl << "Zwischenergebnis für i = " << i << endl;
@@ -260,34 +260,34 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 	}
 	int counter = 0;			   						//for positioning vector_parity 
 
-	debug cout<<"------------------Algorithm start-----------"<< endl;
-	debug cout << "Startmatrix M :"<<endl;
+	/*cout<<"------------------Algorithm start-----------"<< endl;
+	cout << "Startmatrix M :"<<endl;
 	if (row < 13) {debug print_matrix(gal,row, col, M);}
-	else {debug cout << "too big, will not write it down" <<endl;}
+	else {cout << "too big, will not write it down" <<endl;}
 
-	debug cout << "Computing Y...";
+	cout << "Computing Y...";*/
 	uint64_t** Y = create_Y( gal, M, row, col, random_values);
-	debug cout << "done." << endl;
+	// cout << "done." << endl;
 	//print_matrix(gal, row, row, Y);
 
 	uint64_t** Y_copy_det = copy_matrix(Y, row, row);
 
-	debug cout << "Computing determinant of Y ...";
+	// cout << "Computing determinant of Y ...";
 	uint64_t det = gauss.determinant(gal, row, Y_copy_det);	
-	debug cout << "done. Det(Y) = " << gal.to_string(det) << endl;
+	// cout << "done. Det(Y) = " << gal.to_string(det) << endl;
 
 	my_free(Y_copy_det, row);
 	
 	if (det == 0) {
 		
-		debug cout << endl << endl << "THERE IS NO PARITY BASIS" << endl << "Searching for redundant rows of Y.." ;
+		// cout << endl << endl << "THERE IS NO PARITY BASIS" << endl << "Searching for redundant rows of Y.." ;
 
 		std::vector<int> del_row  = findRedundantRows(Y, row, row);
-		debug cout << "done " <<endl;
+		// cout << "done " <<endl;
 		row -= del_row.size(); 
 		sort(del_row.begin(), del_row.end());
 		for(unsigned int kk = 0; kk < del_row.size(); kk++){
-			debug cout << "del_row[" << kk << "] = " << del_row[kk] << endl;
+			// cout << "del_row[" << kk << "] = " << del_row[kk] << endl;
 		}
 
 		if (row == 0){
@@ -335,18 +335,18 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 	
 
 
-	debug cout << "Computing again Y...";
+	// cout << "Computing again Y...";
 	//my_free(Y, row); 
 	Y = create_Y( gal, M, row, col, random_values);
-	debug cout << "done." << endl;
+	// cout << "done." << endl;
 	//print_matrix(gal, row, row, Y);
 
 	
 
 
-	debug cout << "Computing Inverse Y^-1 ...";
+	// cout << "Computing Inverse Y^-1 ...";
 	uint64_t** Y_inverse = invertMatrix(gal, Y,  row);
-	debug cout << "done" << endl;
+	// cout << "done" << endl;
 
 	//print_matrix(gal, row, row, Y_inverse);
 
@@ -375,7 +375,7 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 		
 		my_free(SMW_det,2);
 
-		debug cout<< "det von Y_prime durch smallrankupdate ist " << gal.to_string(det_SMW) << endl;
+		// cout<< "det von Y_prime durch smallrankupdate ist " << gal.to_string(det_SMW) << endl;
 		
 
 		if (det_SMW != 0){ //if det(Y_prime) != 0
@@ -407,7 +407,7 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 	delete [] random_values;
 	*length = row;
 
-	print_vector_normal(row, parity_basis);
+	//print_vector_normal(row, parity_basis);
 	return parity_basis;
 }
 

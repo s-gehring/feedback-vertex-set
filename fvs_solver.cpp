@@ -103,7 +103,7 @@ bool degree3=true;
         if(h->get_n() > 0 && h->get_m() > 0)
         connected_graphs.push_back(*h);
     }
-    debug cout << "Found/Created "<< connected_components.size() << " connected components with "<<i<<" edges in total." <<endl;
+    //debug cout << "Found/Created "<< connected_components.size() << " connected components with "<<i<<" edges in total." <<endl;
   }
 
   pair<set<Node>, bool> fvs::forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node> v1, set<Node> v2, int k, Galois& ga) {
