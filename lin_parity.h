@@ -29,10 +29,10 @@ int get_random_value(int max);
  */ 
 
  /**
-	* @brief Swaps two rows of the matrix
+	* @brief Create the compact matrix representation for the linear matriod parity problem
 	*
-	* Manipulates the delivered matrix by swaping row "line1" with the row "line2".
-	* If the indixes are not in matrix, it will return false, otherwise (successfully swapped) true
+	* Creates matrix Y of algorithm 4.1, the compact representation of the linear matroid parity problem.
+	* The used random values will be stored in the vector "random_values" (for later use)
 	*
 	* @param [in] mat The matrix of size row x col
 	* @param [in] row the number of rows of the delivered matrix
