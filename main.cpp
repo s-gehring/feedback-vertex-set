@@ -199,7 +199,7 @@ int main(int argc, char** argv) {
    	Galois & ga=Galois::getInstance();
     ga.set_w(16);
     ga.set_mode_logtb();
-    ga.seed(0);
+    ga.seed(13);
 	GraphData graph_data = read_graph();
 
 	set<Node> necessary_nodes = graph_data.necessary_nodes;

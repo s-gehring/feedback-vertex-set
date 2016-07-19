@@ -16,7 +16,7 @@ int get_random_value(int max){
  * so random_values has to be a "column of M-half-dim" vec (a pointer of it)
  * random values are integral between 1 and max_random_value
  */ 
-uint64_t** create_Y(Galois gal, uint64_t **M, int row, int col, uint64_t *random_values){
+uint64_t** create_Y(Galois & gal, uint64_t **M, int row, int col, uint64_t *random_values){
 	
 	//create a new row x row matrix (will be Y, the result)
 	uint64_t** result_matrix= new uint64_t*[row];
@@ -34,7 +34,9 @@ uint64_t** create_Y(Galois gal, uint64_t **M, int row, int col, uint64_t *random
 	for(int i = 0 ; i < col ; i = i+2){
 		///compute Y = Y + random_value (b ^ c) where b is the i-th col and c the i+1-th col
 		while (random_values[i/2] == 0 ){ 
+			
 			random_values[i/2] = gal.uniform_random_element(); // if no specific random_value vector is handed, a new random value is assigned 	(!=0)
+			//cout << "rand ist " << gal.to_string(random_values[i/2]) << endl;
 		}
 		//random_values[i/2] = (uint64_t) 1;
 		//if (col < 30) {debug cout << "Random value ist " << gal.to_string(random_values[i/2]) << endl;}	//if something goes wrong, you can see the random value on the console
@@ -61,7 +63,7 @@ uint64_t** create_Y(Galois gal, uint64_t **M, int row, int col, uint64_t *random
  * in the other computation (ref create_Y() ) there is a computation for every cell in one line
  * For debugging very helpful
  */
-uint64_t** create_Y_naive(Galois gal, uint64_t **M, int row, int col, uint64_t *random_values){
+uint64_t** create_Y_naive(Galois & gal, uint64_t **M, int row, int col, uint64_t *random_values){
 
 	//create a new row x row matrix (will be Y, the result)
 	uint64_t** result_matrix= new uint64_t*[row];
@@ -214,7 +216,7 @@ int* simple_parity(Galois gal, uint64_t** M, int row, int col){
  * gibt U = x_i * ( b_i  c_i ) zurück, also x_i * ( i-th col   i+1-th col )
  * U ist also size x 2 matrix
  */
-uint64_t** get_U(Galois gal, uint64_t** M, int size, uint64_t random, int i){
+uint64_t** get_U(Galois & gal, uint64_t** M, int size, uint64_t random, int i){
 	//construce a size x 2 matrix
 	uint64_t** U = new uint64_t*[size];
 	for (int k=0; k<size; k++){
@@ -235,7 +237,7 @@ uint64_t** get_U(Galois gal, uint64_t** M, int size, uint64_t random, int i){
  * V ist also 2 x size matrix
  */
 
- uint64_t** get_V(Galois gal, uint64_t** M, int size, int i){
+ uint64_t** get_V(Galois & gal, uint64_t** M, int size, int i){
  	//construce a 2 x size matrix
  	
 	uint64_t** V = new uint64_t*[2];
@@ -252,7 +254,15 @@ uint64_t** get_U(Galois gal, uint64_t** M, int size, uint64_t random, int i){
 	return V;
  }
 
-int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length){
+
+
+int* simple_parity_fast(Galois & gal, uint64_t** M, int row, int col, int* length){
+	int success = 0;
+	int* parity_basis;
+
+while (success == 0){
+	success = 1;
+
 	int check = 0;
 	int row_difference = 0;
 	Gauss gauss;
@@ -260,8 +270,12 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 	for (int i = 0; i < col/2; i++){
 		random_values[i] = 0;
 	}
-	int counter2 = 0;			   						//for positioning vector_parity 
+	
+	//cout << "|";
+	//cout.flush();
 
+	
+	
 	/*cout<<"------------------Algorithm start-----------"<< endl;
 	cout << "Startmatrix M :"<<endl;
 	if (row < 13) {debug print_matrix(gal,row, col, M);}
@@ -269,6 +283,8 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 
 	cout << "Computing Y...";*/
 	uint64_t** Y = create_Y( gal, M, row, col, random_values);
+
+	
 	// cout << "done." << endl;
 	//print_matrix(gal, row, row, Y);
 
@@ -290,6 +306,9 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 		row_difference = del_row.size();
 		sort(del_row.begin(), del_row.end());
 		
+
+		//cout <<"row = " << row << "und row_difference = " << row_difference << endl;
+		//cout.flush();
 		/*for(unsigned int kk = 0; kk < del_row.size(); kk++){
 			 cout << "del_row[" << kk << "] = " << del_row[kk] << endl;
 		}*/
@@ -366,20 +385,24 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 
 	
 
-	int* parity_basis = new int[row];		    //in here we will store the indices of the columns that built the parity basis
+	parity_basis = new int[row];		    //in here we will store the indices of the columns that built the parity basis
 	for (int i = 0; i < row; i++){
 		parity_basis[i] = 0;
 	}
 	
-
+	int pos = 0;			   						//for positioning vector_parity 
 	for(int i = 0; i < col; i = i+2){
 
 		//mat Y_prime = Y - random_values(i/2) *  (M.col(i) * M.col(i+1).t() - M.col(i+1)* M.col(i).t() );
 		
-	
+
+
+
 		uint64_t** V = get_V(gal, M, row, i);
 		uint64_t** U = get_U(gal, M, row,random_values[i/2], i);	
- 		
+
+					
+ 	
  		uint64_t** SMW_det = SMW_matrix(gal,  V, Y_inverse, U, row);
  		
 
@@ -390,7 +413,7 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 		my_free(SMW_det,2);
 
 		// cout<< "det von Y_prime durch smallrankupdate ist " << gal.to_string(det_SMW) << endl;
-		
+			
 
 		if (det_SMW != 0){ //if det(Y_prime) != 0
 
@@ -412,13 +435,23 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 			my_free(U, row);
 			my_free(V, 2);
 			my_free(SMW, 2);
-			if (counter2>=row)
+			if (pos>=row)
 			{
-				throw std::runtime_error("OVERFLOW");
+				/*
+				cout << "row is " << row << "col is " << col << "pos is " << pos << endl << endl << endl;
+				cout << "OVERFLOW STARTE ERNEUT"<<endl <<endl;
+				
+				
+				cout.flush();
+				print_vector(gal, (col/2), random_values);
+				*/
+				success = 0;
+				break;
+				
 			}
-			parity_basis[counter2] = i;
-			parity_basis[counter2+1] = i+1;
-			counter2 = counter2 + 2;
+			parity_basis[pos] = i;
+			parity_basis[pos+1] = i+1;
+			pos = pos + 2;
 		}
 	}
 
@@ -427,10 +460,14 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 
 	my_free(Y, row);
 	my_free(Y_inverse, row);
-	my_free(M, row);
+
+
+	if (success == 1) my_free(M, row);
 
 	//print_vector_normal(row, parity_basis);
-	return parity_basis;
+ }
+ //print_vector_normal(row, parity_basis);
+ return parity_basis;
 }
 
 

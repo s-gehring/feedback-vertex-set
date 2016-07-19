@@ -44,33 +44,33 @@ int get_random_value(int max);
     * @param [in] line2 the index of the second row to swap
 	* @returns true if sussessfull, false otherwise
 	*/
-uint64_t** create_Y(Galois gal, uint64_t **M, int row, int col, uint64_t *random_values);
+uint64_t** create_Y(Galois & gal, uint64_t **M, int row, int col, uint64_t *random_values);
 
 /*
  * basically not needed, this is a computation with 2 intermediate steps (but this means there a two row x row matrices)
  * in the other computation (ref create_Y() ) there is a computation for every cell in one line
  * For debugging very helpful
  */
-uint64_t** create_Y_naive(Galois gal, uint64_t **M, int row, int col, uint64_t *random_values);
+uint64_t** create_Y_naive(Galois & gal, uint64_t **M, int row, int col, uint64_t *random_values);
 
 
 /*
  * This implementations does not use the Sherman Morrisin Woodbury fast rank update formula
  */
-int* simple_parity(Galois gal, uint64_t** M, int row, int col);
+int* simple_parity(Galois & gal, uint64_t** M, int row, int col);
 
 /*
  * gibt U = x_i * ( b_i  c_i ) zurück, also x_i * ( i-th col   i+1-th col )
  * U ist also size x 2 matrix
  */
-uint64_t** get_U(Galois gal, uint64_t** M, int size, uint64_t random, int i);
+uint64_t** get_U(Galois & gal, uint64_t** M, int size, uint64_t random, int i);
 
 /*
  * gibt V = ( -c_i  b_i )^T zurück, also ( - i+1-th col   i-th col) ^T
  * V ist also 2 x size matrix
  */
 
- uint64_t** get_V(Galois gal, uint64_t** M, int size, int i);
+ uint64_t** get_V(Galois & gal, uint64_t** M, int size, int i);
 
 
 
@@ -79,7 +79,7 @@ uint64_t** get_U(Galois gal, uint64_t** M, int size, uint64_t random, int i);
  * parity basis
  * in length it returns the number of lin. independent vectors (so there are lenght/2 pairs)
  */
-int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length);
+int* simple_parity_fast(Galois & gal, uint64_t** M, int row, int col, int* length);
 //std::vector<int> simple_parity(mat M, int max_random_value);
 
 

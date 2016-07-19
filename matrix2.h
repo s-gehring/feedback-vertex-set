@@ -193,4 +193,5 @@ uint64_t** copy_matrix(uint64_t** mat, int row, int col);
   
 	*/
 void my_free(uint64_t** mat, int row);
+bool compare(Galois gal, uint64_t** A, uint64_t** B, int size);
 #endif /* LIN_PARITY_H_ */

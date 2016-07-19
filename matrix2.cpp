@@ -314,3 +314,15 @@ void my_free(uint64_t** mat, int row){
     	delete [] mat[i];
 	delete [] mat;
 }
+
+bool compare(Galois gal, uint64_t** A, uint64_t** B, int size){
+  int i , j;
+  bool check = true;
+  for ( i =0; i < size; i++){
+    for( j = 0; j < size; j++){
+      if (gal.add(A[i][j], B[i][j])) check = false;
+    }
+  }
+
+  return check;
+}
