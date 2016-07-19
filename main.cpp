@@ -195,7 +195,8 @@ set<set<Node>> multi_edge_partitions(set<set<Node>>& m, set<Node>& taken,  Graph
 
 int main(int argc, char** argv) {
 	// Read graph and store information in variables.
-	Galois ga;
+    //Galois & ga;
+   	Galois & ga=Galois::getInstance();
     ga.set_w(16);
     ga.set_mode_logtb();
     ga.seed(0);

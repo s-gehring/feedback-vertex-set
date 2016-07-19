@@ -70,7 +70,6 @@ public:
 
 private:
 	void updateDimension();
-	Galois g;
 	std::vector<std::vector<uint64_t>> matrix;
 	int w;
 	int h;

@@ -44,4 +44,13 @@ class Galois
     uint64_t** d_table;
     uint64_t*  logtb;
     uint64_t*  ilogtb;
+    static Galois & getInstance()
+    {
+          static Galois instance;
+          return instance;
+    }
+   private:
+    Galois(){};
+    //Galois(Galois const&) = delete;
+    //void operator=(Galois const&)  = delete;
 };

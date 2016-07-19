@@ -2,7 +2,7 @@
 #include "galois.h"
 
 
-mat::mat(Galois& ga,int height, int width)
+/*mat::mat(Galois& ga,int height, int width)
 {
 	g=ga;
 	for (int i = 0; i<width; i++)
@@ -11,12 +11,13 @@ mat::mat(Galois& ga,int height, int width)
 		matrix.push_back(column);
 	}
 	updateDimension();
-}
+}*/
 
 mat::mat(uint64_t** pmatrix, int height, int width) 
 {
-	g.set_w(16);
-	g.set_mode_naive();
+	//g.set_w(16);
+	//g.set_mode_naive();
+	//g=myGa;
 	for (int i = 0; i < height; i++)
 	{
 		for (int j = 0; j < width; j++)
@@ -30,8 +31,9 @@ mat::mat(uint64_t** pmatrix, int height, int width)
 
 mat::mat(int height, int width)
 {
-	g.set_w(16);
-	g.set_mode_naive();
+	//g.set_w(16);
+	//g.set_mode_naive();
+	//g=myGa;
 	for (int i = 0; i<width; i++)
 	{
 		std::vector<uint64_t>column(height,0);
@@ -42,8 +44,9 @@ mat::mat(int height, int width)
 
 mat::mat()
 {
-	g.set_w(16);
-	g.set_mode_naive();
+	//g.set_w(16);
+	//g.set_mode_naive();
+	//g=myGa;
 	updateDimension();
 }
 
@@ -55,8 +58,8 @@ mat::~mat()
 mat::mat(std::initializer_list<std::initializer_list<uint64_t>> lst)
 	: n_rows(lst.size()), n_cols(n_rows ? lst.begin()->size() : 0)
 {
-	g.set_w(16);
-	g.set_mode_naive();
+	//g.set_w(16);
+	//g.set_mode_naive();
 	int i = 0;
 	for (const auto& row : lst) {
 		for (const auto& value : row) {
@@ -129,7 +132,7 @@ mat mat::operator*(const mat & rhs)
 		{
 			for (std::size_t k=0;k<getWidth();k++)
 			{
-				result(j,i) = g.add(result(j,i),g.multiply(matrix[k][j],rhs(k,i)));
+				result(j,i) = Galois::getInstance().add(result(j,i),Galois::getInstance().multiply(matrix[k][j],rhs(k,i)));
 			}
 		}
 	}
@@ -147,7 +150,7 @@ mat mat::operator+(const mat & rhs)
 	{
 		for (std::size_t j = 0; j<result.getHeight(); j++)
 		{
-			result(j,i) = g.add(matrix[i][j], rhs(j,i));
+			result(j,i) = Galois::getInstance().add(matrix[i][j], rhs(j,i));
 		}
 	}
 	return result;
@@ -307,22 +310,15 @@ std::vector<int> mat::maxSubmatrix()
 	{
 		throw std::runtime_error("Wrong Dimensions");;
 	}
-	//std::cout<<"bTrans"<<std::endl;
 	auto uTriangle = upper_triangle_transform();
-	//std::cout<<"aTrans"<<std::endl;
 	std::vector<int> result;
 	for (int i = std::min(std::get<0>(uTriangle).getHeight(), std::get<0>(uTriangle).getWidth())-1; i >=0; i--)
 	{
-		//std::cout<<i<<std::endl;
 		if (std::get<0>(uTriangle)(i, i) == 0)
 		{
 			result.push_back(std::get<2>(uTriangle)[i]);
 		}
 	}
-	/*for (auto i: result)
-	{
-		std::cout<<i<<std::endl;
-	}*/
 	return result;
 }
 
@@ -353,7 +349,7 @@ void mat::columnTransform(mat & matrix, mat & inverse, int colNumber, int destCo
 {
 	if (matrix(rowNumber, colNumber) != 1)
 	{
-		uint64_t inv=g.inverse(matrix(rowNumber, colNumber));
+		uint64_t inv=Galois::getInstance().inverse(matrix(rowNumber, colNumber));
 		columnOperation(matrix,colNumber, inv);
 		columnOperation(inverse,colNumber, inv);
 	}
@@ -366,7 +362,7 @@ void mat::columnOperation(mat& matrix, int colNumber, uint64_t factor)
 {
 	for (std::size_t i = 0; i < matrix.getHeight(); i++)
 	{
-		matrix(i,colNumber) = g.multiply(matrix(i,colNumber),factor);
+		matrix(i,colNumber) = Galois::getInstance().multiply(matrix(i,colNumber),factor);
 	}
 }
 
@@ -374,7 +370,7 @@ void mat::columnOperation(mat & matrix, int firstColNumber, int secondColNumber,
 {
 	for (std::size_t i = 0; i < matrix.getHeight(); i++)
 	{
-		matrix(i,secondColNumber) = g.add(g.multiply(matrix(i,firstColNumber), factor), matrix(i,secondColNumber));
+		matrix(i,secondColNumber) = Galois::getInstance().add(Galois::getInstance().multiply(matrix(i,firstColNumber), factor), matrix(i,secondColNumber));
 	}
 }
 
@@ -382,7 +378,7 @@ void mat::rowTransform(mat & matrix, mat & inverse, int rowNumber, int destRowNu
 {
 	if (matrix(rowNumber, colNumber) != 1)
 	{
-		uint64_t inv = g.inverse(matrix(rowNumber, colNumber));
+		uint64_t inv = Galois::getInstance().inverse(matrix(rowNumber, colNumber));
 		rowOperation(matrix, rowNumber, inv);
 		rowOperation(inverse, rowNumber, inv);
 	}
@@ -395,7 +391,7 @@ void mat::rowTransform(mat & matrix, int rowNumber, int destRowNumber, int colNu
 {
 	if (matrix(rowNumber, colNumber) != 1)
 	{
-		uint64_t inv = g.inverse(matrix(rowNumber, colNumber));
+		uint64_t inv = Galois::getInstance().inverse(matrix(rowNumber, colNumber));
 		rowOperation(matrix, rowNumber, inv);
 	}
 	uint64_t fac = matrix(destRowNumber, colNumber);
@@ -412,7 +408,7 @@ void mat::rowOperation(mat& matrix, int rowNumber, uint64_t factor)
 		}
 		else if (factor!=1)
 		{
-			matrix(rowNumber, i) = g.multiply(matrix(rowNumber, i), factor);
+			matrix(rowNumber, i) = Galois::getInstance().multiply(matrix(rowNumber, i), factor);
 		}
 	}
 }
@@ -423,11 +419,11 @@ void mat::rowOperation(mat & matrix, int firstRowNumber, int secondRowNumber, ui
 	{
 		if (factor == 1)
 		{
-			matrix(secondRowNumber, i) = g.add(matrix(firstRowNumber, i), matrix(secondRowNumber, i));
+			matrix(secondRowNumber, i) = Galois::getInstance().add(matrix(firstRowNumber, i), matrix(secondRowNumber, i));
 		}
 		else if (factor != 0)
 		{
-			matrix(secondRowNumber, i) = g.add(g.multiply(matrix(firstRowNumber, i), factor), matrix(secondRowNumber, i));
+			matrix(secondRowNumber, i) = Galois::getInstance().add(Galois::getInstance().multiply(matrix(firstRowNumber, i), factor), matrix(secondRowNumber, i));
 		}
 	}
 }
@@ -438,7 +434,7 @@ uint64_t mat::det()
 	uint64_t result = std::get<0>(transform)(0,0);
 	for (std::size_t i = 1; i < std::get<0>(transform).getWidth(); i++)
 	{
-		result = g.multiply(result, std::get<0>(transform)(i,i));
+		result = Galois::getInstance().multiply(result, std::get<0>(transform)(i,i));
 	}
 	return result;
 }
@@ -567,7 +563,6 @@ bool mat::operator!=(const mat & rhs)
 std::vector<int> findRedundantRows(uint64_t** pmatrix, int height, int width)
 {
 	mat input(pmatrix,height, width);
-	//input.print("fRRMatrix");
 	return input.maxSubmatrix();
 }
 
