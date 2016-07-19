@@ -15,7 +15,7 @@ mat::mat(Galois& ga,int height, int width)
 
 mat::mat(uint64_t** pmatrix, int height, int width) 
 {
-	g.set_w(64);
+	g.set_w(16);
 	g.set_mode_naive();
 	for (int i = 0; i < height; i++)
 	{
@@ -30,7 +30,7 @@ mat::mat(uint64_t** pmatrix, int height, int width)
 
 mat::mat(int height, int width)
 {
-	g.set_w(64);
+	g.set_w(16);
 	g.set_mode_naive();
 	for (int i = 0; i<width; i++)
 	{
@@ -42,7 +42,7 @@ mat::mat(int height, int width)
 
 mat::mat()
 {
-	g.set_w(64);
+	g.set_w(16);
 	g.set_mode_naive();
 	updateDimension();
 }
@@ -55,7 +55,7 @@ mat::~mat()
 mat::mat(std::initializer_list<std::initializer_list<uint64_t>> lst)
 	: n_rows(lst.size()), n_cols(n_rows ? lst.begin()->size() : 0)
 {
-	g.set_w(64);
+	g.set_w(16);
 	g.set_mode_naive();
 	int i = 0;
 	for (const auto& row : lst) {
@@ -305,17 +305,24 @@ std::vector<int> mat::maxSubmatrix()
 {
 	if (getWidth() != getHeight())
 	{
-		throw;
+		throw std::runtime_error("Wrong Dimensions");;
 	}
+	//std::cout<<"bTrans"<<std::endl;
 	auto uTriangle = upper_triangle_transform();
+	//std::cout<<"aTrans"<<std::endl;
 	std::vector<int> result;
 	for (int i = std::min(std::get<0>(uTriangle).getHeight(), std::get<0>(uTriangle).getWidth())-1; i >=0; i--)
 	{
+		//std::cout<<i<<std::endl;
 		if (std::get<0>(uTriangle)(i, i) == 0)
 		{
 			result.push_back(std::get<2>(uTriangle)[i]);
 		}
 	}
+	/*for (auto i: result)
+	{
+		std::cout<<i<<std::endl;
+	}*/
 	return result;
 }
 
@@ -560,6 +567,7 @@ bool mat::operator!=(const mat & rhs)
 std::vector<int> findRedundantRows(uint64_t** pmatrix, int height, int width)
 {
 	mat input(pmatrix,height, width);
+	//input.print("fRRMatrix");
 	return input.maxSubmatrix();
 }
 
