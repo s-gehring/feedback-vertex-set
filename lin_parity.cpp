@@ -421,7 +421,10 @@ int* simple_parity_fast(Galois gal, uint64_t** M, int row, int col, int* length)
 			counter2 = counter2 + 2;
 		}
 	}
-
+	if (counter2!=row)
+	{
+		throw std::runtime_error("Wrong number of parity elements");
+	}
 	delete [] random_values;
 	*length = row;
 

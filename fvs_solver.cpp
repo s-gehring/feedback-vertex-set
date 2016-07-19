@@ -3,7 +3,7 @@
 using namespace fvs;
 using namespace BinCount;
 
-bool degree3=false;
+bool degree3=true;
 
   void fvs::print_nodes(const set<Node>& s) {
     set<Node>::iterator it = s.begin();
@@ -208,7 +208,7 @@ bool degree3=false;
     			fvs.insert(complete_solution.cbegin(), complete_solution.cend());
           //if (subFVS2.second!=true)
           {
-          //  throw;
+            //throw;
           }
     			return make_pair(fvs, true);
     		}
@@ -216,7 +216,7 @@ bool degree3=false;
     		{
           //if (subFVS2.second!=false)
           {
-          //  throw;
+            //throw;
           }
     			return make_pair(fvs,false);
     		}
