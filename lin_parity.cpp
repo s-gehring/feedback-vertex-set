@@ -454,7 +454,10 @@ while (success == 0){
 			pos = pos + 2;
 		}
 	}
-
+	if (counter2!=row)
+	{
+		throw std::runtime_error("Wrong number of parity elements");
+	}
 	delete [] random_values;
 	*length = row;
 
