@@ -128,8 +128,12 @@ set<Edge> contract_edges(Graph &g) {
     return branching_pairs;
 }
 
+/*
+/* We basically try to find all edge-dominating-sets in the graph only consisting of the multiedges.
+/* This is not even believed to be FPT but since n <= k it is okay.
+*/
 set<set<Node>> multi_edge_partitions(set<set<Node>>& m, set<Node>& taken,  Graph& g) {
-	cout << taken.size() << endl;
+	debug cout << taken.size() << endl;
 	set<set<Node>> return_value;
 	AdjacencyList adj = g.get_adjacency_list();
 	// graph is partitioned
