@@ -179,8 +179,6 @@ namespace FvsGraph{
             } while(changes_occur);
             return changes;
           }
-            
-  
           
           void Graph::clear_node(const Node v) {
             std::set<Node> targets;

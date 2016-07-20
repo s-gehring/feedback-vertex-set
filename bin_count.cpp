@@ -7,6 +7,10 @@ namespace BinCount {
 		if (size > 0) {
 			full = false;
 		}
+		else
+		{
+			full=false;
+		}
 	}
 
 	bool Bin_count::at(int pos) {

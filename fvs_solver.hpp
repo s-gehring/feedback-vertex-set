@@ -18,6 +18,8 @@
 using namespace std;
 using namespace FvsGraph;
 
+static bool degree3=true;
+
 namespace fvs {
 	/**
 	* @brief Checks, wether the given graph contains a cycle.
@@ -133,7 +135,7 @@ namespace fvs {
 	* @returns A pair of a set of nodes and a bool. The set of nodes contains a part of the feedback
 	*		vertex set. The bool will be false, if the algorithm decides that there is no fvs.
 	*/
-	pair<set<Node>, bool> forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node> f, set<Node> v2, int k,Galois & ga);
+	pair<set<Node>, bool> forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node> f, set<Node> v2, int k);
 
 	/**
 	*@brief: Tries to decrease the size of a given fvs in a given graph by 1.
@@ -142,7 +144,7 @@ namespace fvs {
 	* @param[in] S The feedback vertex set which will be compressed.
 	* @returns A new fvs with size of the old fvs -1 if it exists, otherwise false.
 	*/
-	pair<set<Node>, bool> compression_fvs(const Graph& orig, const set<Node>& S,Galois& ga);
+	pair<set<Node>, bool> compression_fvs(const Graph& orig, const set<Node>& S);
 
 	/**
 	*@brief: Computes the minimum feedback vertex set for a given graph.
@@ -153,7 +155,7 @@ namespace fvs {
 	* @param[in] orig The graph.
 	* @returns A minimum feedback vertex set.
 	*/
-	set<Node> compute_min_fvs(const Graph& orig, Galois & ga);
+	set<Node> compute_min_fvs(const Graph& orig);
 
 	/**
 	*@brief: Computes the difference set of two given sets.

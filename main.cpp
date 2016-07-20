@@ -60,9 +60,9 @@ void output_arti_elems_bridges(const Graph& g) {
 *
 * @param [in] g The filepath of the file where the graph is in.
 */
-set<Node> run_iter_comp(Graph g,Galois& ga) {
+set<Node> run_iter_comp(Graph g) {
     // compute min fvs by using iterative compression
-    set<Node> min_fvs = compute_min_fvs(g, ga);
+    set<Node> min_fvs = compute_min_fvs(g);
     // sanity check and output of the results
     if (is_fvs(g, min_fvs)) {
 	return min_fvs;
@@ -195,7 +195,6 @@ set<set<Node>> multi_edge_partitions(set<set<Node>>& m, set<Node>& taken,  Graph
 
 int main(int argc, char** argv) {
 	// Read graph and store information in variables.
-    //Galois & ga;
    	Galois & ga=Galois::getInstance();
     ga.set_w(16);
     ga.set_mode_logtb();
@@ -279,7 +278,24 @@ int main(int argc, char** argv) {
             // contract edges and start branching on multiedges within one connected component
             set<Edge> branching_pairs = contract_edges(it);
             set<Node> partial_solution;
-            if (branching_pairs.size() > 0) {
+            if(degree3 && it.is_deg_three())
+            {
+                debug cout << "Degree 3 case" << endl;
+                throw;
+                set<Node> V1;
+                int maxIndex=-1;
+                for (const auto &it2 : it.get_adjacency_list())
+                {
+                    V1.insert(it2.first);
+                    if (it2.first>maxIndex)
+                    {
+                        maxIndex=it2.first;
+                    }
+                }
+                vector<int> nodeToComponent(maxIndex+1);
+                partial_solution = solveDegree3(it,V1,nodeToComponent);
+            }
+            else if (branching_pairs.size() > 0) {
                 debug cout << "Start branching on " << branching_pairs.size() << " different multi-edges ";
                 debug cout << "for one connected component." << endl;
                 // create graph by using all multi-edges
@@ -299,7 +315,7 @@ int main(int argc, char** argv) {
                         h.remove_node(*it1);
                         current_solution.insert(*it1);
                     }
-                    set<Node> help_solution = run_iter_comp(h,ga);
+                    set<Node> help_solution = run_iter_comp(h);
                     current_solution.insert(help_solution.begin(), help_solution.end());
                     // found a new best partial solution using the current multi-edge branching nodes
                     if (current_solution.size() < partial_solution.size() || partial_solution.size() == 0) {
@@ -310,7 +326,7 @@ int main(int argc, char** argv) {
             // if there are no multi-edges, just run iterative compression on the connected component
             else {
                 debug cout << "There are no multi-edges." << endl;
-                partial_solution = run_iter_comp(it,ga);
+                partial_solution = run_iter_comp(it);
             }
             partial_solutions.push_back(partial_solution);
             debug cout << "Found partial solution: ";

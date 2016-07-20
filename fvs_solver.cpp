@@ -3,8 +3,6 @@
 using namespace fvs;
 using namespace BinCount;
 
-bool degree3=true;
-
   void fvs::print_nodes(const set<Node>& s) {
     set<Node>::iterator it = s.begin();
     if (s.size() > 0) {
@@ -106,7 +104,7 @@ bool degree3=true;
     //debug cout << "Found/Created "<< connected_components.size() << " connected components with "<<i<<" edges in total." <<endl;
   }
 
-  pair<set<Node>, bool> fvs::forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node> v1, set<Node> v2, int k, Galois& ga) {
+  pair<set<Node>, bool> fvs::forest_bipartition_fvs(const Graph& orig, Graph& g, set<Node> v1, set<Node> v2, int k) {
     set<Node> fvs;
     pair<set<Node>, bool> retValue;
     /*
@@ -197,11 +195,11 @@ bool degree3=true;
              v3.insert(v);
            }
           }
-    		  auto subFVS= solveDegree3(it,v3,0,nodeToComponent,ga);
+    		  auto subFVS= solveDegree3(it,v3,nodeToComponent);
           complete_solution.insert(subFVS.cbegin(), subFVS.cend());
         }
         degree3=false;
-        //auto subFVS2=forest_bipartition_fvs(orig, g,v1, v2,k,ga);
+        //auto subFVS2=forest_bipartition_fvs(orig, g,v1, v2,k);
         degree3=true;
         if (fvs.size()+complete_solution.size()<= (unsigned) k)
     		{
@@ -237,7 +235,7 @@ bool degree3=true;
         /*
         * select w and reduce the budget by 1
         */
-        retValue = forest_bipartition_fvs(orig, h, v1, v2, k - 1,ga);
+        retValue = forest_bipartition_fvs(orig, h, v1, v2, k - 1);
         /*
         * if returning NO, then return NO
         */
@@ -262,7 +260,7 @@ bool degree3=true;
         /*
         * branch on w
         */
-        retValue = forest_bipartition_fvs(orig, h, v1, v2, k - 1,ga);
+        retValue = forest_bipartition_fvs(orig, h, v1, v2, k - 1);
         if(retValue.second) {
           /*
           * add w to the fvs and reduce the budget by 1
@@ -276,7 +274,7 @@ bool degree3=true;
           * do not select w, move w to v2 -> less connected components in g[v2]
           */
           v2.insert(w);
-          return forest_bipartition_fvs(orig, g, v1, v2, k,ga);
+          return forest_bipartition_fvs(orig, g, v1, v2, k);
         }
       }
     } else {
@@ -292,7 +290,7 @@ bool degree3=true;
         Graph h(g);
         v1.erase(w);
         h.remove_node(w);
-        return retValue = forest_bipartition_fvs(orig, h, v1, v2, k,ga);
+        return retValue = forest_bipartition_fvs(orig, h, v1, v2, k);
       }
       /*
       * else it has exactly one neighbour in v1 and one in v2
@@ -302,7 +300,7 @@ bool degree3=true;
       else if (w != INVALID_NODE) {
         v1.erase(w);
         v2.insert(w);
-        return forest_bipartition_fvs(orig, g, v1, v2, k,ga);
+        return forest_bipartition_fvs(orig, g, v1, v2, k);
       }
     }
     return make_pair(fvs, false);
@@ -521,7 +519,7 @@ bool degree3=true;
     return !has_cycle(h);
   }
 
-  pair<set<Node>, bool> fvs::compression_fvs(const Graph& orig, const set<Node>& S,Galois& ga) {
+  pair<set<Node>, bool> fvs::compression_fvs(const Graph& orig, const set<Node>& S) {
     Graph g_help(orig);
     size_t k = S.size() - 1;
     Bin_count counter(k + 1);
@@ -556,7 +554,7 @@ bool degree3=true;
         }
         // run forest bipartition fvs
         set<Node> v_without_s = set_minus(V, S);
-        result = forest_bipartition_fvs(g,g,v_without_s,s_without_d,k-D.size(), ga);
+        result = forest_bipartition_fvs(g,g,v_without_s,s_without_d,k-D.size());
         if (result.second) {
           set<Node> output = set_union(result.first, D);
           return make_pair(output, true);
@@ -594,7 +592,7 @@ bool degree3=true;
     return union_;
   }
 
-  set<Node> fvs::compute_min_fvs(const Graph& orig, Galois & ga) {
+  set<Node> fvs::compute_min_fvs(const Graph& orig) {
     Graph g(orig);
     // get nodes of the graph
     set<Node> v;
@@ -631,7 +629,7 @@ bool degree3=true;
       orig.induced_subgraph(h, v_iter);
       h.delete_low_degree_nodes();
       // run compression
-      result = compression_fvs(h, f_iter,ga);
+      result = compression_fvs(h, f_iter);
       if(result.second) {
         f_iter = result.first;
       }
