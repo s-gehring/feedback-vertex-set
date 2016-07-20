@@ -248,8 +248,8 @@ int main(int argc, char** argv) {
 			set<Node> taken;
 			set<set<Node>> partitions;
 			partitions = multi_edge_partitions(partitions, taken, m);
-			debug cout << "Reduced size from " << pow(2, branching_pairs.size()) << " to ";
-			debug cout << partitions.size() << " partitions of the graph using the multiedges." << endl;
+			debug cout << "Reduced number of necessary branchings on multiedges from " << pow(2, branching_pairs.size());
+			debug cout << " different branchings to " << partitions.size() << "." << endl;
 			for (set<set<Node>>::iterator partition = partitions.begin(); partition != partitions.end(); ++partition) {
 				Graph h(it);
 				set<Node> current_solution;
