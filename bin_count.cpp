@@ -7,9 +7,9 @@ namespace BinCount {
 		if (size > 0) {
 			full = false;
 		}
-		else
-		{
-			full=false;
+		else {
+			std::cout << "Warning: Tried to create an empty counter!" << std::endl;
+			full = true;
 		}
 	}
 
@@ -34,7 +34,7 @@ namespace BinCount {
 			}
 		}
 		else {
-			std::cout << "Counter cannot be increased anymore. Please reset!" << std::endl;
+			std::cout << "Warning: Counter cannot be increased anymore. Please reset!" << std::endl;
 		}
 	} 
 
