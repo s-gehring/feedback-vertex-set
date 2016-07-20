@@ -129,8 +129,8 @@ set<Edge> contract_edges(Graph &g) {
 }
 
 /*
-/* We basically try to find all edge-dominating-sets in the graph only consisting of the multiedges.
-/* This is not even believed to be FPT but since #edges <= k it is okay to use this recursive branching.
+* We basically try to find all edge-dominating-sets in the graph only consisting of the multiedges.
+* This is not even believed to be FPT but since #edges <= k it is okay to use this recursive branching.
 */
 set<set<Node>> multi_edge_partitions(set<set<Node>>& m, set<Node>& taken,  Graph& g) {
 	set<set<Node>> return_value;
