@@ -129,6 +129,7 @@ set<Edge> contract_edges(Graph &g) {
 }
 
 set<set<Node>> multi_edge_partitions(set<set<Node>>& m, set<Node>& taken,  Graph& g) {
+	cout << taken.size() << endl;
 	set<set<Node>> return_value;
 	AdjacencyList adj = g.get_adjacency_list();
 	// graph is partitioned
