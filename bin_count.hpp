@@ -65,6 +65,7 @@ namespace BinCount {
         size_t get_true_values();
 
 	private:
+		Bin_count(); // to get an error when using constructor without argument while compiling
 		std::vector<bool> counter;
 		int size;
 		bool full;
