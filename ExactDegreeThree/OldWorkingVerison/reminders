@@ -1,2 +1,0 @@
--this, together with "fvs_solver", was a working version for the exact degree 3 case, only thing missing is the expension to a tree (after selecting the parity pairs)
-- works with the boost structure and does not use galois field
