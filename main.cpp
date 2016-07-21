@@ -129,8 +129,8 @@ set<Edge> contract_edges(Graph &g) {
 }
 
 /*
-* We basically try to find all edge-dominating-sets in the graph only consisting of the multiedges.
-* This is not even believed to be FPT but since #edges <= k it is okay to use this recursive branching.
+* We basically try to find all minimal vertex covers in the graph only consisting of the multiedges.
+* Since #multiedges < k it is okay to do this recursive branching.
 */
 set<set<Node>> multi_edge_partitions(set<set<Node>>& m, set<Node>& taken,  Graph& g) {
 	set<set<Node>> return_value;
@@ -157,6 +157,15 @@ set<set<Node>> multi_edge_partitions(set<set<Node>>& m, set<Node>& taken,  Graph
 			if (h1.get_single_degree(it) == 0) {
 				h1.remove_node(it);
 			}
+			// or if it has degree 1 and again a neighbour with degree 0
+			// we can skip it and take its neighbour
+			else if (h1.get_single_degree(it) == 1) {
+				if (h1.get_single_degree(*h1.get_neighbors(it).first.begin()) == 0) {
+					new_taken.insert(*h1.get_neighbors(it).first.begin());
+					h1.remove_node(*h1.get_neighbors(it).first.begin());
+					h1.remove_node(it);
+				}
+			}
 		}
 		set<set<Node>> new_partition1 = multi_edge_partitions(m, new_taken, h1);
 		m.insert(new_partition1.begin(), new_partition1.end());
@@ -167,6 +176,12 @@ set<set<Node>> multi_edge_partitions(set<set<Node>>& m, set<Node>& taken,  Graph
 		for (auto &it : adj.begin()->second) {
 			new_taken.insert(it);
 			h2.remove_node(it);
+		}
+		// and delete all neighbouring nodes that now have degree 0
+		for (auto &it : adj) {
+			if (h2.get_single_degree(it.first) == 0 && it.first != branched_node) {
+				h2.remove_node(it.first);
+			}
 		}
 		h2.remove_node(branched_node);
 		set<set<Node>> new_partition2 = multi_edge_partitions(m, new_taken, h2);
