@@ -191,12 +191,24 @@ set<set<Node>> multi_edge_partitions(set<set<Node>>& m, set<Node>& taken,  Graph
 }
 
 int main(int argc, char** argv) {
-	// Read graph and store information in variables.
-	
+	long seed = 0;
+    if(argc > 1) {
+        // Guess that the last string is the seed.
+        // For everything else, we can define undefined behavior
+        // and just not care.
+        char* sd = argv[argc-1];
+        if(sscanf(sd, "%li", &seed) == 0) {
+            seed = 0;
+            debug cout << "Can't parse seed. Settings to 0."<<endl;
+        } else {
+            debug cout << "Settings seed to "<<seed<<"."<<endl;   
+        }
+    }
+    
 	Galois & ga = Galois::getInstance();
 	ga.set_w(16);
 	ga.set_mode_logtb();
-  ga.seed(0);
+    ga.seed(seed);
 	
 	GraphData graph_data = read_graph();
     /*
