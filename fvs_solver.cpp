@@ -323,7 +323,14 @@ using namespace BinCount;
     */
     string line;
     while (!getline(cin, line).eof()) {
-      if(cin.peek() == '#') continue; // Comments
+      if(line.empty()) {
+          debug cout << "Empty line"<<endl;
+          continue;
+      }
+      if(line.at(0) == '#') {
+          debug cout << "Got comment"<<line<<endl;
+          continue; // Comments
+      }
       istringstream iss(line);
       /*
       **  Put the two read strings into src and dst. 

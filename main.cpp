@@ -222,7 +222,20 @@ int main(int argc, char** argv) {
   ga.seed(0);
 	
 	GraphData graph_data = read_graph();
-
+    /*
+    **  Edge case: n = 0
+    */
+    if(graph_data.graph.get_n() == 0) {
+       debug cout << "Edge case: No not-necessary vertices. Outputting necessary vertices only."<<endl;
+       for(const auto &it : graph_data.necessary_nodes) {
+          cout << graph_data.mapping.second[it] << endl;
+       }
+       return 0;
+    }
+    
+    
+    
+    
 	set<Node> necessary_nodes = graph_data.necessary_nodes;
 	Mapping node_names = graph_data.mapping;
 	Graph g = graph_data.graph;
