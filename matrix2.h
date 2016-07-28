@@ -193,5 +193,19 @@ uint64_t** copy_matrix(uint64_t** mat, int row, int col);
   
 	*/
 void my_free(uint64_t** mat, int row);
+
+
+   /**
+	* @brief compares two matrices component for component
+	*
+	* Checks, if the two given matrices are equal. (Used for debug)
+	*
+	* @param [in] gal The Galois field structure.
+	* @param [in] A The first matrix of size "size" 
+	* @param [in] B The secound matrix of size "size"
+	* @param [in] size the size of the delivered matrices
+  	*
+  	* @returns true if same, false if unequal
+	*/
 bool compare(Galois gal, uint64_t** A, uint64_t** B, int size);
 #endif /* LIN_PARITY_H_ */

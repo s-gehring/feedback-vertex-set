@@ -46,30 +46,35 @@ int get_random_value(int max);
 	*/
 uint64_t** create_Y(Galois & gal, uint64_t **M, int row, int col, uint64_t *random_values);
 
-/*
- * basically not needed, this is a computation with 2 intermediate steps (but this means there a two row x row matrices)
- * in the other computation (ref create_Y() ) there is a computation for every cell in one line
- * For debugging very helpful
- */
-uint64_t** create_Y_naive(Galois & gal, uint64_t **M, int row, int col, uint64_t *random_values);
 
-
-/*
- * This implementations does not use the Sherman Morrisin Woodbury fast rank update formula
- */
-int* simple_parity(Galois & gal, uint64_t** M, int row, int col);
-
-/*
- * gibt U = x_i * ( b_i  c_i ) zurück, also x_i * ( i-th col   i+1-th col )
- * U ist also size x 2 matrix
- */
+ /**
+	* @brief Creates the matrix U for the algo 4.1.
+	*
+	* Creates the matrix U for the algo 4.1, so it takes the i-th and the (i+1)-th column of M, scaled by the random value
+	* U = x_i * ( i-th col  |  i+1-th col )
+	*
+	* @param [in] gal The galois field structure
+	* @param [in] M The main matrix of lin parity 
+    * @param [in] size the number of rows of M
+    * @param [in] random the random value, the result size x 2 matrix will be scaled with this 
+    * @param [in] i the number of the desired i-th collumn
+	* @returns The Matrix U
+	*/
 uint64_t** get_U(Galois & gal, uint64_t** M, int size, uint64_t random, int i);
 
-/*
- * gibt V = ( -c_i  b_i )^T zurück, also ( - i+1-th col   i-th col) ^T
- * V ist also 2 x size matrix
- */
 
+/**
+	* @brief Creates the matrix V for the algo 4.1.
+	*
+	* Creates the matrix V for the algo 4.1, so it takes the i+1-th and the i-th column of M and uses the transposed
+	* V = ( i+1-th col   i-th col) ^T
+	*
+	* @param [in] gal The galois field structure
+	* @param [in] M The main matrix of lin parity 
+    * @param [in] size the number of rows of M 
+    * @param [in] i the number of the desired i-th collumn
+	* @returns The Matrix V
+	*/
  uint64_t** get_V(Galois & gal, uint64_t** M, int size, int i);
 
 
@@ -79,8 +84,22 @@ uint64_t** get_U(Galois & gal, uint64_t** M, int size, uint64_t random, int i);
  * parity basis
  * in length it returns the number of lin. independent vectors (so there are lenght/2 pairs)
  */
+ /**
+	* @brief Computes the max number of linear independent pairs of the delivered matrix M
+	*
+	* Solves the linear matroid parity problem for the given instance M, so it detects the maximum number of pairs, which are
+	* lineary independent. It uses the small rank update formula by sherman-morrison-woodbury to not compute in every itaration 
+	* the determinant from scratch.
+	*
+	* @param [in] gal The galois field structure
+	* @param [in] M The main matrix of lin parity 
+    * @param [in] row the number of rows of M
+    * @param [in] col the number of rows of M 
+    * @param [in] length here we will store the length of the output (number of lin indepentent vectors )
+	* @returns an array with all the numbers of cols of the lin independent vector-pairs
+	*/
 int* simple_parity_fast(Galois & gal, uint64_t** M, int row, int col, int* length);
-//std::vector<int> simple_parity(mat M, int max_random_value);
+
 
 
 
