@@ -324,11 +324,11 @@ using namespace BinCount;
     string line;
     while (!getline(cin, line).eof()) {
       if(line.empty()) {
-          debug cout << "Empty line"<<endl;
+          debug cout << "Empty line."<<endl;
           continue;
       }
       if(line.at(0) == '#') {
-          debug cout << "Got comment"<<line<<endl;
+          debug cout << "Got comment: "<<line<<endl;
           continue; // Comments
       }
       istringstream iss(line);
