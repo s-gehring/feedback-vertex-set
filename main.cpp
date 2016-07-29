@@ -132,6 +132,7 @@ set<Edge> contract_edges(Graph &g) {
                 */
                 changes_occur = true;
                 to_contract.insert(it);
+                break;
             }
             
            
