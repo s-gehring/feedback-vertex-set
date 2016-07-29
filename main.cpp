@@ -5,7 +5,7 @@ using namespace fvs;
 using namespace FvsGraph;
 using namespace BinCount;
 #ifndef debug
-    #define debug if(true)
+    #define debug if(0)
 #endif
 #define MAX_OUTPUT_ARTICULATION 40
 
@@ -158,7 +158,7 @@ set<Edge> contract_edges(Graph &g) {
             //debug cout << "("<<g.get_node_name(u)<<"<->"<<g.get_node_name(it)<<"<->"<<g.get_node_name(v)<<") => ("<<g.get_node_name(u)<<"<->"<<g.get_node_name(v)<<"),";
             ++contracted_edges;
             g.remove_node(it);
-            }
+            
         }
     }
     //debug cout <<endl<<endl;
