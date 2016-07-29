@@ -234,8 +234,9 @@ int main(int argc, char** argv) {
     }
     
 	Galois & ga = Galois::getInstance();
-	ga.set_w(16);
+	ga.set_w(20);
 	ga.set_mode_logtb();
+	//ga.set_mode_pcmul();
     ga.seed(seed);
 	
 	GraphData graph_data = read_graph();
@@ -355,8 +356,8 @@ int main(int argc, char** argv) {
 	}
 	debug cout << "Sanity check: " << (is_fvs(orig, complete_solution) ? "PASS" : "FAILED") << endl;
 	debug cout << "--------------- END OF PROGRAM ---------------" << endl;
-	/*
-	auto sol2= greedy(orig);
+	
+	/*auto sol2= greedy(orig);
 	cout<< "Sol: " << complete_solution.size() << endl;
 	cout<< "Sol2: " << sol2.size() << endl;	
 	orig.print_nodeset(sol2);

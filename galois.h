@@ -51,6 +51,4 @@ class Galois
     }
    private:
     Galois(){};
-    //Galois(Galois const&) = delete;
-    //void operator=(Galois const&)  = delete;
 };
