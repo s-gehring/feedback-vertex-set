@@ -119,7 +119,7 @@ namespace FvsGraph{
           bool Graph::is_deg_three() const {
             if(get_low_degree_nodes().size() != get_n()) return false;
             for(const auto &it :get_low_degree_nodes()) {
-              if(get_single_degree(it) < 3) return false; 
+              if(get_single_degree(it) < 2) return false; 
             }
             return true;
           }
