@@ -289,7 +289,7 @@ int main(int argc, char** argv) {
 	for (auto &it : connected_graphs) {
 	  debug cout << "Trying to find partial solution for graph " << it.get_name() << "/"<<connected_graphs.size()<<" [n=" << it.get_n() << "|m=" << it.get_m() << "]" << endl;
 
-	´ set<Node> partial_solution;
+	  set<Node> partial_solution;
 	  if(degree3 && it.is_deg_three()) {
       debug cout << "Degree 3 case" << endl;
       set<Node> V1;
