@@ -8,6 +8,10 @@
 	supervised by: Stefan Fafianie, Stefan Kratsch}
 \maketitle
 
+First, we apply basic preprocessing procedures as deleting all vertices with self-loops and deleting all vertices with degree strictly smaller than 2. The next step is to iteratively remove semidisjoint cycle. There, it is clear that taking the single vertex with degree greater two is always optimal. After that, the graph is split into all connected components it consists of. All of these are solved independently since this grants an exponential reduction of runtime. Now we check whether the degree of each vertex of the graph is three or smaller because these instances can be solved in polynomial time by applying ??????????????. After that, every connected component's edges are contracted and all the multiedges which are created by this procedure are stored. Since some multiedges may be overlapping, the last preprocessing step is to create a graph consisting only of the multiedges and detect all minimal vertex covers by a recursive procedure. These minimal vertex covers correspond to all the different multiedge branchings which need to be considered and all of them are tested for finding the best solution.
+\par 
+Now, the main part of the algorithm is applied: the iterative compression algorithm which is presented in \cite{chen2008}. Within this algorithm, the approximative solution is computed with the algorithm given in \cite{bafna1999}. There is only one minor change: Instead of taking the whole semidisjoint cycle into the unreduced approximate solution in every step, we only take the vertex which has degree greater than two instead of taking the whole semidisjoint cycle. It is obvious that this is still optimal but saves a tiny bit of runtime. Whenever we make use of algorithm 1 given in \cite{chen2008}, we first solve all the vertices with highest degree until there are only vertices with degree smaller or equal three left. The reason for this is that we want to apply the degree three case algorithm as often as possible.
+
 \addcontentsline{toc}{section}{literature}
 \nocite{bafna1999}
 \nocite{chen2008}
