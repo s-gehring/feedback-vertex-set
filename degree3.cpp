@@ -2,16 +2,24 @@
 
 using namespace std;
 
-int getComponentNumber(const Node & n, const vector<int> & nodeToComponent)
-{
-	return nodeToComponent[n];
-}
-
+ /**
+	* @brief generates the incidence of an edge
+	* @param [in] g input graph
+  * @param [in] e set of nodes can be included in the final fvs set
+	* @param [in] edgesUsed the number of artificial edges we already inserted for a specific edge
+	* @param [in] lastUsedRow the last index of the row we added to the matrix
+	* @param [in] matrix the resulting matrix
+	* @param [in] columnNumber the number of columns we already generated in matrix
+	* @param [in] pairNumber the number of edge pairs that shares a specific node
+	* @param [in] lastVertexIndex the row of the last node of artificial edges for a specific edge, -1 if none was generated so far
+	* @param [in] nodeToRow assigns a node to its initial row number
+	*/
 void generateIncidenceVector(const Graph& g, const Edge & e, vector<vector<int>>& edgesUsed, int & lastUsedRow, mat & matrix, std::size_t columnNumber ,const vector<int> & pairNumber, vector<vector<int>>& lastVertexIndex, vector<int> & nodeToRow)
 {
 	int mi = min(nodeToRow[e.first], nodeToRow[e.second]);
 	int ma = max(nodeToRow[e.first], nodeToRow[e.second]);
 	edgesUsed[mi][ma]++;
+	//set the entry of the first node to 1
 	if (lastVertexIndex[mi][ma] != -1)
 	{
 		matrix(lastVertexIndex[mi][ma], columnNumber) = 1;
@@ -20,6 +28,7 @@ void generateIncidenceVector(const Graph& g, const Edge & e, vector<vector<int>>
 	{
 		matrix(mi, columnNumber) = 1;
 	}
+	//set the entry of the second node to 1
 	if (edgesUsed[mi][ma] == pairNumber[mi] + pairNumber[ma])
 	{
 		matrix(ma,columnNumber) = 1;
@@ -32,36 +41,43 @@ void generateIncidenceVector(const Graph& g, const Edge & e, vector<vector<int>>
 	}
 }
 
-pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u,const vector<int> & nodeToComponent)
+ /**
+	* @brief generates a colinear matroid parity problem from the graph
+	* @param [in] g input graph
+  * @param [in] s set of nodes can be included in the final fvs set
+	* @param [in] nodeToComponent assigns all nodes not in s to an connected component number
+	* @returns the matrix and the assignment of column to the corresponding edge
+	*/
+pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& s,const vector<int> & nodeToComponent)
 {
+	//first find all edge pairs that shares a node in s
   set<pair<Edge,Edge>> edgePairs;
 	vector<int> nodeToRow(nodeToComponent.size());
 	vector<int> componentToRow(nodeToComponent.size(), -1);
   int lastUsedRow = 0;
   for (const auto &it : g.get_adjacency_list()) {
-	  if (u.find(it.first) != u.end())
+	  if (s.find(it.first) != s.end())
 	  {
 		  nodeToRow[it.first] = lastUsedRow;
 		  lastUsedRow++;
 	  }
 	  else
 	  {
-		  if (componentToRow[getComponentNumber(it.first,nodeToComponent)] == -1)
+		  if (componentToRow[nodeToComponent[it.first]] == -1)
 		  {
-			  componentToRow[getComponentNumber(it.first,nodeToComponent)] = lastUsedRow;
+			  componentToRow[nodeToComponent[it.first]] = lastUsedRow;
 			  lastUsedRow++;
 		  }
-		  nodeToRow[it.first] = componentToRow[getComponentNumber(it.first,nodeToComponent)];
+		  nodeToRow[it.first] = componentToRow[nodeToComponent[it.first]];
 	  }
   }
-  //cout <<"Number of Nodes: "<<lastUsedRow << endl;
   vector<int> pairNumber(g.get_n(),0);
   size_t edgeNumber = 0;
-  for (const auto& firstNode : u) {
+  for (const auto& firstNode : s) {
     vector<Edge> neighbours;
 	  Neighborhood nextToFirstNode = g.get_neighbors(firstNode).first;
 	  for (const auto& secondNode : nextToFirstNode) {
-		  if (u.find(secondNode)==u.end() || firstNode < secondNode)
+		  if (s.find(secondNode)==s.end() || firstNode < secondNode)
 		  {
 			  edgeNumber++;
 		  }
@@ -79,7 +95,6 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u,const ve
         }
       }
   }
-  //cout<<"Number of edges: "<<edgeNumber <<" Number of nEdges: "<<g.get_m() <<endl << "Number of pairs: " << edgePairs.size() << endl <<"Max Index: " <<nodeToComponent.size()<< endl;
   vector<Edge> assignment;
   vector<vector<int>> edgesUsed;
   vector<vector<int>> lastVertexIndex;
@@ -90,10 +105,11 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u,const ve
     edgesUsed.push_back(v);
     lastVertexIndex.push_back(w);
   }
+	//create the result matrix
   int row_number = lastUsedRow + 2 * edgePairs.size() - edgeNumber;
-  //cout << "Number of rows: " << row_number << endl<< "Number of columns: "<<2*edgePairs.size()<<endl <<"Number of entries: "<< row_number* 2 * edgePairs.size() <<endl;
   mat matrix(row_number,edgePairs.size()*2);
   int columnNumber=0;
+	//generate the incidence vector for the edges
   for(auto & p: edgePairs)
   {
 	  generateIncidenceVector(g, p.first, edgesUsed, lastUsedRow,matrix ,columnNumber, pairNumber, lastVertexIndex, nodeToRow);
@@ -105,37 +121,20 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& u,const ve
   }
   return make_pair(matrix,assignment);
 }
-
-mat transformFullRowRank(mat input)
-{
-  /*int i=0;
-  int inputRank=matRank(input);
-  while(inputRank!=input.n_rows)
-  {
-    mat smallerMat=input;
-    smallerMat.shed_row(i);
-	int newRank = matRank(smallerMat);
-    if (newRank==inputRank)
-    {
-      input=smallerMat;
-    }
-    else
-    {
-      i++;
-    }        
-  }*/
-  input.shed_row(0);
-  return input;
-}
-
+ /**
+	* @brief converts the colinear matroid parity problem to a linear parity problem
+	*/
 mat colinearToLinear(const mat & input)
 {
+	//delete one row to get a full rank matrix since graph is connected so the matrix has rank row+1
   mat fullRank = input;
   fullRank.shed_row(0);
+	//if the matrixx is a square, the graph is a tree
   if (fullRank.is_square())
   {
 	  return eye<mat>(0, 0);
   }
+	//transform the matrix to the from (IB) where I is the identity matrix
   auto standardForm = fullRank.toStandarForm();
   vector<int> arrangement = standardForm.second;
   vector<int> restIndex;
@@ -143,80 +142,78 @@ mat colinearToLinear(const mat & input)
   {
 	  restIndex.push_back(i);
   }
+	//extract the right part B of the standard form matrix
   mat newRight = standardForm.first.extractColumns(restIndex);
+	//transpose and concat with identity matrix
   mat finalMatrix= join_rows(newRight.t(),eye<mat>(fullRank.n_cols-fullRank.n_rows, fullRank.n_cols-fullRank.n_rows));
   return finalMatrix.rearrangeMatrix(arrangement);
 }
 
-void print_edges(const set<Edge>& s) {
-    set<Edge>::iterator it = s.begin();
-    if (s.size() > 0) {
-      cout << "{" << (*it).first<<"-" << (*it).second;
-      while (++it != s.end()) {
-
-        cout << ", " << (*it).first<<"-" << (*it).second;
-      }
-      cout << "}" << endl;
-    }
-    else {
-      cout << "{}" << endl;
-    }
-  }
-
+ /**
+	* @brief find remaining nodes of the fvs, that is all the nodes which are not a common node of a two group 
+	* @param [in] g input graph
+  * @param [in] s set of nodes can be included in the final fvs set
+	* @param [in] fvs set
+	*/
 void findNodes(Graph & g, set<Node> & s, set<Node> & result)
 {
-	auto mst=g.minimal_spanning_forest();
+		auto mst=g.minimal_spanning_forest();
+		//deletes all nodes that are not in the mst
     for(const auto &it : g.get_adjacency_list()) {
-		Node firstNode=it.first;
-		Neighborhood nextToFirstNode = g.get_neighbors(firstNode).first;
-		for (const auto& secondNode : nextToFirstNode) {
-			Edge e;
-			e.first = firstNode;
-			e.second = secondNode;
-			if (e.first< e.second && mst.find(e) == mst.end())
-			{
-				if (s.find(firstNode) != s.end())
+			Node firstNode=it.first;
+			Neighborhood nextToFirstNode = g.get_neighbors(firstNode).first;
+			for (const auto& secondNode : nextToFirstNode) {
+				Edge e;
+				e.first = firstNode;
+				e.second = secondNode;
+				if (e.first< e.second && mst.find(e) == mst.end())
 				{
-					result.insert(firstNode);
-				}
-				else
-				{
-					result.insert(secondNode);
+					if (s.find(firstNode) != s.end())
+					{
+						result.insert(firstNode);
+					}
+					else
+					{
+						result.insert(secondNode);
+					}
 				}
 			}
 		}
-	}
 }
-
+ /**
+	* @brief solves the fvs problem in the degree 3 case in polynomial time
+	* @param [in] g input graph it should be connected without vertices of degree 1
+  * @param [in] s set of nodes can be included in the final fvs set
+	* @param [in] nodeToComponent an array that assigns all nodes not in s to an connected component number
+	* @returns fvs set
+	*/
 set<Node> solveDegree3(Graph& g, set<Node>& s, const vector<int> & nodeToComponent)
 {
-  //g.print_tidy();
-  //g.print_nodeset(s);
 	set<Node> feedBackSet;
+	//convert graph to matrix
 	auto result = graphToMatrix(g, s,nodeToComponent);
-	//result.first.print("IncidenceMatrix");
+	//convert colinear parity problem to linear parity problem
 	mat instance = colinearToLinear(result.first);
-	//instance.print("transformed");
+	//return emtpy fvs if graph is a tree
 	if (instance==eye<mat>(0,0))
 	{
 		return feedBackSet;
 	}
 	int length;
+	//solve the linear parity priblem
 	int* res = simple_parity_fast(Galois::getInstance(), instance.toNMatrix(), instance.getHeight(), instance.getWidth(), &length);
+	//remove the edges of the solution of the colinear parity problem
 	for (int i = 0; i < length; i++)
 	{
-		//cout << "Delete edge from " << result.second[res[i]].first << " to " << result.second[res[i]].second << endl;
 		g.remove_edge(result.second[res[i]].first, result.second[res[i]].second);
 	}
+	//insert common node of the edgepairs to the fvs
 	for (int i=0;i<length;i+=2)
 	{
 		feedBackSet.insert(result.second[res[i]].first);
 	}
+	//find the remaining nodes of the fvs
 	findNodes(g, s, feedBackSet);
-	//for (Node n : feedBackSet)
-	{
-		//cout << "Delete node: " << n << endl;
-	}
 	delete[] res;
 	return feedBackSet;
 }

@@ -9,6 +9,30 @@ using namespace BinCount;
 #endif
 #define MAX_OUTPUT_ARTICULATION 40
 
+set<Node> greedy(Graph g)
+{
+	set<Node> result;
+	Graph h(g);
+	h.delete_low_degree_nodes();
+	while(h.get_n()!=0)
+	{
+		Node n=-1;
+		int maxDegree=-1;
+    	for (const auto &it : h.get_adjacency_list()) {
+			int degree=h.get_neighbors(it.first).first.size();
+			if(maxDegree<degree)
+			{
+				maxDegree=degree;
+				n=it.first;
+			}
+		}
+		result.insert(n);
+		h.remove_node(n);
+		h.delete_low_degree_nodes();
+	}
+	return result;
+}
+
 /*
 *  Output all articulation vertices and bridges.
 *  Note, that I defined that
@@ -341,5 +365,14 @@ int main(int argc, char** argv) {
 	}
 	debug cout << "Sanity check: " << (is_fvs(orig, complete_solution) ? "PASS" : "FAILED") << endl;
 	debug cout << "--------------- END OF PROGRAM ---------------" << endl;
+	/*
+	auto sol2= greedy(orig);
+	cout<< "Sol: " << complete_solution.size() << endl;
+	cout<< "Sol2: " << sol2.size() << endl;	
+	orig.print_nodeset(sol2);
+	if(sol2.size()<complete_solution.size())
+	{
+		while(true){}
+	}*/
 }
 

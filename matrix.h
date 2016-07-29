@@ -16,7 +16,6 @@ public:
 	mat();
 	mat(uint64_t** pmatrix,int height, int width);
 	mat(std::initializer_list<std::initializer_list<uint64_t>> lst);
-	~mat();
 	void zeros();
 	mat operator+(const mat& rhs);
 	mat operator*(const mat& rhs);
@@ -62,24 +61,19 @@ public:
 	uint64_t** toNMatrix();
 	mat rearrangeMatrix(const std::vector<int> & arrangement);
 	std::pair<mat, std::vector<int>> toStandarForm();
+
+private:
+	void updateDimension();
+	std::vector<std::vector<uint64_t>> matrix;
 	void rowTransform(mat & matrix, mat & inverse, int rowNumber, int destRowNumber, int colNumber);
 	void rowOperation(mat& matrix, int rowNumber, uint64_t factor);
 	void rowOperation(mat & matrix, int firstRowNumber, int secondRowNumber, uint64_t factor);
 	void rowTransform(mat & matrix, int rowNumber, int destRowNumber, int colNumber);
 
-
-private:
-	void updateDimension();
-	std::vector<std::vector<uint64_t>> matrix;
-	int w;
-	int h;
 	void columnTransform(mat & matrix, mat & inverse, int colNumber, int destColNumber, int rowNumber);
 	void columnOperation(mat& matrix, int colNumber, uint64_t factor);
 	void columnOperation(mat & matrix, int firstColNumber, int secondColNumber, uint64_t factor);
 	void addValue(uint64_t value,int columnNumber);
-	uint64_t** nMat=nullptr;
-	void freeMat();
-	std::size_t nMatHeight = 0;
 };
 
 mat join_rows(const mat & left,const mat & right);

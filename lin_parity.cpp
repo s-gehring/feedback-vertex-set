@@ -5,17 +5,36 @@
 #include "matrix.h"
 #include "matrix2.h"
 
-
+/**
+	* @brief Creates a random value
+	* Creates a non-zero integral random value between 1 and max.
+	* @param [in] max THe upper bound for the integral random value.
+	* @return random value
+	*/
 int get_random_value(int max){
 	int random_variable = std::rand();
     return random_variable % max + 1 ;
 }
 
-
 /* Creates the compact Matrix Y and stores the random values x_i in vector random_values
  * so random_values has to be a "column of M-half-dim" vec (a pointer of it)
  * random values are integral between 1 and max_random_value
  */ 
+
+ /**
+	* @brief Create the compact matrix representation for the linear matriod parity problem
+	*
+	* Creates matrix Y of algorithm 4.1, the compact representation of the linear matroid parity problem.
+	* The used random values will be stored in the vector "random_values" (for later use).
+	* the random value
+	*
+	* @param [in] mat The matrix of size row x col
+	* @param [in] row the number of rows of the delivered matrix
+    * @param [in] col the number of collumns of the delivered matrix
+    * @param [in] line1 the index of the first row to swap
+    * @param [in] line2 the index of the second row to swap
+	* @returns true if sussessfull, false otherwise
+	*/
 uint64_t** create_Y(Galois & gal, uint64_t **M, int row, int col, uint64_t *random_values){
 	
 	//create a new row x row matrix (will be Y, the result)
@@ -36,186 +55,35 @@ uint64_t** create_Y(Galois & gal, uint64_t **M, int row, int col, uint64_t *rand
 		while (random_values[i/2] == 0 ){ 
 			
 			random_values[i/2] = gal.uniform_random_element(); // if no specific random_value vector is handed, a new random value is assigned 	(!=0)
-			//cout << "rand ist " << gal.to_string(random_values[i/2]) << endl;
+			
 		}
-		//random_values[i/2] = (uint64_t) 1;
-		//if (col < 30) {debug cout << "Random value ist " << gal.to_string(random_values[i/2]) << endl;}	//if something goes wrong, you can see the random value on the console
+		
 
-		for(int row_index = 0 ; row_index < row; row_index++){		//row ist die dimension von Y (Y is row x row matrix, want to update Y)
+		for(int row_index = 0 ; row_index < row; row_index++){		//row is dimension of Y (Y is row x row matrix, want to update Y)
 			for (int col_index = 0; col_index < row ; col_index++){
 				//want to add x_i (M[][i] ^ M[][i+1]) to Y
 				result_matrix[row_index][col_index] =gal.add(result_matrix[row_index][col_index], gal.multiply(random_values[i/2], gal.add(gal.multiply(M[row_index][i], M[col_index][i+1]), gal.multiply(M[row_index][i+1], M[col_index][i] ) )  ));
 			}
 		}
-
-		//cout << endl << "Zwischenergebnis für i = " << i << endl;
-		//print_matrix(gal, row, row, result_matrix);
-
-		
+	
 	}
 
 	return result_matrix;
 }
 
-
-/*
- * basically not needed, this is a computation with 2 intermediate steps (but this means there a two row x row matrices)
- * in the other computation (ref create_Y() ) there is a computation for every cell in one line
- * For debugging very helpful
- */
-uint64_t** create_Y_naive(Galois & gal, uint64_t **M, int row, int col, uint64_t *random_values){
-
-	//create a new row x row matrix (will be Y, the result)
-	uint64_t** result_matrix= new uint64_t*[row];
-	for (int i=0; i<row; i++){
-    	result_matrix[i]= new uint64_t[row];
-	}
-
-	//initialise the result_matrix with zeros
-	for (int i=0; i<row; i++){
-    	for(int j=0; j<row; j++){
-        	result_matrix[i][j]= (uint64_t) 0;
-    	}
-	}
-
-	for(int i = 0 ; i < col ; i = i+2){
-		//compute Y = Y + random_value (b ^ c) where b is the i-th col and c the i+1-th col
-		while (random_values[i/2] == 0 ) {
-			random_values[i/2] = gal.uniform_random_element(); // if no specific random_value vector is handed, a new random value is assigned (!=0)
-		}
-		//random_values[i/2] = (uint64_t) 1;
-		// cout << "Random value ist " << gal.to_string(random_values[i/2]) << endl;	//if something goes wrong, you can see the random value on the console
-
-		uint64_t* b = new uint64_t[row];
-		
-		for (int j = 0; j < row; j++){
-			b[j] = M[j][i];
-		}
-
-		uint64_t* c = new uint64_t[row];
-		for (int j = 0; j < row; j++){
-			c[j] = M[j][i+1];
-		}
-
-		//cout << "b ist " << endl;
-		//print_vector(gal, row, b );
-		//cout << "c ist " << endl;
-		//print_vector(gal, row, c );
-
-		uint64_t** wedge = wedge_product(gal, b, c, row);
-
-		//cout << "wedge product davon ist: " << endl;
-		//print_matrix(gal, row, row, wedge);
-		scalar_matrix(gal, wedge, random_values[i/2], row, row);
-
-		// cout << "komponente von i = " << i  << endl << endl << endl;
-		// print_matrix(gal, row, row, wedge);
-
-		add_matrix(gal, result_matrix, wedge, row, row);
-		//cout << endl << "Zwischenergebnis für i = " << i << endl;
-		//print_matrix(gal, row, row, result_matrix);
-
-		//random_value = 1;
-		//Result = Result + (*random_values)(i/2) * (M.col(i) * M.col(i+1).t() - M.col(i+1)* M.col(i).t() );
-
-	}
-
-	return result_matrix;
-}
-
-/*
-int* simple_parity(Galois gal, uint64_t** M, int row, int col){
-	Gauss gauss;
-	uint64_t* random_values = new uint64_t[col/2]; 		//stores the randomvalues x_i, created in create_Y (needed later on) 
-	for (int i = 0; i < col/2; i++){
-		random_values[i] = 0;
-	}
-	int counter = 0;			   						//for positioning vector_parity 
-
-	cout<<"Algorithm start"<< endl;
-
-
-	uint64_t** Y = create_Y( gal, M, row, col, random_values);
-
-	cout << "Startmatrix M :"<<endl;
-	print_matrix(gal,row, col, M);
-	cout << "Computed Y :" << endl;
-	print_matrix(gal, row, row, Y);
-
-	uint64_t det = gauss.determinant(gal, row, Y);	
-	//int rank_Y = rank(Y);
-	
-	if (det == 0) {
-		cout << endl << endl << "THERE IS NO PARITY BASIS" << endl << "Searching for max rank submatrix of Y" << endl;
-		*//*
-		Col<uword> deleted_cols = find_max_submatrix(Y);   //all columns that can be deleted (and still remain full-rank)
-	
-		deleted_cols = all_except(deleted_cols, Y.n_cols); //all columns that can stay (and still remain full-rank)
-		
-		M = M.rows(deleted_cols);
-
-		M.print("Reduced M (and new instance for parity-basis-algo with less rows):");
-		*/
-		/*
-	}
-
-	Y = create_Y( gal, M, row, col, random_values);
-
-	int* parity_basis = new int[row];		    //in here we will store the indices of the columns that built the parity basis
-	for (int i = 0; i < row; i++){
-		parity_basis[i] = 0;
-	}
-
-	for(int i = 0; i < col; i = i+2){
-
-		//mat Y_prime = Y - random_values(i/2) *  (M.col(i) * M.col(i+1).t() - M.col(i+1)* M.col(i).t() );
-
-
-
-		uint64_t** Y_prime= new uint64_t*[row];
-		for (int i=0; i<row; i++){
-    		Y_prime[i]= new uint64_t[row];
-		}
- 	
-		
-		
-		for(int row_index = 0 ; row_index < row; row_index++){		//row ist die dimension von Y (Y is row x row matrix, want to update Y)
-			for (int col_index = 0; col_index < row ; col_index++){
-				//want to add x_i (M[][i] ^ M[][i+1]) to Y
-				Y_prime[row_index][col_index] =gal.add(Y[row_index][col_index], gal.multiply(random_values[i/2], gal.add(gal.multiply(M[row_index][i], M[col_index][i+1]), gal.multiply(M[row_index][i+1], M[col_index][i] ) )  ));
-			}
-		}
-
-		uint64_t det_y_prime = gauss.determinant(gal, row, Y_prime);
-		//jetzt ist y_prime aber kaputt, neu berechnen
-
-		for(int row_index = 0 ; row_index < row; row_index++){		//row ist die dimension von Y (Y is row x row matrix, want to update Y)
-			for (int col_index = 0; col_index < row ; col_index++){
-				//want to add x_i (M[][i] ^ M[][i+1]) to Y
-				Y_prime[row_index][col_index] =gal.add(Y[row_index][col_index], gal.multiply(random_values[i/2], gal.add(gal.multiply(M[row_index][i], M[col_index][i+1]), gal.multiply(M[row_index][i+1], M[col_index][i] ) )  ));
-			}
-		}
-
-
-		if (det_y_prime != 0){ //if det(Y_prime) != 0
-			
-			Y = Y_prime;
-		}
-		else{
-			
-			parity_basis[counter] = i;
-			parity_basis[counter+1] = i+1;
-			counter = counter + 2;
-		}
-	}
-	return parity_basis;
-}
-
-*/
-/*
- * gibt U = x_i * ( b_i  c_i ) zurück, also x_i * ( i-th col   i+1-th col )
- * U ist also size x 2 matrix
- */
+/**
+	* @brief Creates the matrix U for the algo 4.1.
+	*
+	* Creates the matrix U for the algo 4.1, so it takes the i-th and the (i+1)-th column of M, scaled by the random value
+	* U = x_i * ( i-th col  |  i+1-th col )
+	*
+	* @param [in] gal The galois field structure
+	* @param [in] M The main matrix of lin parity 
+    * @param [in] size the number of rows of M
+    * @param [in] random the random value, the result size x 2 matrix will be scaled with this 
+    * @param [in] i the number of the desired i-th collumn
+	* @returns The Matrix U
+	*/
 uint64_t** get_U(Galois & gal, uint64_t** M, int size, uint64_t random, int i){
 	//construce a size x 2 matrix
 	uint64_t** U = new uint64_t*[size];
@@ -232,14 +100,21 @@ uint64_t** get_U(Galois & gal, uint64_t** M, int size, uint64_t random, int i){
 	return U;
 }
 
-/*
- * gibt V = ( -c_i  b_i )^T zurück, also ( - i+1-th col   i-th col) ^T
- * V ist also 2 x size matrix
- */
-
+/**
+	* @brief Creates the matrix V for the algo 4.1.
+	*
+	* Creates the matrix V for the algo 4.1, so it takes the i+1-th and the i-th column of M and uses the transposed
+	* V = ( i+1-th col   i-th col) ^T
+	*
+	* @param [in] gal The galois field structure
+	* @param [in] M The main matrix of lin parity 
+    * @param [in] size the number of rows of M 
+    * @param [in] i the number of the desired i-th collumn
+	* @returns The Matrix V
+	*/
  uint64_t** get_V(Galois & gal, uint64_t** M, int size, int i){
+
  	//construce a 2 x size matrix
- 	
 	uint64_t** V = new uint64_t*[2];
 	for (int k=0; k<2; k++){
     	V[k]= new uint64_t[size];
@@ -250,12 +125,30 @@ uint64_t** get_U(Galois & gal, uint64_t** M, int size, uint64_t random, int i){
 		V[1][k] = M[k][i];
 	}
 	
-	
 	return V;
  }
 
 
 
+/*
+ * This implemetation uses the small rank update formula and also return a maximum number of pairs, if there is no
+ * parity basis
+ * in length it returns the number of lin. independent vectors (so there are lenght/2 pairs)
+ */
+ /**
+	* @brief Computes the max number of linear independent pairs of the delivered matrix M
+	*
+	* Solves the linear matroid parity problem for the given instance M, so it detects the maximum number of pairs, which are
+	* lineary independent. It uses the small rank update formula by sherman-morrison-woodbury to not compute in every itaration 
+	* the determinant from scratch.
+	*
+	* @param [in] gal The galois field structure
+	* @param [in] M The main matrix of lin parity 
+    * @param [in] row the number of rows of M
+    * @param [in] col the number of rows of M 
+    * @param [in] length here we will store the length of the output (number of lin indepentent vectors )
+	* @returns an array with all the numbers of cols of the lin independent vector-pairs
+	*/
 int* simple_parity_fast(Galois & gal, uint64_t** M, int row, int col, int* length){
 	int success = 0;
 	int* parity_basis;
@@ -271,50 +164,33 @@ while (success == 0){
 		random_values[i] = 0;
 	}
 	
-	//cout << "|";
-	//cout.flush();
+	
 
-	
-	
 	/*cout<<"------------------Algorithm start-----------"<< endl;
 	cout << "Startmatrix M :"<<endl;
 	if (row < 13) {debug print_matrix(gal,row, col, M);}
 	else {cout << "too big, will not write it down" <<endl;}
-
-	cout << "Computing Y...";*/
+	*/
+	//computing Y
 	uint64_t** Y = create_Y( gal, M, row, col, random_values);
+	uint64_t** Y_copy_det = copy_matrix(Y, row, row); //copy matrix for computing the determinant (matrix will get transformed by the det function)
 
-	
-	// cout << "done." << endl;
-	//print_matrix(gal, row, row, Y);
-
-	uint64_t** Y_copy_det = copy_matrix(Y, row, row);
-
-	// cout << "Computing determinant of Y ...";
 	uint64_t det = gauss.determinant(gal, row, Y_copy_det);	
-	// cout << "done. Det(Y) = " << gal.to_string(det) << endl;
-
+	
 	my_free(Y_copy_det, row);
 	
 	if (det == 0) {
 		check = 1;
-		// cout << endl << endl << "THERE IS NO PARITY BASIS" << endl << "Searching for redundant rows of Y.." ;
+		// There is no parity basis, so we are searching for redundent rows to delete
 		
 		std::vector<int> del_row  = findRedundantRows(Y, row, row);
-		// cout << "done " <<endl;
-		row -= del_row.size(); 
-		row_difference = del_row.size();
+		
+		row -= del_row.size();   				//updating our new number of rows
+		row_difference = del_row.size();		//just needed for correctly freeing space later	
 		sort(del_row.begin(), del_row.end());
 		
-
-		//cout <<"row = " << row << "und row_difference = " << row_difference << endl;
-		//cout.flush();
-		/*for(unsigned int kk = 0; kk < del_row.size(); kk++){
-			 cout << "del_row[" << kk << "] = " << del_row[kk] << endl;
-		}*/
-
 		if (row == 0){
-			//alles wird gelöscht, es gibt kein pair
+			//everything was redunden, new matrix is empty, return this
 			delete[] random_values;
 			my_free(Y, row + row_difference);
 			my_free(M, row + row_difference);
@@ -330,60 +206,33 @@ while (success == 0){
     			M_prime[k]= new uint64_t[col];
 		}
 
-	
-
 		unsigned int counter = 0;
 		for (unsigned int i = 0; i < row + del_row.size() ; i++ ){
 			if ((counter < del_row.size()) &&   (i == (unsigned) del_row[counter])) {
-		
 				counter++;
 			}
 			else{
-				
-				for(int j = 0; j < col; j++){
-					
-					M_prime[i-counter][j] = M[i][j];
-					
-					
+				for(int j = 0; j < col; j++){			
+					M_prime[i-counter][j] = M[i][j];	
 				}
 			}
 		}
 
 		my_free(M, row + row_difference);
 
-
+		//now we have our new (redundent-free, full rank) matrix M with det(Y) != 0 
 		M = M_prime;
-
-
-		//cout<<"fedditsch" <<endl;
-		//print_matrix(gal, row, col, M);
-
-
 
 	}
 
-	
 
-
-	// cout << "Computing again Y...";
-	//my_free(Y, row); 
+	//have to compute Y once again for the new M
 	if (check == 1){
 		my_free(Y, row + row_difference);
 		Y = create_Y( gal, M, row, col, random_values);
 	}
-	// cout << "done." << endl;
-	//print_matrix(gal, row, row, Y);
 
-	
-
-
-	// cout << "Computing Inverse Y^-1 ...";
 	uint64_t** Y_inverse = invertMatrix(gal, Y,  row);
-	// cout << "done" << endl;
-
-	//print_matrix(gal, row, row, Y_inverse);
-
-	
 
 	parity_basis = new int[row];		    //in here we will store the indices of the columns that built the parity basis
 	for (int i = 0; i < row; i++){
@@ -392,28 +241,16 @@ while (success == 0){
 	
 	int pos = 0;			   						//for positioning vector_parity 
 	for(int i = 0; i < col; i = i+2){
-
-		//mat Y_prime = Y - random_values(i/2) *  (M.col(i) * M.col(i+1).t() - M.col(i+1)* M.col(i).t() );
-		
-
-
-
+		//using the small rank update formula (instead of computing det of Y_prime we compute it of a 2x2 matrix!)
 		uint64_t** V = get_V(gal, M, row, i);
 		uint64_t** U = get_U(gal, M, row,random_values[i/2], i);	
 
-					
- 	
  		uint64_t** SMW_det = SMW_matrix(gal,  V, Y_inverse, U, row);
- 		
-
 		uint64_t** SMW = copy_matrix(SMW_det, 2,2);
 		
 		uint64_t det_SMW = gauss.determinant(gal, 2, SMW_det);
 		
 		my_free(SMW_det,2);
-
-		// cout<< "det von Y_prime durch smallrankupdate ist " << gal.to_string(det_SMW) << endl;
-			
 
 		if (det_SMW != 0){ //if det(Y_prime) != 0
 
@@ -436,18 +273,9 @@ while (success == 0){
 			my_free(V, 2);
 			my_free(SMW, 2);
 			if (pos>=row)
-			{
-				/*
-				cout << "row is " << row << "col is " << col << "pos is " << pos << endl << endl << endl;
-				cout << "OVERFLOW STARTE ERNEUT"<<endl <<endl;
-				
-				
-				cout.flush();
-				print_vector(gal, (col/2), random_values);
-				*/
+			{	
 				success = 0;
 				break;
-				
 			}
 			parity_basis[pos] = i;
 			parity_basis[pos+1] = i+1;
@@ -463,9 +291,9 @@ while (success == 0){
 
 	if (success == 1) my_free(M, row);
 
-	//print_vector_normal(row, parity_basis);
+	
  }
- //print_vector_normal(row, parity_basis);
+
  return parity_basis;
 }
 
