@@ -6,12 +6,16 @@
 #include "static.cpp"
 
 using namespace std;
-
+ /**
+	* @brief add two elements of galois fields
+	*/
 uint64_t Galois::add(uint64_t arg1, uint64_t arg2)
 {
   return arg1 ^ arg2;
 }
-
+ /**
+	* @brief multiply two elements of galois fields
+	*/
 uint64_t Galois::multiply(uint64_t arg1, uint64_t arg2)
 {
   switch(mode)
@@ -165,18 +169,25 @@ uint64_t Galois::ilog(uint64_t arg1)
 {
   return ilogtb[arg1];
 }
-
+ /**
+	* @brief set a random seed
+	*/
 void Galois::seed()
 {
   random_device rd;  
   gen.seed(rd());   
 }
-
+ /**
+	* @brief set a specific seed
+	*/
 void Galois::seed(int se)
 {
 	gen.seed(se);
 }
 
+ /**
+	* @brief generate a random element
+	*/
 uint64_t Galois::uniform_random_element()
 { 
   int bits = w;
@@ -258,6 +269,9 @@ void Galois::set_mode_pcmul()
   w = 64;
 }
 
+ /**
+	* @brief set the size of the galois field
+	*/
 void Galois::set_w(int exponent)
 {
   w = exponent;

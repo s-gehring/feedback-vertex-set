@@ -36,6 +36,9 @@ mat::mat()
 	updateDimension();
 }
 
+ /**
+	* @brief creates a matrix
+	*/
 mat::mat(std::initializer_list<std::initializer_list<uint64_t>> lst)
 	: n_rows(lst.size()), n_cols(n_rows ? lst.begin()->size() : 0)
 {
@@ -155,7 +158,9 @@ mat mat::operator-(const mat & rhs)
 {
 	return (*this)+rhs;
 }
-
+ /**
+	* @brief concat the left matrix with the right matrix
+	*/
 mat join_rows(const mat & left, const mat & right)
 {
 	if (left.getHeight() != 0 && right.getHeight() != 0 && left.getHeight() != right.getHeight())
@@ -169,7 +174,9 @@ mat join_rows(const mat & left, const mat & right)
 	}
 	return result;
 }
-
+/**
+	* @brief concat the left matrix a column
+	*/
 mat join_rows(const mat & left, const std::vector<uint64_t> & right)
 {
 	if (left.getHeight() != 0 && right.size() != 0 && left.getHeight() != right.size())
@@ -181,14 +188,6 @@ mat join_rows(const mat & left, const std::vector<uint64_t> & right)
 	return result;
 }
 
-void join_rows_fast(mat & left, const std::vector<uint64_t> & right)
-{
-	if (left.getHeight() != 0 && right.size() != 0 && left.getHeight() != right.size())
-	{
-		throw;
-	}
-	left.addColumn(right);
-}
  /**
 	* @brief updates the saved dimensions of the matrix
 	*/
@@ -349,29 +348,9 @@ std::vector<int> mat::maxSubmatrix()
 	return result;
 }
 
-void mat::extractMatrix(std::vector<int> rowCols, const std::vector<int> & arrangement)
-{
-	std::sort(rowCols.begin(), rowCols.end(), std::greater<int>());
-	for (auto i : rowCols)
-	{
-		matrix.erase(matrix.begin()+i);
-	}
-	throw std::runtime_error("uncomment");
-	/*std::sort(rowCols.begin(), rowCols.end(), [&arrangement](int & left, int & right) {
-		return arrangement[left] > arrangement[right];
-	});*/
-	for (auto i: rowCols)
-	{
-		for (auto & j : matrix)
-		{
-			j.erase(j.begin()+ arrangement[i]);
-		}
-	}
-	matrix.shrink_to_fit();
-	matrix[0].shrink_to_fit();
-	updateDimension();
-}
-
+ /**
+	* @brief use column operations to zero destColNumber using the pivot element at rowNumber,colNumber. Operate also on inverse
+	*/
 void mat::columnTransform(mat & matrix, mat & inverse, int colNumber, int destColNumber, int rowNumber)
 {
 	if (matrix(rowNumber, colNumber) != 1)
@@ -384,7 +363,9 @@ void mat::columnTransform(mat & matrix, mat & inverse, int colNumber, int destCo
 	columnOperation(matrix, colNumber, destColNumber, fac);
 	columnOperation(inverse,colNumber, destColNumber, fac);
 }
-
+ /**
+	* @brief multiply a column of matrix with a factor
+	*/
 void mat::columnOperation(mat& matrix, int colNumber, uint64_t factor)
 {
 	for (std::size_t i = 0; i < matrix.getHeight(); i++)
@@ -392,7 +373,9 @@ void mat::columnOperation(mat& matrix, int colNumber, uint64_t factor)
 		matrix(i,colNumber) = Galois::getInstance().multiply(matrix(i,colNumber),factor);
 	}
 }
-
+ /**
+	* @brief multiply the first column with a factor and add to the second column
+	*/
 void mat::columnOperation(mat & matrix, int firstColNumber, int secondColNumber, uint64_t factor)
 {
 	for (std::size_t i = 0; i < matrix.getHeight(); i++)
@@ -400,7 +383,9 @@ void mat::columnOperation(mat & matrix, int firstColNumber, int secondColNumber,
 		matrix(i,secondColNumber) = Galois::getInstance().add(Galois::getInstance().multiply(matrix(i,firstColNumber), factor), matrix(i,secondColNumber));
 	}
 }
-
+ /**
+	* @brief use row operations to zero destRowNumber using the pivot element at rowNumber,colNumber. Operate also on inverse
+	*/
 void mat::rowTransform(mat & matrix, mat & inverse, int rowNumber, int destRowNumber, int colNumber)
 {
 	if (matrix(rowNumber, colNumber) != 1)
@@ -413,7 +398,9 @@ void mat::rowTransform(mat & matrix, mat & inverse, int rowNumber, int destRowNu
 	rowOperation(matrix, rowNumber, destRowNumber, fac);
 	rowOperation(inverse, rowNumber, destRowNumber, fac);
 }
-
+ /**
+	* @brief use row operations to zero destRow using the pivot element at rowNumber,colNumber
+	*/
 void mat::rowTransform(mat & matrix, int rowNumber, int destRowNumber, int colNumber)
 {
 	if (matrix(rowNumber, colNumber) != 1)
@@ -424,7 +411,9 @@ void mat::rowTransform(mat & matrix, int rowNumber, int destRowNumber, int colNu
 	uint64_t fac = matrix(destRowNumber, colNumber);
 	rowOperation(matrix, rowNumber, destRowNumber, fac);
 }
-
+ /**
+	* @brief multiply a row of matrix with a factor
+	*/
 void mat::rowOperation(mat& matrix, int rowNumber, uint64_t factor)
 {
 	for (size_t i = 0; i < matrix.getWidth(); i++)
@@ -439,7 +428,9 @@ void mat::rowOperation(mat& matrix, int rowNumber, uint64_t factor)
 		}
 	}
 }
-
+ /**
+	* @brief multiply the frist row with a factor and add to the second row
+	*/
 void mat::rowOperation(mat & matrix, int firstRowNumber, int secondRowNumber, uint64_t factor)
 {
 	for (std::size_t i = 0; i < matrix.getWidth(); i++)
@@ -481,6 +472,11 @@ void mat::swapColumns(const int a,const int b)
 	matrix[b]=temp;
 }
 
+ /**
+	* @brief backSubstituation step of the Gauss algorithm
+	* @param [in] upperTriangle the matrix, inverted matrix so far and permutation of the columns
+	* @returns the inverse
+	*/
 mat mat::backSubstituation(std::tuple < mat, mat,std::vector<int> > & upperTriangle)
 {
 	for (int i=std::get<0>(upperTriangle).getHeight()-1;i>=0;i--)
@@ -494,6 +490,10 @@ mat mat::backSubstituation(std::tuple < mat, mat,std::vector<int> > & upperTrian
 	return std::get<1>(upperTriangle);
 }
 
+ /**
+	* @brief transform matrix to upper triangle form
+	* @returns matrix, inverted matrix so far, permutation of the columns
+	*/
 std::tuple<mat,mat,std::vector<int>> mat::upper_triangle_transform()
 {
 	mat matrix = (*this);
@@ -505,17 +505,18 @@ std::tuple<mat,mat,std::vector<int>> mat::upper_triangle_transform()
 	}
 	for (std::size_t n = 0; n < std::min(matrix.getHeight(),matrix.getWidth()); n++)
 	{
+		//find a nonzero entry
 		int nonzero = findNonZero(matrix, n, n);
-
 		if (nonzero!=-1)
 		{
+			//swap the columns such that 
 			if ((unsigned) nonzero != n)
 			{
 				matrix.swapColumns(nonzero, n);
 				pInverse.swapColumns(nonzero, n);
 				std::swap(result[nonzero],result[n]);
 			}
-
+			//use column transformation to zero entries right to the diagonal
 			for (std::size_t i = n + 1; i < matrix.getWidth(); i++)
 			{
 				columnTransform(matrix, pInverse, n, i, n);
@@ -525,6 +526,10 @@ std::tuple<mat,mat,std::vector<int>> mat::upper_triangle_transform()
 	return std::make_tuple(matrix,pInverse,result);
 }
 
+ /**
+	* @brief transform the matrix to the from (IB) where I is the identity matrix
+	* @returns the matrix and the permutation of the columns
+	*/
 std::pair<mat,std::vector<int>> mat::toStandarForm()
 {
 	mat matrix = (*this);
@@ -535,22 +540,24 @@ std::pair<mat,std::vector<int>> mat::toStandarForm()
 	}
 	for (std::size_t n = 0; n < std::min(matrix.getHeight(), matrix.getWidth()); n++)
 	{
+		//find nonzero entry
 		int nonzero = findNonZero(matrix, n, n);
-
 		if (nonzero != -1)
 		{
+			//swap columns if necessary
 			if ((unsigned) nonzero != n)
 			{
 				matrix.swapColumns(nonzero, n);
 				std::swap(result[nonzero], result[n]);
 			}
-
+			//use row operation to zero entries right the diagonal
 			for (std::size_t i = n + 1; i < matrix.getHeight(); i++)
 			{
 				rowTransform(matrix, n, i, n);
 			}
 		}
 	}
+	//use row transformation to zero entries not on the diagonal	
 	for (int i = matrix.getHeight() - 1; i >= 0; i--)
 	{
 		for (int j = 0; j<i; j++)

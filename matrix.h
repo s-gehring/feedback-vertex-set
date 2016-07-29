@@ -11,7 +11,6 @@
 class mat
 {
 public:
-	mat(Galois& ga, int height, int width);
 	mat(int height, int width);
 	mat();
 	mat(uint64_t** pmatrix,int height, int width);
@@ -56,7 +55,6 @@ public:
 	uint64_t det();
 	void swapColumns(int a, int b);
 	mat backSubstituation(std::tuple<mat, mat, std::vector<int>>& upperTriangle);
-	void extractMatrix(std::vector<int> rowCols,const std::vector<int> & arrangement);
 	std::vector<int> maxSubmatrix();
 	uint64_t** toNMatrix();
 	mat rearrangeMatrix(const std::vector<int> & arrangement);
@@ -78,7 +76,6 @@ private:
 
 mat join_rows(const mat & left,const mat & right);
 mat join_rows(const mat & left, const std::vector<uint64_t> & right);
-void join_rows_fast(mat & left, const std::vector<uint64_t> & right);
 int findNonZero(mat & input, int row, int startCol);
 int matRank(mat Matrix);
 template <typename T>

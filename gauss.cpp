@@ -2,7 +2,9 @@
 #include "gauss.h"
 
 using namespace std;
-
+ /**
+	* @brief calculates the determinat
+	*/
 uint64_t Gauss::determinant(Galois g, int size, uint64_t** matrix)
 {
   uint64_t** transform = upper_triangle_transform(g, size, matrix);
@@ -14,6 +16,9 @@ uint64_t Gauss::determinant(Galois g, int size, uint64_t** matrix)
   return result;
 }
 
+ /**
+	* @brief transforms the matrix to upper triangle form
+	*/
 uint64_t** Gauss::upper_triangle_transform(Galois g, int size, uint64_t** matrix)
 {
 

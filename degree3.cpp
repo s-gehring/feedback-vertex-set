@@ -50,8 +50,18 @@ void generateIncidenceVector(const Graph& g, const Edge & e, vector<vector<int>>
 	*/
 pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& s,const vector<int> & nodeToComponent)
 {
-	//first find all edge pairs that shares a node in s
   set<pair<Edge,Edge>> edgePairs;
+	vector<Edge> assignment;
+  vector<vector<int>> edgesUsed;
+  vector<vector<int>> lastVertexIndex;
+  for (size_t i=0;i<g.get_n();i++)
+  {
+    vector<int> v(g.get_n(),0);
+    vector<int> w(g.get_n(), -1);
+    edgesUsed.push_back(v);
+    lastVertexIndex.push_back(w);
+  }
+	//assign every node to a row, nodes not in s share a row in their connected components
 	vector<int> nodeToRow(nodeToComponent.size());
 	vector<int> componentToRow(nodeToComponent.size(), -1);
   int lastUsedRow = 0;
@@ -71,6 +81,7 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& s,const ve
 		  nodeToRow[it.first] = componentToRow[nodeToComponent[it.first]];
 	  }
   }
+	//find all edge pairs that share a node in s
   vector<int> pairNumber(g.get_n(),0);
   size_t edgeNumber = 0;
   for (const auto& firstNode : s) {
@@ -94,16 +105,6 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& s,const ve
             edgePairs.insert(make_pair(neighbours[i],neighbours[j]));
         }
       }
-  }
-  vector<Edge> assignment;
-  vector<vector<int>> edgesUsed;
-  vector<vector<int>> lastVertexIndex;
-  for (size_t i=0;i<g.get_n();i++)
-  {
-    vector<int> v(g.get_n(),0);
-    vector<int> w(g.get_n(), -1);
-    edgesUsed.push_back(v);
-    lastVertexIndex.push_back(w);
   }
 	//create the result matrix
   int row_number = lastUsedRow + 2 * edgePairs.size() - edgeNumber;
@@ -158,7 +159,7 @@ mat colinearToLinear(const mat & input)
 void findNodes(Graph & g, set<Node> & s, set<Node> & result)
 {
 		auto mst=g.minimal_spanning_forest();
-		//deletes all nodes that are not in the mst
+		//add all nodes that are not in the mst to the fvs set
     for(const auto &it : g.get_adjacency_list()) {
 			Node firstNode=it.first;
 			Neighborhood nextToFirstNode = g.get_neighbors(firstNode).first;

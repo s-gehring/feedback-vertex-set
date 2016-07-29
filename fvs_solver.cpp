@@ -183,6 +183,7 @@ using namespace BinCount;
         std::list<Graph> connected_graphs;
         get_connected_graphs(h, h.get_connected_components(), connected_graphs);
         set<Node> complete_solution;
+        //solve for each connected components
         for (auto &it : connected_graphs) {
           set<Node> v3;
           for(auto v: v1)
@@ -195,24 +196,14 @@ using namespace BinCount;
     		  auto subFVS= solveDegree3(it,v3,nodeToComponent);
           complete_solution.insert(subFVS.cbegin(), subFVS.cend());
         }
-        degree3=false;
-        //auto subFVS2=forest_bipartition_fvs(orig, g,v1, v2,k);
-        degree3=true;
+        //check if solution is less than k
         if (fvs.size()+complete_solution.size()<= (unsigned) k)
     		{
     			fvs.insert(complete_solution.cbegin(), complete_solution.cend());
-          //if (subFVS2.second!=true)
-          {
-            //throw;
-          }
     			return make_pair(fvs, true);
     		}
     		else
     		{
-          //if (subFVS2.second!=false)
-          {
-            //throw;
-          }
     			return make_pair(fvs,false);
     		}
     	}
