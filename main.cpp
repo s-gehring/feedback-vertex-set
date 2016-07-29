@@ -120,29 +120,12 @@ set<Edge> contract_edges(Graph &g) {
     Node v = INVALID_NODE;
     int contracted_edges = 0;
     //debug cout << "Contracting edges: ";
-    bool changes_occur = true;
-    while(changes_occur) {
-        changes_occur = false;
-        set<Node> to_contract;
-        for(const auto &it : g.get_low_degree_nodes()) {
-            if(g.get_single_degree(it) == 2) {
-                /*
-                ** We found an edge to contract in this iteration.
-                ** Try another iteration afterwards.
-                */
-                changes_occur = true;
-                to_contract.insert(it);
-                break;
-            }
-            
-           
-        }
-        for(const auto &it : to_contract) {
+    unordered_set<Node> to_delete;
+    unordered_set<Node> candidates = g.get_low_degree_nodes();
+    for(auto &it : candidates) {
+        if(g.get_single_degree(it) == 2) {
+            // Shitty hack, because iterators are weird:
             bool first = true;
-            /*
-            * If we want to contract this edge, we would create multiedges
-            * instead, we keep a single edge and remember that we have to take one of them into the fvs
-            */
             for(const auto &it2 : g.get_neighbors(it).first) {
                 if(first) {
                     first = false;
@@ -151,18 +134,24 @@ set<Edge> contract_edges(Graph &g) {
                     v = it2;
                 }
             }
+	    /*
+	    * If we want to contract this edge, we would create multiedges
+	    * instead, we keep a single edge and remember that we have to take one of them into the fvs
+	    */
             if(g.has_edge(u, v)) {
-                branching_pairs.insert(make_pair(u, v));
-            } else {
-                g.add_edge(u, v);
+		branching_pairs.insert(make_pair(u, v));
+	        to_delete.insert(it); // do not delete it now, to make sure that the multiedge nodes are not deleted
             }
-            //debug cout << "("<<g.get_node_name(u)<<"<->"<<g.get_node_name(it)<<"<->"<<g.get_node_name(v)<<") => ("<<g.get_node_name(u)<<"<->"<<g.get_node_name(v)<<"),";
-            ++contracted_edges;
-            g.remove_node(it);
-            
+	    else {
+		g.add_edge(u, v);
+	        g.remove_node(it);
+	    }
+	    ++contracted_edges;
         }
     }
-    //debug cout <<endl<<endl;
+    for (auto &it : to_delete) {
+	g.remove_node(it);
+    }
     debug cout << "Contracted " << contracted_edges << " edges." <<endl;
     return branching_pairs;
 }
