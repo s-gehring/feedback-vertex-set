@@ -13,9 +13,9 @@ set<Node> greedy(Graph g)
 {
 	set<Node> result;
 	Graph h(g);
-	while(!is_fvs(g,result))
+	h.delete_low_degree_nodes();
+	while(h.get_n()!=0)
 	{
-		h.delete_low_degree_nodes();
 		Node n=-1;
 		int maxDegree=-1;
     	for (const auto &it : h.get_adjacency_list()) {
@@ -28,6 +28,7 @@ set<Node> greedy(Graph g)
 		}
 		result.insert(n);
 		h.remove_node(n);
+		h.delete_low_degree_nodes();
 	}
 	return result;
 }
@@ -341,7 +342,7 @@ int main(int argc, char** argv) {
 	auto sol2= greedy(orig);
 	cout<< "Sol: " << complete_solution.size() << endl;
 	cout<< "Sol2: " << sol2.size() << endl;	
-	g.print_nodeset(sol2);
+	orig.print_nodeset(sol2);
 	if(sol2.size()<complete_solution.size())
 	{
 		while(true){}

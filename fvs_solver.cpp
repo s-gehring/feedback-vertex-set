@@ -182,11 +182,8 @@ using namespace BinCount;
         h.delete_low_degree_nodes();
         std::list<Graph> connected_graphs;
         get_connected_graphs(h, h.get_connected_components(), connected_graphs);
-        //list<set<Node> > partial_solutions;
         set<Node> complete_solution;
-        //int totalFvsSize=0;
         for (auto &it : connected_graphs) {
-    		//insert seed
           set<Node> v3;
           for(auto v: v1)
           {
