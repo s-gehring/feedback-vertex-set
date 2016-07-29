@@ -5,7 +5,7 @@ using namespace fvs;
 using namespace FvsGraph;
 using namespace BinCount;
 #ifndef debug
-    #define debug if(true)
+    #define debug if(0)
 #endif
 #define MAX_OUTPUT_ARTICULATION 40
 
@@ -120,7 +120,9 @@ set<Edge> contract_edges(Graph &g) {
     Node v = INVALID_NODE;
     int contracted_edges = 0;
     //debug cout << "Contracting edges: ";
-    for(auto &it : g.get_low_degree_nodes()) {
+    unordered_set<Node> to_delete;
+    unordered_set<Node> candidates = g.get_low_degree_nodes();
+    for(auto &it : candidates) {
         if(g.get_single_degree(it) == 2) {
             // Shitty hack, because iterators are weird:
             bool first = true;
@@ -138,16 +140,18 @@ set<Edge> contract_edges(Graph &g) {
 	    */
             if(g.has_edge(u, v)) {
 		branching_pairs.insert(make_pair(u, v));
+	        to_delete.insert(it); // do not delete it now, to make sure that the multiedge nodes are not deleted
             }
 	    else {
 		g.add_edge(u, v);
+	        g.remove_node(it);
 	    }
-	    //debug cout << "("<<g.get_node_name(u)<<"<->"<<g.get_node_name(it)<<"<->"<<g.get_node_name(v)<<") => ("<<g.get_node_name(u)<<"<->"<<g.get_node_name(v)<<"),";
 	    ++contracted_edges;
-	    g.remove_node(it);
         }
     }
-    //debug cout <<endl<<endl;
+    for (auto &it : to_delete) {
+	g.remove_node(it);
+    }
     debug cout << "Contracted " << contracted_edges << " edges." <<endl;
     return branching_pairs;
 }
@@ -223,7 +227,7 @@ int main(int argc, char** argv) {
         char* sd = argv[argc-1];
         if(sscanf(sd, "%li", &seed) == 0) {
             seed = 0;
-            debug cout << "Can't parse seed. Settings to 0."<<endl;
+            debug cout << "Can't parse seed. Setting to 0."<<endl;
         } else {
             debug cout << "Settings seed to "<<seed<<"."<<endl;   
         }
