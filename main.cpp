@@ -156,6 +156,34 @@ set<Edge> contract_edges(Graph &g) {
     return branching_pairs;
 }
 
+void contract_edges_deg3(Graph &g) {
+	Node u = INVALID_NODE;
+	Node v = INVALID_NODE;
+	int contracted_edges = 0;
+	unordered_set<Node> candidates = g.get_low_degree_nodes();
+	for (auto &it : candidates) {
+		if (g.get_single_degree(it) == 2) {
+			// Shitty hack, because iterators are weird:
+			bool first = true;
+			for (const auto &it2 : g.get_neighbors(it).first) {
+				if (first) {
+					first = false;
+					u = it2;
+				}
+				else {
+					v = it2;
+				}
+			}
+			if (!g.has_edge(u, v)) {
+				g.add_edge(u, v);
+				g.remove_node(it);
+				++contracted_edges;
+			}
+		}
+	}
+	debug cout << "Contracted " << contracted_edges << " edges." << endl;
+}
+
 /*
 * We basically try to find all minimal vertex covers in the graph only consisting of the multiedges.
 * Since #multiedges < k it is okay to do this recursive branching.
@@ -229,7 +257,7 @@ int main(int argc, char** argv) {
             seed = 0;
             debug cout << "Can't parse seed. Setting to 0."<<endl;
         } else {
-            debug cout << "Settings seed to "<<seed<<"."<<endl;   
+            debug cout << "Setting seed to "<<seed<<"."<<endl;   
         }
     }
     
@@ -251,9 +279,6 @@ int main(int argc, char** argv) {
        return 0;
     }
     
-    
-    
-    
 	set<Node> necessary_nodes = graph_data.necessary_nodes;
 	Mapping node_names = graph_data.mapping;
 	Graph g = graph_data.graph;
@@ -262,7 +287,7 @@ int main(int argc, char** argv) {
 	
 	// Create original copy.
 	Graph orig(g);
-
+	
 	// preprocessing
 	remove_bridges(g, g.get_articulation_elements().second);
 
@@ -292,19 +317,20 @@ int main(int argc, char** argv) {
 
 	  set<Node> partial_solution;
 	  if(degree3 && it.is_deg_three()) {
-      debug cout << "Degree 3 case" << endl;
-      set<Node> V1;
-      int maxIndex=-1;
-      for (const auto &it2 : it.get_adjacency_list())
-      {
-          V1.insert(it2.first);
-          if (it2.first>maxIndex)
-          {
-              maxIndex=it2.first;
-          }
-      }
-      vector<int> nodeToComponent(maxIndex+1);
-      partial_solution = solveDegree3(it,V1,nodeToComponent);
+		  contract_edges_deg3(it);
+		  debug cout << "Degree 3 case" << endl;
+		  set<Node> V1;
+		  int maxIndex=-1;
+		  for (const auto &it2 : it.get_adjacency_list())
+		  {
+			  V1.insert(it2.first);
+			  if (it2.first>maxIndex)
+			  {
+				  maxIndex=it2.first;
+			  }
+		  }
+		  vector<int> nodeToComponent(maxIndex+1);
+		  partial_solution = solveDegree3(it,V1,nodeToComponent);
 		}
 		else {
 			// contract edges and start branching on multiedges within one connected component
