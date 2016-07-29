@@ -287,12 +287,10 @@ int main(int argc, char** argv) {
 	list<set<Node> > partial_solutions;
 	set<Node> complete_solution;
 	for (auto &it : connected_graphs) {
-		debug cout << "Trying to find partial solution for graph " << it.get_name() << "/"<<connected_graphs.size()<<" [n=" << it.get_n() << "|m=" << it.get_m() << "]" << endl;
+	  debug cout << "Trying to find partial solution for graph " << it.get_name() << "/"<<connected_graphs.size()<<" [n=" << it.get_n() << "|m=" << it.get_m() << "]" << endl;
 
-		// contract edges and start branching on multiedges within one connected component
-		set<Edge> branching_pairs = contract_edges(it);
-		set<Node> partial_solution;
-		if(degree3 && it.is_deg_three()) {
+	´ set<Node> partial_solution;
+	  if(degree3 && it.is_deg_three()) {
       debug cout << "Degree 3 case" << endl;
       set<Node> V1;
       int maxIndex=-1;
@@ -306,37 +304,42 @@ int main(int argc, char** argv) {
       }
       vector<int> nodeToComponent(maxIndex+1);
       partial_solution = solveDegree3(it,V1,nodeToComponent);
-    } else if (branching_pairs.size() > 0) {
-			debug cout << "Start branching on " << branching_pairs.size() << " different multi-edges ";
-			debug cout << "for one connected component." << endl;
-			// create graph by using all multi-edges
-			Graph m;
-			m.add_edges(branching_pairs);
-			// generate all partitions
-			set<Node> taken;
-			set<set<Node>> partitions;
-			partitions = multi_edge_partitions(partitions, taken, m);
-			debug cout << "Reduced number of necessary branchings on multiedges from " << pow(2, branching_pairs.size());
-			debug cout << " different branchings to " << partitions.size() << "." << endl;
-			for (set<set<Node>>::iterator partition = partitions.begin(); partition != partitions.end(); ++partition) {
-				Graph h(it);
-				set<Node> current_solution;
-				for (set<Node>::iterator it1 = partition->begin(); it1 != partition->end(); ++it1) {
-					h.remove_node(*it1);
-					current_solution.insert(*it1);
-				}
-				set<Node> help_solution = run_iter_comp(h);
-				current_solution.insert(help_solution.begin(), help_solution.end());
-				// found a new best partial solution using the current multi-edge branching nodes
-				if (current_solution.size() < partial_solution.size() || partial_solution.size() == 0) {
-					partial_solution = current_solution;
+		}
+		else {
+			// contract edges and start branching on multiedges within one connected component
+			set<Edge> branching_pairs = contract_edges(it);
+			if (branching_pairs.size() > 0) {
+				debug cout << "Start branching on " << branching_pairs.size() << " different multi-edges ";
+				debug cout << "for one connected component." << endl;
+				// create graph by using all multi-edges
+				Graph m;
+				m.add_edges(branching_pairs);
+				// generate all partitions
+				set<Node> taken;
+				set<set<Node>> partitions;
+				partitions = multi_edge_partitions(partitions, taken, m);
+				debug cout << "Reduced number of necessary branchings on multiedges from " << pow(2, branching_pairs.size());
+				debug cout << " different branchings to " << partitions.size() << "." << endl;
+				for (set<set<Node>>::iterator partition = partitions.begin(); partition != partitions.end(); ++partition) {
+					Graph h(it);
+					set<Node> current_solution;
+					for (set<Node>::iterator it1 = partition->begin(); it1 != partition->end(); ++it1) {
+						h.remove_node(*it1);
+						current_solution.insert(*it1);
+					}
+					set<Node> help_solution = run_iter_comp(h);
+					current_solution.insert(help_solution.begin(), help_solution.end());
+					// found a new best partial solution using the current multi-edge branching nodes
+					if (current_solution.size() < partial_solution.size() || partial_solution.size() == 0) {
+						partial_solution = current_solution;
+					}
 				}
 			}
-		}
-		// if there are no multi-edges, just run iterative compression on the connected component
-		else {
-			debug cout << "There are no multi-edges." << endl;
-			partial_solution = run_iter_comp(it);
+			// if there are no multi-edges, just run iterative compression on the connected component
+			else {
+				debug cout << "There are no multi-edges." << endl;
+				partial_solution = run_iter_comp(it);
+			}
 		}
 		partial_solutions.push_back(partial_solution);
 		debug cout << "Found partial solution: ";
