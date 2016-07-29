@@ -1,39 +1,25 @@
 #include "matrix.h"
 #include "galois.h"
 
-
-/*mat::mat(Galois& ga,int height, int width)
-{
-	g=ga;
-	for (int i = 0; i<width; i++)
-	{
-		std::vector<uint64_t>column(height, 0);
-		matrix.push_back(column);
-	}
-	updateDimension();
-}*/
-
+ /**
+	* @brief creates a matrix with given height and width from a given array
+	*/
 mat::mat(uint64_t** pmatrix, int height, int width) 
 {
-	//g.set_w(16);
-	//g.set_mode_naive();
-	//g=myGa;
 	for (int i = 0; i < height; i++)
 	{
 		for (int j = 0; j < width; j++)
 		{
 			addValue(pmatrix[i][j],j);
 		}
-		//newRow();
 	}
 }
 
-
+ /**
+	* @brief creates a matrix with given height and width
+	*/
 mat::mat(int height, int width)
 {
-	//g.set_w(16);
-	//g.set_mode_naive();
-	//g=myGa;
 	for (int i = 0; i<width; i++)
 	{
 		std::vector<uint64_t>column(height,0);
@@ -42,24 +28,17 @@ mat::mat(int height, int width)
 	updateDimension();
 }
 
+ /**
+	* @brief creates a matrix
+	*/
 mat::mat()
 {
-	//g.set_w(16);
-	//g.set_mode_naive();
-	//g=myGa;
 	updateDimension();
-}
-
-mat::~mat()
-{
-//	freeMat();
 }
 
 mat::mat(std::initializer_list<std::initializer_list<uint64_t>> lst)
 	: n_rows(lst.size()), n_cols(n_rows ? lst.begin()->size() : 0)
 {
-	//g.set_w(16);
-	//g.set_mode_naive();
 	int i = 0;
 	for (const auto& row : lst) {
 		for (const auto& value : row) {
@@ -67,9 +46,12 @@ mat::mat(std::initializer_list<std::initializer_list<uint64_t>> lst)
 			i++;
 		}
 		i=0;
-		//newRow();
 	}
 }
+
+ /**
+	* @brief append a value tho the matrix in the given column
+	*/
 
 void mat::addValue(uint64_t value, int columnNumber)
 {
@@ -82,12 +64,9 @@ void mat::addValue(uint64_t value, int columnNumber)
 		matrix[columnNumber].push_back(value);
 	}
 }
-
-/*void mat::newRow()
-{
-	currentRow = 0;
-}*/
-
+ /**
+	* @brief zeros the entry of the matrix
+	*/
 void mat::zeros()
 {
 	for (auto & i: matrix)
@@ -98,27 +77,38 @@ void mat::zeros()
 		}
 	}
 }
-
+ /**
+	* @brief returns the entry of the matrix at position a,b
+	*/
 uint64_t & mat::operator()(const int a,const int b)
 {
 	return matrix[b][a];
 }
-
+ /**
+	* @brief returns the entry of the matrix at position a,b
+	*/
 uint64_t mat::operator()(const int a, const int b) const
 {
 	return matrix[b][a];
 }
-
+ /**
+	* @brief returns the entry of the matrix at position a,b
+	*/
 uint64_t mat::at(const int a, const int b) const
 {
 	return matrix[b][a];
 }
-
+ /**
+	* @brief returns the entry of the matrix at position a,b
+	*/
 uint64_t & mat::at(const int a, const int b)
 {
 	return matrix[b][a];
 }
 
+ /**
+	* @brief multiplicates two matrices
+	*/
 mat mat::operator*(const mat & rhs)
 {
 	if (getWidth() != rhs.getHeight())
@@ -138,7 +128,9 @@ mat mat::operator*(const mat & rhs)
 	}
 	return result;
 }
-
+ /**
+	* @brief adds two matrices
+	*/
 mat mat::operator+(const mat & rhs)
 {
 	if (getWidth() != rhs.getWidth() || getHeight()!= rhs.getHeight())
@@ -156,6 +148,9 @@ mat mat::operator+(const mat & rhs)
 	return result;
 }
 
+ /**
+	* @brief subtract two matrices
+	*/
 mat mat::operator-(const mat & rhs)
 {
 	return (*this)+rhs;
@@ -194,23 +189,31 @@ void join_rows_fast(mat & left, const std::vector<uint64_t> & right)
 	}
 	left.addColumn(right);
 }
-
+ /**
+	* @brief updates the saved dimensions of the matrix
+	*/
 void mat::updateDimension()
 {
 	n_rows = getHeight();
 	n_cols = getWidth();
 }
-
+ /**
+	* @brief returns a specific column of the matrix
+	*/
 std::vector<uint64_t> & mat::col(const int colnumber)
 {
 	return matrix[colnumber];
 }
-
+ /**
+	* @brief returns a specific column of the matrix
+	*/
 std::vector<uint64_t> mat::col(const int colnumber) const
 {
 	return matrix[colnumber];
 }
-
+ /**
+	* @brief deletes a specific row of the matrix
+	*/
 void mat::shed_row(const int rowNumber)
 {
 	for (auto & row : matrix)
@@ -221,13 +224,17 @@ void mat::shed_row(const int rowNumber)
 	updateDimension();
 }
 
-
+ /**
+	* @brief adds a specific column
+	*/
 void mat::addColumn(const std::vector<uint64_t> & column)
 {
 	matrix.push_back(column);
 	updateDimension();
 }
-
+ /**
+	* @brief prints the matrix
+	*/
 void mat::print(const std::string & str) const
 {
 	std::cout << str<<std::endl;
@@ -249,7 +256,9 @@ void mat::print(const std::string & str) const
 		}
 	}
 }
-
+ /**
+	* @brief calculates the rank of the matrix
+	*/
 int matRank(mat matrix)
 {
 	auto transform = matrix.upper_triangle_transform();
@@ -264,11 +273,17 @@ int matRank(mat matrix)
 	return rank;
 }
 
+ /**
+	* @brief checks if the matrix is a square matrix
+	*/
 bool mat::is_square() const
 {
 	return getWidth() == getHeight();
 }
 
+ /**
+	* @brief transposes the matrix
+	*/
 mat mat::t()
 {
 	mat result(getWidth(), getHeight());
@@ -282,6 +297,9 @@ mat mat::t()
 	return result;
 }
 
+ /**
+	* @brief invertes the matrix
+	*/
 mat mat::i()
 {
 	if (!is_square())
@@ -291,7 +309,13 @@ mat mat::i()
 	auto uTriangle = upper_triangle_transform();
 	return backSubstituation(uTriangle);
 }
-
+ /**
+	* @brief finds the first non-zero value of a matrix in some row starting right to a specific position
+	* @param [in] input the matrix we are interested in
+    * @param [in] row the row we want to find the nonzero entry
+	* @param [in] the starting colomn number, we will not look left from this column
+	* @returns column number if successful, -1 else
+	*/
 int findNonZero(mat & input,int row, int startCol)
 {
 	for (std::size_t i = startCol;i<input.getWidth();i++)
@@ -303,7 +327,10 @@ int findNonZero(mat & input,int row, int startCol)
 	}
 	return -1;
 }
-
+ /**
+	* @brief finds a maximum submatrix that has full rank
+	* @returns indices of rows and columns the submatrix is consisting of
+	*/
 std::vector<int> mat::maxSubmatrix()
 {
 	if (getWidth() != getHeight())
@@ -428,6 +455,10 @@ void mat::rowOperation(mat & matrix, int firstRowNumber, int secondRowNumber, ui
 	}
 }
 
+ /**
+	* @brief calculates the determinant of the matrix
+	*/
+
 uint64_t mat::det()
 {
 	auto transform = upper_triangle_transform();
@@ -438,6 +469,10 @@ uint64_t mat::det()
 	}
 	return result;
 }
+
+ /**
+	* @brief swaps the given two rows
+	*/
 
 void mat::swapColumns(const int a,const int b)
 {
@@ -526,6 +561,9 @@ std::pair<mat,std::vector<int>> mat::toStandarForm()
 	return std::make_pair(matrix, result);
 }
 
+ /**
+	* @brief matracts the given columns of the matrix
+	*/
 mat mat::extractColumns(const std::vector<int> & index)
 {
 	mat result;
@@ -536,6 +574,9 @@ mat mat::extractColumns(const std::vector<int> & index)
 	return result;
 }
 
+ /**
+	* @brief compares two matrices
+	*/
 bool mat::operator==(const mat & rhs) 
 {
 	if (getHeight() != rhs.getHeight() || getWidth() != rhs.getWidth())
@@ -555,22 +596,29 @@ bool mat::operator==(const mat & rhs)
 	return true;
 }
 
+ /**
+	* @brief compares to matrices
+	*/
 bool mat::operator!=(const mat & rhs)
 {
 	return !((*this) == rhs);
 }
 
+ /**
+	* @brief generates a matrix from array and return indices a maximal full rank submatrix is consisting of
+	*/
 std::vector<int> findRedundantRows(uint64_t** pmatrix, int height, int width)
 {
 	mat input(pmatrix,height, width);
 	return input.maxSubmatrix();
 }
 
+ /**
+	* @brief converts the matrix to array
+	*/
 uint64_t** mat::toNMatrix()
 {
-	freeMat();
-	nMatHeight = getHeight();
-	nMat = new uint64_t* [getHeight()];
+	uint64_t** nMat = new uint64_t* [getHeight()];
 	for (std::size_t i = 0; i < getHeight(); i++)
 	{
 		nMat[i]=new uint64_t[getWidth()];
@@ -585,19 +633,9 @@ uint64_t** mat::toNMatrix()
 	return nMat;
 }
 
-void mat::freeMat()
-{
-	if (nMat != nullptr)
-	{
-		for (std::size_t i = 0; i < nMatHeight; i++)
-		{
-			delete[] nMat[i];
-		}
-		delete[] nMat;
-	}
-	nMat=nullptr;
-}
-
+ /**
+	* @brief rearranges the columns of the matrix by the given permutation
+	*/
 mat mat::rearrangeMatrix(const std::vector<int> & arrangement)
 {
   mat result(getHeight(),getWidth());

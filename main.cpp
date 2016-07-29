@@ -351,6 +351,7 @@ int main(int argc, char** argv) {
 	}
 	debug cout << "Sanity check: " << (is_fvs(orig, complete_solution) ? "PASS" : "FAILED") << endl;
 	debug cout << "--------------- END OF PROGRAM ---------------" << endl;
+	/*
 	auto sol2= greedy(orig);
 	cout<< "Sol: " << complete_solution.size() << endl;
 	cout<< "Sol2: " << sol2.size() << endl;	
@@ -358,6 +359,6 @@ int main(int argc, char** argv) {
 	if(sol2.size()<complete_solution.size())
 	{
 		while(true){}
-	}
+	}*/
 }
 
