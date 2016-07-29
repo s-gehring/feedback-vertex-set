@@ -96,10 +96,28 @@ set<Edge> contract_edges(Graph &g) {
     Node v = INVALID_NODE;
     int contracted_edges = 0;
     //debug cout << "Contracting edges: ";
-    for(auto &it : g.get_low_degree_nodes()) {
-        if(g.get_single_degree(it) == 2) {
-            // Shitty hack, because iterators are weird:
+    bool changes_occur = true;
+    while(changes_occur) {
+        changes_occur = false;
+        set<Node> to_contract;
+        for(const auto &it : g.get_low_degree_nodes()) {
+            if(g.get_single_degree(it) == 2) {
+                /*
+                ** We found an edge to contract in this iteration.
+                ** Try another iteration afterwards.
+                */
+                changes_occur = true;
+                to_contract.insert(it);
+            }
+            
+           
+        }
+        for(const auto &it : to_contract) {
             bool first = true;
+            /*
+            * If we want to contract this edge, we would create multiedges
+            * instead, we keep a single edge and remember that we have to take one of them into the fvs
+            */
             for(const auto &it2 : g.get_neighbors(it).first) {
                 if(first) {
                     first = false;
@@ -108,19 +126,15 @@ set<Edge> contract_edges(Graph &g) {
                     v = it2;
                 }
             }
-	    /*
-	    * If we want to contract this edge, we would create multiedges
-	    * instead, we keep a single edge and remember that we have to take one of them into the fvs
-	    */
             if(g.has_edge(u, v)) {
-		branching_pairs.insert(make_pair(u, v));
+                branching_pairs.insert(make_pair(u, v));
+            } else {
+                g.add_edge(u, v);
             }
-	    else {
-		g.add_edge(u, v);
-	    }
-	    //debug cout << "("<<g.get_node_name(u)<<"<->"<<g.get_node_name(it)<<"<->"<<g.get_node_name(v)<<") => ("<<g.get_node_name(u)<<"<->"<<g.get_node_name(v)<<"),";
-	    ++contracted_edges;
-	    g.remove_node(it);
+            //debug cout << "("<<g.get_node_name(u)<<"<->"<<g.get_node_name(it)<<"<->"<<g.get_node_name(v)<<") => ("<<g.get_node_name(u)<<"<->"<<g.get_node_name(v)<<"),";
+            ++contracted_edges;
+            g.remove_node(it);
+            }
         }
     }
     //debug cout <<endl<<endl;
@@ -199,7 +213,7 @@ int main(int argc, char** argv) {
         char* sd = argv[argc-1];
         if(sscanf(sd, "%li", &seed) == 0) {
             seed = 0;
-            debug cout << "Can't parse seed. Settings to 0."<<endl;
+            debug cout << "Can't parse seed. Setting to 0."<<endl;
         } else {
             debug cout << "Settings seed to "<<seed<<"."<<endl;   
         }
