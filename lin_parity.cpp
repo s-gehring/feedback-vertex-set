@@ -5,17 +5,6 @@
 #include "matrix.h"
 #include "matrix2.h"
 
-/**
-	* @brief Creates a random value
-	* Creates a non-zero integral random value between 1 and max.
-	* @param [in] max THe upper bound for the integral random value.
-	* @return random value
-	*/
-int get_random_value(int max){
-	int random_variable = std::rand();
-    return random_variable % max + 1 ;
-}
-
 /* Creates the compact Matrix Y and stores the random values x_i in vector random_values
  * so random_values has to be a "column of M-half-dim" vec (a pointer of it)
  * random values are integral between 1 and max_random_value
@@ -164,13 +153,6 @@ while (success == 0){
 		random_values[i] = 0;
 	}
 	
-	
-
-	/*cout<<"------------------Algorithm start-----------"<< endl;
-	cout << "Startmatrix M :"<<endl;
-	if (row < 13) {debug print_matrix(gal,row, col, M);}
-	else {cout << "too big, will not write it down" <<endl;}
-	*/
 	//computing Y
 	uint64_t** Y = create_Y( gal, M, row, col, random_values);
 	uint64_t** Y_copy_det = copy_matrix(Y, row, row); //copy matrix for computing the determinant (matrix will get transformed by the det function)
@@ -306,58 +288,3 @@ while (success == 0){
 
  return parity_basis;
 }
-
-
-
-
-
-
-
-/*int main(){
-	
-	Galois gal;
-  	Gauss gauss;
-  	gal.set_w(16);
-  
-  	gal.set_mode_logtb();
-  
-  	gal.seed();
-	
-	int row = 41;
-	int col = 60;
-	
- 
- 	//construct a row x col matrix
-	uint64_t** matrix= new uint64_t*[row];
- 
-	for (int i=0; i<row; i++){
-    	matrix[i]= new uint64_t[col];
-	}
- 	
-	//fill it with random numbers
-	for (int i=0; i<row; i++){
-    	for(int j=0; j<col; j++){
-        	matrix[i][j]= gal.uniform_random_element();
-        	if (j == (col-1)){
-        		 matrix[i][j-3] = matrix[i][j];
-        		 matrix[i][j-2] = matrix[i][j];
-        		 matrix[i][j-1] = matrix[i][j];
-        		
-        	}
-    	}
-	}
-	cout<< "Startmatrix = ";
-	print_matrix(gal, row, col, matrix);
-	
-	int length;
-
-	int* result = simple_parity_fast(gal, matrix, row, col, &length);
-
-	cout << "ENDERGEBNIS " << endl;
-	print_vector_normal(length, result);
-
-  	my_free(matrix, row);	
-  	delete [] result;
-	return 0;
-
-}*/

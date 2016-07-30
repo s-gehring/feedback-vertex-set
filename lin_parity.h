@@ -12,19 +12,6 @@
 
 using namespace std;
 
-
-/**
-	* @brief Creates a random value
-	*
-	* Creates a non-zero integral random value between 1 and max.
-	*
-	* @param [in] max THe upper bound for the integral random value.
-	*
-	* @return random value
-	*/
-int get_random_value(int max);
-
-
 /* Creates the compact Matrix Y and stores the random values x_i in vector random_values
  * so random_values has to be a "column of M-half-dim" vec (a pointer of it)
  * random values are integral between 1 and max_random_value
