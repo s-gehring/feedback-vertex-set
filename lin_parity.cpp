@@ -241,7 +241,6 @@ while (success == 0){
 	{
 		success=0;
 		my_free(Y, row);
-		my_free(Y_inverse, row);
 		continue;
 	}
 

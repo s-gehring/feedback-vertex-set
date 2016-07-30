@@ -262,9 +262,9 @@ int main(int argc, char** argv) {
     }
     
 	Galois & ga = Galois::getInstance();
-	ga.set_w(20);
-	ga.set_mode_logtb();
-	//ga.set_mode_pcmul();
+	//ga.set_w(64);
+	//ga.set_mode_logtb();
+	ga.set_mode_pcmul();
     ga.seed(seed);
 	
 	GraphData graph_data = read_graph();
