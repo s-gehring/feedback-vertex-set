@@ -14,7 +14,12 @@ Now, the main part of the algorithm is applied: the iterative compression algori
 
 \section{Degree 3 Case}
 
-We detect and solve the degree 3 special case in polynomial time as described in \cite{DBLP:journals/corr/abs-1004-1672}. Whenever we detect in the iterated compression that all vertices in $V_1$ have degree at most 3, we first delete all vertices with degree 1 or less that were created by the branching process and then consider every connected component seperately. We reduce this special case to the cographic matroid parity problem of the auxility graph described in Section 3 of the paper. To solve this problem, we reduce it to the colinear matroid parity problem by generating the incidence matrix and transfer it to the linear parity problem. Here the entries of the matrix are taken in finite fields to allow for exact calculations. In the end we solve the linear parity problem by \cite{Cheung:2014:AAL:2620785.2601066}. The idea is based on the theorem of Lovasz. The galois fields have size $2^{16}$, so by the .
+We detect and solve the degree 3 special case in polynomial time as described in \cite{DBLP:journals/corr/abs-1004-1672}. We call an instance a \textit{degree 3 case}, if in the problem $DISJOINT-FVS(G; V_1, V_2; k)$ all vertices of $V_1$ have degree 3 or smaller, where $V_2$ is a FVS of G of size k+1 and we want to compute a FVS completely in $V_1$ of size k. The DISJOINT-FVS problem appears in the iterative compression.
+
+
+The key idea is the following: If we consider a $G[V_2]$-spanning tree $T$, every edge in $G - E[T]$ creates a cycle. A $V_1-adjacency-matching$ is a partition of those edge in $G - E[T]$ in groups of one or two edges and every group of two edges share an endpoint in $V_1$. We are searching for a $G[V_2]$-spanning tree that maximizes the number of two-groups. Then we put for every two-group the shared vertex and for every one-group an arbitrary vertex into the FVS. This is showed to be an optimal FVS in \cite{DBLP:journals/corr/abs-1004-1672}. To get this best $G[V_2]$-spanning tree $T$ we reduce this problem to a cographic matroid parity problem of an auxiliary graph described in Section 3 of the paper. The cographic version is itself solved by a linear matroid parity algorithm as described in \cite{Cheung:2014:AAL:2620785.2601066}. To get a huge speedup in the algorithm, we use the small rank update formula by Sherman, Morrison and Woodbury to check if a matrix is non-singular. All entries of the matrices are taken over a finite field to get exact calculation. We used the Galois field structure to get a good performance.
+
+
 
 \addcontentsline{toc}{section}{literature}
 \nocite{bafna1999}
