@@ -209,16 +209,24 @@ uint64_t** invertMatrix(Galois gal, uint64_t** mat, int size)
  
     //Compute determinant
    
-    uint64_t det = A[0][0];
+    /*uint64_t det = A[0][0];
   	for (int i = 1; i < size; i++)
   	{
     det = gal.multiply(det, A[i][i]);
+  	}*/
+    bool det=true;
+    for (int i = 0; i < size; i++)
+  	{
+      if (A[i][i]==0)
+      {
+        det=false;
+      }
   	}
-
 
     if(det == 0)  // Determinant is 0  -> matrix not invertable
 	{
-        
+       	my_free(inv, size);
+       	my_free(A, size);
         return 0;
 	}
  

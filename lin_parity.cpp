@@ -229,10 +229,21 @@ while (success == 0){
 	//have to compute Y once again for the new M
 	if (check == 1){
 		my_free(Y, row + row_difference);
+		for (int i = 0; i < col/2; i++){
+			random_values[i] = 0;
+		}
 		Y = create_Y( gal, M, row, col, random_values);
 	}
 
 	uint64_t** Y_inverse = invertMatrix(gal, Y,  row);
+
+	if (Y_inverse==0)
+	{
+		success=0;
+		my_free(Y, row);
+		my_free(Y_inverse, row);
+		continue;
+	}
 
 	parity_basis = new int[row];		    //in here we will store the indices of the columns that built the parity basis
 	for (int i = 0; i < row; i++){
