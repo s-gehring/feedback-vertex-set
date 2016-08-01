@@ -561,7 +561,6 @@ namespace FvsGraph{
             }
             
             low_deg_nodes.erase(u);
-            // Fuck. Go to each neighbor and inform him about the change.
             std::set<Edge> to_remove;
             for(Neighborhood::const_iterator it = adj[u].begin(); it != adj[u].end(); ++it) {
                 to_remove.insert(std::make_pair(*it, u));
