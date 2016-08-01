@@ -239,7 +239,6 @@ int main(int argc, char** argv) {
     
 	Galois & ga = Galois::getInstance();
 	ga.set_w(64);
-	//ga.set_mode_logtb();
 	ga.set_mode_pcmul();
     ga.seed(seed);
 	

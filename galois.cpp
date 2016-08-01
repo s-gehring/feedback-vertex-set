@@ -74,30 +74,32 @@ uint64_t Galois::logtb_multiply(uint64_t arg1, uint64_t arg2)
 uint64_t Galois::clmul_multiply(uint64_t arg1, uint64_t arg2)
 {
   uint64_t mask = pwm1[32];
+  //uint64_t mask2 = pwm1[64];
   uint64_t x1x0, x2, x3;
-  
-  __asm__ ( 	//carry-less multiplication
-		"movd %3, %%xmm1;" 
-	 	"movd %4, %%xmm2;"
-		"pclmulqdq $0, %%xmm1, %%xmm2;" 
+  uint64_t r;
+ 
+  __asm__ (     //carry-less multiplication
+        "movd %4, %%xmm1;"
+         "movd %5, %%xmm2;"
+        "pclmulqdq $0, %%xmm1, %%xmm2;"
 
-		//fetch first 64 bits
-		"movd %%xmm2, %0;"
-                
-		//fetch 32 more bits
+        //fetch first 64 bits
+        "movd %%xmm2, %0;"
+               
+        //fetch 32 more bits
                 "psrldq $8, %%xmm2;"
                 "movq %%xmm2, %%xmm3;"
-                "movd %5, %%xmm1;"
+                "movd %6, %%xmm1;"
                 "pand %%xmm1, %%xmm3;"
                 "movd %%xmm3, %1;"
 
-		//fetch last 32 bits
+        //fetch last 32 bits
                 "psrldq $4, %%xmm2;"
-		"movd %%xmm2, %2;"          
+                "movd %%xmm2, %2;"         
 
-		: "=r" (x1x0), "=r" (x2), "=r" (x3)
-		: "r" (arg1), "r" (arg2), "r" (mask)		
-	);
+        : "=r" (x1x0), "=r" (x2), "=r" (x3), "=r" (r)
+        : "r" (arg1), "r" (arg2), "r" (mask)       
+    );
 
   //modulo primitive polynomial
   uint64_t x3d = (x3 << 32) ^ (x3 >> 31) ^ (x3 >> 29) ^ (x3 >> 28) ^ x2;
