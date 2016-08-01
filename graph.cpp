@@ -441,7 +441,6 @@ namespace FvsGraph{
               return std::make_pair<std::list<Node>, bool>(std::list<Node>(), false);
           }
           
-//          int Graph::articulate(const Node u, bool vis[], int dsc[], int low[], int par[], std::set<Node> &a_n, std::unordered_set<Edge> &a_e, int time) const {
          int Graph::articulate(const Node u, std::vector<bool>& vis, std::vector<int>& dsc, std::vector<int>& low, std::vector<int>& par, std::set<Node> &a_n, std::unordered_set<Edge> &a_e, int time) const {
             vis[u] = true;
             dsc[u] = time++;
@@ -486,10 +485,6 @@ namespace FvsGraph{
                 if(it.first > n) n = it.first+1;
             }
               
-            /*bool *vis = new bool[n];
-            int *dsc = new int[n];
-            int *low = new int[n];
-            int *par = new int[n];*/
             std::vector<bool> vis(n);
             std::vector<int> dsc(n);
             std::vector<int> low(n);

@@ -108,7 +108,6 @@ pair<mat,vector<Edge>> graphToMatrix(const Graph& g, const set<Node>& s,const ve
   }
 	//create the result matrix
   int row_number = lastUsedRow + 2 * edgePairs.size() - edgeNumber;
-  //cout<<row_number*edgePairs.size()*2<<endl;
   mat matrix(row_number,edgePairs.size()*2);
   int columnNumber=0;
 	//generate the incidence vector for the edges
@@ -183,7 +182,6 @@ void findNodes(Graph & g, set<Node> & s, set<Node> & result)
 		}
 }
 
-//int n=0;
  /**
 	* @brief solves the fvs problem in the degree 3 case in polynomial time
 	* @param [in] g input graph it should be connected without vertices of degree 1
@@ -193,8 +191,6 @@ void findNodes(Graph & g, set<Node> & s, set<Node> & result)
 	*/
 set<Node> solveDegree3(Graph& g, set<Node>& s, const vector<int> & nodeToComponent)
 {
-	//n++;
-	//cout<<n<<endl;
 	set<Node> feedBackSet;
 	//convert graph to matrix
 	auto result = graphToMatrix(g, s,nodeToComponent);

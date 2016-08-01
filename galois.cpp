@@ -103,7 +103,6 @@ uint64_t Galois::clmul_multiply(uint64_t arg1, uint64_t arg2)
   uint64_t x3d = (x3 << 32) ^ (x3 >> 31) ^ (x3 >> 29) ^ (x3 >> 28) ^ x2;
   uint64_t h1h0 = (x3d << 1) ^ (x3d << 3) ^ (x3d << 4) ^ x3d;
   return h1h0 ^ x1x0;
-	return 0;
 }
 
 uint64_t Galois::divide(uint64_t arg1, uint64_t arg2)
