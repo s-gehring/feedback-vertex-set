@@ -48,13 +48,13 @@ we want to apply the polynomial time degree three case algorithm as often as pos
 2. Degree Three Case
 
 We detect and solve the degree three special case in polynomial time as described in [2].
-We call an instance a degree three case, if in the problem DISJOINT-􀀀FVS(G; V1; V2; k)
+We call an instance a degree three case, if in the problem DISJOINT-FVS(G; V1; V2; k)
 all vertices of V1 have degree three or smaller, where V2 is a FVS of G of size k + 1 and
 we want to compute a FVS completely in V1 of size k. The DISJOINT-FVS problem
 appears in the iterative compression.
 The key idea is the following: If we consider a G[V2]-spanning tree T, every edge in
-G-E[T] creates a cycle. A V1 􀀀 adjacency 􀀀 matching is a partition of those edge in
-G􀀀-E[T] in groups of one or two edges and every group of two edges share an endpoint
+G-E[T] creates a cycle. A V1-adjacency-matching is a partition of those edge in
+G-E[T] in groups of one or two edges and every group of two edges share an endpoint
 in V1. We are searching for a G[V2]-spanning tree that maximizes the number of two-
 groups. Then we put for every two-group the shared vertex and for every one-group
 an arbitrary vertex into the FVS. This is showed to be an optimal FVS in [2]. To get
