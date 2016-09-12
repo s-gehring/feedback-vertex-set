@@ -15,7 +15,7 @@ Comment lines begin with a '#' literal.
 
 # Documentation 
 
-1. General Case
+1 General Case
 
 First, we apply basic preprocessing procedures as deleting all vertices with self-loops and
 deleting all vertices with degree strictly smaller than two. The next step is to iteratively
@@ -32,8 +32,8 @@ step we take a vertex with degree two and replace it by an edge connecting its n
 possibly creating multiedges. Notice that for every such multiedge, we need at least one
 of its vertices. Since some multiedges may be overlapping, the last preprocessing step is
 to create a graph consisting only of the multiedges and detect all minimal vertex covers
-by a recursive procedure. These minimal vertex covers correspond to all the dierent
-multiedge branchings which need to be considered and all of them are tested for nding
+by a recursive procedure. These minimal vertex covers correspond to all the different
+multiedge branchings which need to be considered and all of them are tested for finding
 the best solution.
 Now, the main part of the algorithm is applied: the iterative compression algorithm
 which is presented in [3]. Within this algorithm, the approximative solution is computed
@@ -45,7 +45,7 @@ use of algorithm 1 given in [3], we first solve all the vertices with highest de
 there are only vertices with degree smaller or equal three left. The reason for this is that
 we want to apply the polynomial time degree three case algorithm as often as possible.
 
-2. Degree Three Case
+2 Degree Three Case
 
 We detect and solve the degree three special case in polynomial time as described in [2].
 We call an instance a degree three case, if in the problem DISJOINT-FVS(G; V1; V2; k)
@@ -77,7 +77,7 @@ failure probability is bounded by
 
     1-(1-(90000/2^64)^2)^10^15<10^-12
     
-3. References
+3 References
 
 [1] V. Bafna, P. Berman, and T. Fujito. A 2-approximation algorithm for the undirected
 feedback vertex set problem. SIAM Journal on Discrete Mathematics, 12(3):289-297,
