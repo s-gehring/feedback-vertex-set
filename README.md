@@ -82,10 +82,13 @@ failure probability is bounded by
 [1] V. Bafna, P. Berman, and T. Fujito. A 2-approximation algorithm for the undirected
 feedback vertex set problem. SIAM Journal on Discrete Mathematics, 12(3):289-297,
 1999.
+
 [2] Y. Cao, J. Chen, and Y. Liu. On feedback vertex set, new measure and new struc-
 tures. CoRR, abs/1004.1672, 2010.
+
 [3] J. Chen, F. V. Fomin, Y. Liu, S. Lu, and Y. Villanger. Improved algorithms for
 feedback vertex set problems. Journal of Computer and System Sciences, 74(7):1188-
 1198, 2008.
+
 [4] H. Y. Cheung, L. C. Lau, and K. M. Leung. Algebraic algorithms for linear matroid
 parity problems. ACM Trans. Algorithms, 10(3):10:1-10:26, May 2014.
